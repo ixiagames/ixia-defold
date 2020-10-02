@@ -1,8 +1,10 @@
 package ixia.mgui;
 
 import Defold.hash;
+import defold.Msg;
 import defold.support.ScriptOnInputAction;
 import defold.types.Hash;
+import defold.types.Message;
 import haxe.PosInfos;
 import ixia.mgui.Event.EventData;
 import lua.Lua;
@@ -21,7 +23,10 @@ class MGui {
     final _listenerSelections:Array<{ selector:Selector, events:Array<Event>, listener:EventData->Void }> = [];
     final _targets:Array<GuiTarget> = [];
     
-    public function new(?actionRemap:Map<InputAction, String>) {
+    public function new(acquiresInput:Bool = true, ?actionRemap:Map<InputAction, String>) {
+        if (acquiresInput)
+            Msg.post('.', new Message<Void>("acquire_input_focus"));
+        
         if (actionRemap == null)
             actionIDs = new ActionIDs();
         else
