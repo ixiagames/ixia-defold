@@ -21,11 +21,11 @@ class MGui {
     final _listenerSelections:Array<{ selector:Selector, events:Array<Event>, listener:EventData->Void }> = [];
     final _targets:Array<GuiTarget> = [];
     
-    public function new(?inputRemap:Map<InputAction, String>) {
-        if (inputRemap == null)
+    public function new(?actionRemap:Map<InputAction, String>) {
+        if (actionRemap == null)
             actionIDs = new ActionIDs();
         else
-            actionIDs = new ActionIDs(inputRemap.exists(TOUCH) ? inputRemap[TOUCH] : TOUCH);
+            actionIDs = new ActionIDs(actionRemap.exists(TOUCH) ? actionRemap[TOUCH] : TOUCH);
     }
 
     public function add(id:String, node:Bool = true):GuiTarget {
