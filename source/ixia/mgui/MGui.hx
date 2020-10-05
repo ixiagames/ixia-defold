@@ -20,8 +20,8 @@ class MGui {
 
     public var actionIDs(default, null):ActionIDs;
     public var pointerState(default, null):PointerGlobalState;
-    final _listenerSelections:Array<{ selector:Selector, events:Array<Event>, listener:EventData->Void }> = [];
-    final _targets:Array<GuiTarget> = [];
+    var _listenerSelections:Array<{ selector:Selector, events:Array<Event>, listener:EventData->Void }> = [];
+    var _targets:Array<GuiTarget> = [];
     
     public function new(acquiresInput:Bool = true, ?actionRemap:Map<InputAction, String>) {
         if (acquiresInput)
@@ -38,7 +38,19 @@ class MGui {
     }
 
     public function remove(target:GuiTarget):Void {
-        GuiTarget.put(target);
+        if (_targets.remove(target))
+            GuiTarget.put(target);
+    }
+
+    public function removeAll():Void {
+        for (target in _targets)
+            GuiTarget.put(target);
+        _targets = [];
+    }
+
+    public function clear():Void {
+        _listenerSelections = [];
+        removeAll();
     }
 
     public function listen(selector:Selector, events:Array<Event>, listener:EventData->Void):Void {
