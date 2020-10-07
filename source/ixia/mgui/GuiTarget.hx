@@ -1,8 +1,8 @@
 package ixia.mgui;
 
-import defold.Gui;
 import defold.support.ScriptOnInputAction;
 import ixia.mgui.Event;
+using defold.Gui;
 
 @:access(ixia.mgui.EventData)
 class GuiTarget {
@@ -39,7 +39,7 @@ class GuiTarget {
 
     public var mgui(default, null):MGui;
     public var id(default, null):String;
-    public var node(default, null):ixia.mgui.GuiNode;
+    public var node(default, null):GuiNode;
     public var pointerState(default, null):PointerTargetState;
     var _listeners:Map<Event, Array<EventData->Void>>;
     
@@ -110,7 +110,7 @@ class GuiTarget {
     }
 
     public inline function pick(x:Float, y:Float):Bool {
-        return node.pick(x, y);
+        return node.pick_node(x, y);
     }
 
 }
