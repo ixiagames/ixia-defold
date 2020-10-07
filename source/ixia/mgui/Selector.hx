@@ -26,10 +26,10 @@ abstract Selector(Either<String, (target:GuiTarget)->Bool>) from Either<String, 
         return switch (this) {
             case Left(s):
                 for (s in s.split(',')) {
-                    if (!matchID(target.id, s.trim()))
-                        return false;
+                    if (matchID(target.id, s.trim()))
+                        return true;
                 }
-                return true;
+                return false;
             
             case Right(f):
                 f(target);
