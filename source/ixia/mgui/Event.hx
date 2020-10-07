@@ -46,7 +46,7 @@ enum abstract EventDataPropKey(Int) {
 @:build(ixia.mgui.utils.PropsBuilder.build(EventDataPropKey))
 abstract EventData(RawTable) to RawTable from RawTable {
 
-    public inline function new(target:GuiTarget, event:Event, ?action:ScriptOnInputAction, ?scriptData:Dynamic<{}>) {
+    public inline function new(target:GuiTarget, event:Event, ?action:ScriptOnInputAction, ?scriptData:Dynamic) {
         this = new RawTable();
         this[TARGET] = target;
         this[EVENT] = event;

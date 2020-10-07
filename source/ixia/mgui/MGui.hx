@@ -93,7 +93,7 @@ class MGui {
         }
     }
 
-    public function handleInput(actionID:Hash, action:ScriptOnInputAction, scriptData:Dynamic<{}>):Bool {
+    public function handleInput(actionID:Hash, action:ScriptOnInputAction, scriptData:Dynamic):Bool {
         if (actionID == null) {
             for (target in _targets)
                 target.handleTouchMoveInput(action, scriptData);
