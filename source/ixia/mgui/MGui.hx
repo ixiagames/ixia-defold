@@ -16,6 +16,10 @@ class MGui {
         Lua.error(posInfos.fileName + ':' + posInfos.lineNumber + ": " + message);
     }
 
+    public static function acquireInputFocus():Void {
+        Msg.post('.', new Message<Void>("acquire_input_focus"));
+    }
+
     //
 
     public var actionIDs(default, null):ActionIDs;
@@ -23,9 +27,9 @@ class MGui {
     var _listenerSelections:Array<{ selector:Selector, events:Array<Event>, listener:EventData->Void }> = [];
     var _targets:Array<GuiTarget> = [];
     
-    public function new(acquiresInput:Bool = true, ?actionRemap:Map<InputAction, String>) {
-        if (acquiresInput)
-            Msg.post('.', new Message<Void>("acquire_input_focus"));
+    public function new(acquiresInputFocus:Bool = true, ?actionRemap:Map<InputAction, String>) {
+        if (acquiresInputFocus)
+            acquireInputFocus();
         
         if (actionRemap == null)
             actionIDs = new ActionIDs();
