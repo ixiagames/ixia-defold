@@ -11,6 +11,7 @@ class GuiTarget {
 
     static function create(mgui:MGui, id:String, node:Bool):GuiTarget {
         var target = _pool.length > 0 ? _pool.pop() : new GuiTarget();
+        target.mgui = mgui;
         target.id = id;
         if (node)
             target.node = Gui.get_node(id);
@@ -40,8 +41,8 @@ class GuiTarget {
     public var mgui(default, null):MGui;
     public var id(default, null):String;
     public var node(default, null):GuiNode;
-    public var pointerState(default, null):PointerTargetState;
-    var _listeners:Map<Event, Array<EventData->Void>>;
+    public var pointerState(default, null):PointerTargetState = OUT;
+    var _listeners:Map<Event, Array<EventData->Void>> = [];
     
     private function new() {}
 

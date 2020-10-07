@@ -38,7 +38,9 @@ class MGui {
     }
 
     public function add(id:String, node:Bool = true):GuiTarget {
-        return GuiTarget.create(this, id, node);
+        var target = GuiTarget.create(this, id, node);
+        _targets.push(target);
+        return target;
     }
 
     public function remove(target:GuiTarget):Void {
