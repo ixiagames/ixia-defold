@@ -7,7 +7,6 @@ enum abstract Event(Int) to Int {
     
     var CREATE;
     var REMOVE;
-    var REQUEST_NODE;
     var CLICK;
     var PRESS;
     var JUST_PRESS;

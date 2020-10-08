@@ -1,5 +1,6 @@
 package ixia.mgui;
 
+import defold.Gui;
 import Defold.hash;
 import defold.Msg;
 import defold.support.ScriptOnInputAction;
@@ -11,6 +12,8 @@ import lua.Lua;
 
 @:access(ixia.mgui.GuiTarget)
 class MGui {
+
+    static final _guiTargetPool:Array<GuiTarget> = [];
 
     public static function error(message:String, ?posInfos:PosInfos) {
         Lua.error(posInfos.fileName + ':' + posInfos.lineNumber + ": " + message);
@@ -38,20 +41,47 @@ class MGui {
     }
 
     public function add(id:String, node:Bool = true):GuiTarget {
-        var target = GuiTarget.create(this, id, node);
+        var target = _guiTargetPool.length > 0 ? _guiTargetPool.pop() : new GuiTarget();
+        target.mgui = this;
+        target.id = id;
+        if (node)
+            target.node = Gui.get_node(id);
+
+        for (selection in _listenerSelections) {
+            if (selection.selector.match(target))
+                for (event in selection.events)
+                    target.listen(event, selection.listener);
+        }
+
         _targets.push(target);
+        target.dispatch(target.newEvent(CREATE));
         return target;
     }
 
-    public function remove(target:GuiTarget):Void {
-        if (_targets.remove(target))
-            GuiTarget.put(target);
+    public function remove(target:GuiTarget):Bool {
+        if (target.dispatch(target.newEvent(REMOVE)))
+            return false;
+
+        if (!_targets.remove(target))
+            return false;
+
+        put(target);
+        return true;
     }
 
     public function removeAll():Void {
         for (target in _targets)
-            GuiTarget.put(target);
+            put(target);
         _targets = [];
+    }
+
+    function put(target:GuiTarget):Void {
+        target.mgui = null;
+        target.id = null;
+        target.node = null;
+        target.pointerState = null;
+        target._listeners.clear();
+        _guiTargetPool.push(target);
     }
 
     public function clear():Void {

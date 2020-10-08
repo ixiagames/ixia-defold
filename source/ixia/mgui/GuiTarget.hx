@@ -6,38 +6,7 @@ using defold.Gui;
 
 @:access(ixia.mgui.EventData)
 class GuiTarget {
-
-    static var _pool:Array<GuiTarget> = [];
-
-    static function create(mgui:MGui, id:String, node:Bool):GuiTarget {
-        var target = _pool.length > 0 ? _pool.pop() : new GuiTarget();
-        target.mgui = mgui;
-        target.id = id;
-        if (node)
-            target.node = Gui.get_node(id);
-        else
-            target.dispatch(target.newEvent(REQUEST_NODE));
-        target.dispatch(target.newEvent(CREATE));
-        return target;
-    }
-
-    static function put(target:GuiTarget):Void {
-        if (target.dispatch(target.newEvent(REMOVE)))
-            return;
-
-        if (@:privateAccess !target.mgui._targets.remove(target))
-            return;
-
-        target.mgui = null;
-        target.id = null;
-        target.node = null;
-        target.pointerState = null;
-        target._listeners.clear();
-        _pool.push(target);
-    }
-
-    //
-
+    
     public var mgui(default, null):MGui;
     public var id(default, null):String;
     public var node(default, null):GuiNode;
