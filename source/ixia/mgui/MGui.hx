@@ -132,7 +132,7 @@ class MGui {
     public function handleInput(actionID:Hash, action:ScriptOnInputAction, scriptData:Dynamic):Bool {
         if (actionID == null) {
             for (target in _targets)
-                target.handleTouchMoveInput(action, scriptData);
+                target.handleTouchMove(action, scriptData);
 
         } else if (actionID == actionIDs.touch) {
             if (action.pressed)
@@ -141,7 +141,7 @@ class MGui {
                 pointerState = JUST_PRESSED;
 
             for (target in _targets)
-                target.handleTouchInput(action, scriptData);
+                target.handleTouchPress(action, scriptData);
 
             if (action.pressed)
                 pointerState = PRESSED;

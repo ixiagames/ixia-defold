@@ -16,7 +16,7 @@ class GuiTarget {
     
     private function new() {}
 
-    function handleTouchMoveInput(action:ScriptOnInputAction, scriptData:Dynamic):Void {
+    function handleTouchMove(action:ScriptOnInputAction, scriptData:Dynamic):Void {
         if (pick(action.x, action.y)) {
             if (!pointerState.isIn()) {
                 pointerState = HOVER;
@@ -30,7 +30,7 @@ class GuiTarget {
         }
     }
 
-    function handleTouchInput(action:ScriptOnInputAction, scriptData:Dynamic):Void {
+    function handleTouchPress(action:ScriptOnInputAction, scriptData:Dynamic):Void {
         if (pick(action.x, action.y)) {
             if (action.pressed) {
                 _tap_inited = true;
