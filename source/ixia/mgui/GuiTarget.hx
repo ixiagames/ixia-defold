@@ -12,6 +12,7 @@ class GuiTarget {
     public var node(default, null):GuiNode;
     public var pointerState(default, null):PointerTargetState = OUT;
     var _listeners:Map<Event, Array<EventData->Void>> = [];
+    var _tap_inited:Bool = false;
     
     private function new() {}
 
@@ -32,12 +33,18 @@ class GuiTarget {
     function handleTouchInput(action:ScriptOnInputAction, scriptData:Dynamic):Void {
         if (pick(action.x, action.y)) {
             if (action.pressed) {
+                _tap_inited = true;
                 pointerState = DOWN;
                 if (mgui.pointerState == JUST_PRESSED)
                     dispatch(newEvent(JUST_PRESS, action, scriptData));
                 dispatch(newEvent(PRESS, action, scriptData));
 
             } else if (action.released) {
+                if (_tap_inited) {
+                    _tap_inited = false;
+                    dispatch(newEvent(CLICK, action, scriptData));
+                }
+
                 pointerState = HOVER;
                 if (mgui.pointerState == JUST_RELEASED)
                     dispatch(newEvent(JUST_RELEASE, action, scriptData));
