@@ -9,15 +9,9 @@ enum abstract Event(Int) to Int {
     var REMOVE;
     var CLICK;
     var PRESS;
-    var JUST_PRESS;
     var RELEASE;
-    var JUST_RELEASE;
     var ROLL_OUT;
     var ROLL_IN;
-
-    public inline function isPressing():Bool {
-        return this == PRESS || this == JUST_PRESS;
-    }
 
 }
 

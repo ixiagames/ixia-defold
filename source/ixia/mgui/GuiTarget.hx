@@ -35,8 +35,6 @@ class GuiTarget {
             if (action.pressed) {
                 _tap_inited = true;
                 pointerState = DOWN;
-                if (mgui.pointerState == JUST_PRESSED)
-                    dispatch(newEvent(JUST_PRESS, action, scriptData));
                 dispatch(newEvent(PRESS, action, scriptData));
 
             } else if (action.released) {
@@ -46,8 +44,6 @@ class GuiTarget {
                 }
 
                 pointerState = HOVER;
-                if (mgui.pointerState == JUST_RELEASED)
-                    dispatch(newEvent(JUST_RELEASE, action, scriptData));
                 dispatch(newEvent(RELEASE, action, scriptData));
             }
         }
