@@ -1,7 +1,7 @@
 package ixia.mgui;
 
 import defold.support.ScriptOnInputAction;
-import ixia.mgui.Event;
+import ixia.mgui.EventType;
 using defold.Gui;
 
 @:access(ixia.mgui.EventData)
@@ -11,7 +11,7 @@ class GuiTarget {
     public var id(default, null):String;
     public var node(default, null):GuiNode;
     public var pointerState(default, null):PointerTargetState = OUT;
-    var _listeners:Map<Event, Array<EventData->Void>> = [];
+    var _listeners:Map<EventType, Array<EventData->Void>> = [];
     var _tap_inited:Bool = false;
     
     private function new() {}
@@ -49,7 +49,7 @@ class GuiTarget {
         }
     }
 
-    public function listen(event:Event, listener:(data:EventData)->Void):Bool {
+    public function listen(event:EventType, listener:(data:EventData)->Void):Bool {
         if (!_listeners.exists(event))
             _listeners[event] = [ listener ];
         else {
@@ -60,15 +60,15 @@ class GuiTarget {
         return true;
     }
 
-    public function mute(event:Event, listener:(data:EventData)->Void):Bool {
+    public function mute(event:EventType, listener:(data:EventData)->Void):Bool {
         if (!_listeners.exists(event))
             return false;
         return _listeners[event].remove(listener);
     }
 
     public function dispatch(data:EventData):Dynamic {
-        if (_listeners.exists(data.event)) {
-            for (listener in _listeners[data.event])
+        if (_listeners.exists(data.type)) {
+            for (listener in _listeners[data.type])
                 listener(data);
         }
         var result = data.get(RESULT);
@@ -78,8 +78,8 @@ class GuiTarget {
 
     //
 
-    inline function newEvent(event:Event, ?action:ScriptOnInputAction, ?scriptData:Dynamic):EventData {
-        return new EventData(this, event, action, scriptData);
+    inline function newEvent(type:EventType, ?action:ScriptOnInputAction, ?scriptData:Dynamic):EventData {
+        return new EventData(this, type, action, scriptData);
     }
 
     public inline function pick(x:Float, y:Float):Bool {

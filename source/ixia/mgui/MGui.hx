@@ -7,7 +7,7 @@ import defold.support.ScriptOnInputAction;
 import defold.types.Hash;
 import defold.types.Message;
 import haxe.PosInfos;
-import ixia.mgui.Event.EventData;
+import ixia.mgui.EventData;
 import lua.Lua;
 
 @:access(ixia.mgui.GuiTarget)
@@ -27,7 +27,7 @@ class MGui {
 
     public var actionIDs(default, null):ActionIDs;
     public var pointerState(default, null):PointerGlobalState;
-    var _listenerSelections:Array<{ selector:Selector, events:Array<Event>, listener:EventData->Void }> = [];
+    var _listenerSelections:Array<{ selector:Selector, events:Array<EventType>, listener:EventData->Void }> = [];
     var _targets:Array<GuiTarget> = [];
     
     public function new(acquiresInputFocus:Bool = true, ?actionRemap:Map<InputAction, String>) {
@@ -89,7 +89,7 @@ class MGui {
         removeAll();
     }
 
-    public function listen(selector:Selector, events:Array<Event>, listener:EventData->Void):Void {
+    public function listen(selector:Selector, events:Array<EventType>, listener:EventData->Void):Void {
         _listenerSelections.push({
             selector: selector,
             events: events.copy(),
@@ -103,7 +103,7 @@ class MGui {
         }
     }
 
-    public function mute(?selector:Selector, ?events:Array<Event>, ?listener:EventData->Void):Void {
+    public function mute(?selector:Selector, ?events:Array<EventType>, ?listener:EventData->Void):Void {
         var i = _listenerSelections.length;
         while (i-- > 0) {
             var selection = _listenerSelections[i];

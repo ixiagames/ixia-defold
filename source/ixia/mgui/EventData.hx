@@ -3,25 +3,13 @@ package ixia.mgui;
 import defold.support.ScriptOnInputAction;
 import ixia.mgui.utils.RawTable;
 
-enum abstract Event(Int) to Int {
-    
-    var CREATE;
-    var REMOVE;
-    var CLICK;
-    var PRESS;
-    var RELEASE;
-    var ROLL_OUT;
-    var ROLL_IN;
-
-}
-
 enum abstract EventDataPropKey(Int) {
     
     @prop(ixia.mgui.GuiTarget)
     var TARGET;
     
-    @prop(ixia.mgui.Event)
-    var EVENT;
+    @prop(ixia.mgui.EventType)
+    var TYPE;
 
     @prop(defold.support.ScriptOnInputAction)
     var ACTION;
@@ -39,22 +27,22 @@ enum abstract EventDataPropKey(Int) {
 @:build(ixia.mgui.utils.PropsBuilder.build(EventDataPropKey))
 abstract EventData(RawTable) to RawTable from RawTable {
 
-    public inline function new(target:GuiTarget, event:Event, ?action:ScriptOnInputAction, ?scriptData:Dynamic) {
+    public inline function new(target:GuiTarget, type:EventType, ?action:ScriptOnInputAction, ?scriptData:Dynamic) {
         this = new RawTable();
+        this[TYPE] = type;
         this[TARGET] = target;
-        this[EVENT] = event;
         this[ACTION] = action;
         this[SCRIPT_DATA] = scriptData;
     }
 
     public function cancel():Void {
-        if (event != REMOVE)
+        if (type != REMOVE)
             MGui.error("This event cannot be cancelled.");
         this[RESULT] = true;
     }
     
-    inline function get(event:EventDataPropKey):Dynamic {
-        return this[event];
+    inline function get(key:EventDataPropKey):Dynamic {
+        return this[key];
     }
 
     inline function put():Void {
