@@ -12,7 +12,7 @@ class GuiTarget {
     public var node(default, null):GuiNode;
     public var pointerState(default, null):PointerTargetState = OUT;
     var _listeners:Map<EventType, Array<EventData->Void>> = [];
-    var _tap_inited:Bool = false;
+    var _tapInited:Bool = false;
     
     private function new() {}
 
@@ -33,13 +33,13 @@ class GuiTarget {
     function handleTouchPress(action:ScriptOnInputAction, scriptData:Dynamic):Void {
         if (pick(action.x, action.y)) {
             if (action.pressed) {
-                _tap_inited = true;
+                _tapInited = true;
                 pointerState = DOWN;
                 dispatch(newEvent(PRESS, action, scriptData));
 
             } else if (action.released) {
-                if (_tap_inited) {
-                    _tap_inited = false;
+                if (_tapInited) {
+                    _tapInited = false;
                     dispatch(newEvent(CLICK, action, scriptData));
                 }
 
