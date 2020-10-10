@@ -37,7 +37,7 @@ abstract EventData(RawTable) to RawTable from RawTable {
 
     public function cancel():Void {
         if (type != REMOVE)
-            MGui.error("This event cannot be cancelled.");
+            Error.error("This event cannot be cancelled.");
         this[RESULT] = true;
     }
     

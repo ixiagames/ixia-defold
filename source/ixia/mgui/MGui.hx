@@ -1,23 +1,17 @@
 package ixia.mgui;
 
-import defold.Gui;
 import Defold.hash;
+import defold.Gui;
 import defold.Msg;
 import defold.support.ScriptOnInputAction;
 import defold.types.Hash;
 import defold.types.Message;
-import haxe.PosInfos;
 import ixia.mgui.EventData;
-import lua.Lua;
 
 @:access(ixia.mgui.GuiTarget)
 class MGui {
 
     static final _guiTargetPool:Array<GuiTarget> = [];
-
-    public static function error(message:String, ?posInfos:PosInfos) {
-        Lua.error(posInfos.fileName + ':' + posInfos.lineNumber + ": " + message);
-    }
 
     public static function acquireInputFocus():Void {
         Msg.post('.', new Message<Void>("acquire_input_focus"));
