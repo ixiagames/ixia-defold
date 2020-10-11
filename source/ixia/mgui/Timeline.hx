@@ -8,18 +8,28 @@ class Timeline<T> {
     public var time(default, null):Float;
     public var timeScale:Float = 1;
     public var children(get, never):ReadOnlyArray<SubTimeline<T>>;
+    var _childrenMap:Map<T, SubTimeline<T>> = [];
     var _children:Array<SubTimeline<T>> = [];
     
     public function new() {}
 
     public function add(id:T, startTime:Float, duration:Float):Void {
         #if debug
+        if (_childrenMap.exists(id))
+            Error.error('$id already exists.');
         if (startTime < 0)
             Error.error('startTime cannot be smaller than 0. Got: $startTime');
         if (duration <= 0)
             Error.error('duration has to be positive. Got: $duration');
         #end
-        _children.push(new SubTimeline<T>(id, startTime, duration));
+
+        var child = new SubTimeline<T>(id, startTime, duration);
+        _children.push(child);
+        _childrenMap[id] = child;
+    }
+
+    public inline function getChild(id:T):SubTimeline<T> {
+        return _childrenMap[id];
     }
 
     public function forward(delta:Float, ?onProgress:SubTimeline<T>->Void, ?onComplete:SubTimeline<T>->Void):Timeline<T> {
