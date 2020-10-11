@@ -8,8 +8,8 @@ class Timeline<T> {
     public var time(default, null):Float;
     public var timeScale:Float = 1;
     public var children(get, never):ReadOnlyArray<SubTimeline<T>>;
-    var _childrenMap:Map<T, SubTimeline<T>> = [];
     var _children:Array<SubTimeline<T>> = [];
+    var _childrenMap:Map<T, SubTimeline<T>> = [];
     
     public function new() {}
 
