@@ -61,7 +61,7 @@ class SubTimeline<T> {
     public var time(default, null):Float = 0;
     public var progress(default, null):Float = 0;
     
-    public inline function new(id:T, startTime:Float, duration:Float) {
+    public function new(id:T, startTime:Float, duration:Float) {
         this.id = id;
         this.startTime = startTime;
         this.duration = duration;
