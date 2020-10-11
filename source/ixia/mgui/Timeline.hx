@@ -3,7 +3,7 @@ package ixia.mgui;
 import haxe.ds.ReadOnlyArray;
 
 @:access(ixia.mgui.SubTimeline)
-class Timeline<T> {
+class Timeline<T:Int> {
 
     public var time(default, null):Float;
     public var timeScale:Float = 1;
