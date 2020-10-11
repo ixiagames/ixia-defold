@@ -13,6 +13,12 @@ class Timeline<T> {
     public function new() {}
 
     public function add(id:T, startTime:Float, duration:Float):Void {
+        #if debug
+        if (startTime < 0)
+            Error.error('startTime cannot be smaller than 0. Got: $startTime');
+        if (duration <= 0)
+            Error.error('duration has to be positive. Got: $duration');
+        #end
         _children.push(new SubTimeline<T>(id, startTime, duration));
     }
 
