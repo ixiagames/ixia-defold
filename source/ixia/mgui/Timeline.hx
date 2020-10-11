@@ -72,28 +72,30 @@ class Timeline<T:Int> {
 class SubTimeline<T> {
 
     public var id(default, null):T;
-    public var duration(default, set):Float;
-    public var startTime(default, set):Float;
+    public var duration(get, set):Float; var _duration:Float;
+    public var startTime(get, set):Float; var _startTime:Float;
     public var time(default, null):Float = 0;
     public var progress(default, null):Float = 0;
     
     public function new(id:T, startTime:Float, duration:Float) {
         this.id = id;
-        this.startTime = startTime;
-        this.duration = duration;
+        _startTime = startTime;
+        _duration = duration;
     }
 
+    inline function get_duration() return _duration;
     function set_duration(value:Float):Float {
         progress = Math.max(time / value, 1);
-        return duration = value;
+        return _duration = value;
     }
 
+    inline function get_startTime() return _startTime;
     function set_startTime(value:Float):Float {
-        time += startTime - value;
+        time += _startTime - value;
         if (time < 0)
             time = 0;
-        progress = Math.max(time / duration, 1);
-        return startTime = value;
+        progress = Math.max(time / _duration, 1);
+        return _startTime = value;
     }
 
 }
