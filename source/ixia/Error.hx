@@ -1,4 +1,4 @@
-package ixia.mgui;
+package ixia;
 
 import haxe.PosInfos;
 import lua.Lua;
