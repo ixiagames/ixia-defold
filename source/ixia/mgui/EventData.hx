@@ -1,7 +1,6 @@
 package ixia.mgui;
 
 import defold.support.ScriptOnInputAction;
-import ixia.lua.Error;
 import ixia.lua.RawTable;
 
 enum abstract EventDataPropKey(Int) {

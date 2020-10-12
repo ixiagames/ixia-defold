@@ -1,7 +1,5 @@
 package ixia.timeline;
 
-import ixia.lua.Error;
-
 class TimelineTarget {
 
     public var timeline(default, null):Timeline<TimelineTarget>;
