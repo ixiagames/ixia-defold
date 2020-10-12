@@ -32,7 +32,7 @@ class Timeline<T:Int> {
         return _childrenMap[id];
     }
 
-    public function forward(delta:Float, ?onProgress:SubTimeline<T>->Void, ?onComplete:SubTimeline<T>->Void):Timeline<T> {
+    public function forward(delta:Float, ?onProgress:SubTimeline<T>->Void):Timeline<T> {
         #if debug
         if (delta < 0)
             Error.error('delta cannot be negative. Got: $delta');
@@ -49,8 +49,8 @@ class Timeline<T:Int> {
                 } else {
                     child.progress = 1;
                     child.time = child.duration;
-                    if (onComplete != null)
-                        onComplete(child);
+                    if (onProgress != null)
+                        onProgress(child);
                 }
             }
         }
