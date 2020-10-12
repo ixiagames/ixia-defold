@@ -5,7 +5,7 @@ import haxe.ds.ReadOnlyArray;
 @:access(ixia.mgui.SubTimeline)
 class Timeline<T:Int> {
 
-    public var time(default, null):Float;
+    public var time(default, null):Float = 0;
     public var timeScale:Float = 1;
     public var children(get, never):ReadOnlyArray<SubTimeline<T>>;
     var _children:Array<SubTimeline<T>> = [];
