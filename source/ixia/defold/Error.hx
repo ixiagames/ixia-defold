@@ -1,4 +1,4 @@
-package ixia.lua;
+package ixia.defold;
 
 import haxe.PosInfos;
 import lua.Lua;

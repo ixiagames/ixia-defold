@@ -1,7 +1,7 @@
 package ixia;
 
 #if hxdefold
-typedef Error = ixia.lua.Error;
+typedef Error = ixia.defold.Error;
 #else
 class Error {
     
