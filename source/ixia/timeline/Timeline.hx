@@ -1,6 +1,7 @@
 package ixia.timeline;
 
 import haxe.ds.ReadOnlyArray;
+import ixia.lua.Error;
 
 @:access(ixia.timeline.TimelineTarget)
 class Timeline<T:TimelineTarget> {

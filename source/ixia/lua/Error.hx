@@ -1,4 +1,4 @@
-package ixia;
+package ixia.lua;
 
 import haxe.PosInfos;
 import lua.Lua;
