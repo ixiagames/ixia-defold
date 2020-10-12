@@ -1,11 +1,11 @@
-package ixia.mgui.utils;
+package ixia.lua;
 
 #if macro
 import haxe.macro.Context;
 import haxe.macro.Expr;
 using haxe.macro.Tools;
 
-class PropsBuilder {
+class RawTableBuilder {
     
     public static function build(propKeyTypePath:Expr):Array<Field> {
         var fields = Context.getBuildFields();

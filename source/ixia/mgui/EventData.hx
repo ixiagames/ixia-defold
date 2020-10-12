@@ -1,7 +1,7 @@
 package ixia.mgui;
 
 import defold.support.ScriptOnInputAction;
-import ixia.mgui.utils.RawTable;
+import ixia.lua.RawTable;
 
 enum abstract EventDataPropKey(Int) {
     
@@ -24,7 +24,7 @@ enum abstract EventDataPropKey(Int) {
 
 }
 
-@:build(ixia.mgui.utils.PropsBuilder.build(EventDataPropKey))
+@:build(ixia.lua.RawTableBuilder.build(EventDataPropKey))
 abstract EventData(RawTable) to RawTable from RawTable {
 
     public inline function new(target:GuiTarget, type:EventType, ?action:ScriptOnInputAction, ?scriptData:Dynamic) {

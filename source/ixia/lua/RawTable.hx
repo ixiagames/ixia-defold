@@ -1,4 +1,4 @@
-package ixia.mgui.utils;
+package ixia.lua;
 
 abstract RawTable(Dynamic) {
     
