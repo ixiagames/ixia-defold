@@ -44,11 +44,14 @@ class Timeline<T:TimelineTarget> {
     }
 
     #if hxdefold
-    public function play(duration:Float, ?onProgress:T->Void):Void {
+    public function play(duration:Float, ?onProgress:T->Void, ?onComplete:Timeline<T>->Void):Void {
         defold.Timer.delay(0, true, (_, handle, delta) -> {
             forward(delta, onProgress);
-            if (time >= duration)
+            if (time >= duration) {
                 defold.Timer.cancel(handle);
+                if (onComplete != null)
+                    onComplete(this);
+            }
         });
     }
     #end
