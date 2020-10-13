@@ -1,4 +1,4 @@
-package ixia.math;
+package ixia;
 
 class Random {
     
