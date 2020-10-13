@@ -12,6 +12,12 @@ class Timeline<T:TimelineTarget> {
     
     public function new() {}
     
+    public function reset():Void {
+        time = 0;
+        for (target in _targets)
+            target.time = target.progress = 0;
+    }
+
     public function forward(delta:Float, ?onProgress:T->Void):Timeline<T> {
         #if debug
         if (delta < 0)
@@ -37,11 +43,15 @@ class Timeline<T:TimelineTarget> {
         return this;
     }
 
-    public function reset():Void {
-        time = 0;
-        for (target in _targets)
-            target.time = target.progress = 0;
+    #if hxdefold
+    public function play(duration:Float, ?onProgress:T->Void):Void {
+        defold.Timer.delay(0, true, (_, handle, delta) -> {
+            forward(delta, onProgress);
+            if (time >= duration)
+                defold.Timer.cancel(handle);
+        });
     }
+    #end
 
     inline function get_targets():ReadOnlyArray<T> {
         return _targets;
