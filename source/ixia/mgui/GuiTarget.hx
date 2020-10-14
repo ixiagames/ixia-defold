@@ -18,7 +18,7 @@ class GuiTarget {
     private function new() {}
 
     function handleTouchMove(action:ScriptOnInputAction, scriptData:Dynamic):Void {
-        if (pick(action.x, action.y)) {
+        if (node.pick_node(action.x, action.y)) {
             if (!pointerState.isIn()) {
                 pointerState = HOVER;
                 dispatch(newEvent(ROLL_IN, action, scriptData));
@@ -32,7 +32,7 @@ class GuiTarget {
     }
 
     function handleTouchPress(action:ScriptOnInputAction, scriptData:Dynamic):Void {
-        if (pick(action.x, action.y)) {
+        if (node.pick_node(action.x, action.y)) {
             if (action.pressed) {
                 _tapInited = true;
                 pointerState = DOWN;
@@ -79,10 +79,6 @@ class GuiTarget {
 
     inline function newEvent(type:EventType, ?action:ScriptOnInputAction, ?scriptData:Dynamic):EventData {
         return new EventData(this, type, action, scriptData);
-    }
-
-    public inline function pick(x:Float, y:Float):Bool {
-        return node.pick_node(x, y);
     }
 
     function set_enabled(value:Bool):Bool {
