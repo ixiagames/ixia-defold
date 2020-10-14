@@ -10,6 +10,7 @@ class GuiTarget {
     public var mgui(default, null):MGui;
     public var id(default, null):String;
     public var node(default, null):GuiNode;
+    public var enabled(default, set):Bool = true;
     public var pointerState(default, null):PointerTargetState = OUT;
     var _listeners:Map<EventType, Array<EventData->Void>> = [];
     var _tapInited:Bool = false;
@@ -76,14 +77,18 @@ class GuiTarget {
         return result;
     }
 
-    //
-
     inline function newEvent(type:EventType, ?action:ScriptOnInputAction, ?scriptData:Dynamic):EventData {
         return new EventData(this, type, action, scriptData);
     }
 
     public inline function pick(x:Float, y:Float):Bool {
         return node.pick_node(x, y);
+    }
+
+    function set_enabled(value:Bool):Bool {
+        enabled = value;
+        dispatch(newEvent(enabled ? ENABLE : DISABLE));
+        return enabled;
     }
 
 }

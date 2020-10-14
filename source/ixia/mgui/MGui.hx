@@ -125,8 +125,10 @@ class MGui {
 
     public function handleInput(actionID:Hash, action:ScriptOnInputAction, scriptData:Dynamic):Bool {
         if (actionID == null) {
-            for (target in _targets)
-                target.handleTouchMove(action, scriptData);
+            for (target in _targets) {
+                if (target.enabled)
+                    target.handleTouchMove(action, scriptData);
+            }
 
         } else if (actionID == actionIDs.touch) {
             if (action.pressed)
@@ -134,8 +136,10 @@ class MGui {
             else if (action.released)
                 pointerState = JUST_PRESSED;
 
-            for (target in _targets)
-                target.handleTouchPress(action, scriptData);
+            for (target in _targets) {
+                if (target.enabled)
+                    target.handleTouchPress(action, scriptData);
+            }
 
             if (action.pressed)
                 pointerState = PRESSED;
