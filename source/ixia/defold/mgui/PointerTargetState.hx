@@ -1,4 +1,4 @@
-package ixia.mgui;
+package ixia.defold.mgui;
 
 enum abstract PointerTargetState(Int) to Int {
     

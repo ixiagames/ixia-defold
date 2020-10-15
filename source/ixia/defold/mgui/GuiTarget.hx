@@ -1,10 +1,9 @@
-package ixia.mgui;
+package ixia.defold.mgui;
 
 import defold.support.ScriptOnInputAction;
-import ixia.mgui.EventType;
 using defold.Gui;
 
-@:access(ixia.mgui.EventData)
+@:access(ixia.defold.mgui.EventData)
 class GuiTarget {
     
     public var mgui(default, null):MGui;

@@ -1,4 +1,4 @@
-package ixia.mgui;
+package ixia.defold.mgui;
 
 enum abstract PointerGlobalState(Int) to Int {
     

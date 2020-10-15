@@ -1,14 +1,14 @@
-package ixia.mgui;
+package ixia.defold.mgui;
 
 import defold.support.ScriptOnInputAction;
 import ixia.lua.RawTable;
 
 enum abstract EventDataPropKey(Int) {
     
-    @prop(ixia.mgui.GuiTarget)
+    @prop(ixia.defold.mgui.GuiTarget)
     var TARGET;
     
-    @prop(ixia.mgui.EventType)
+    @prop(ixia.defold.mgui.EventType)
     var TYPE;
 
     @prop(defold.support.ScriptOnInputAction)

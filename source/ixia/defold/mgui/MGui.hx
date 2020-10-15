@@ -1,4 +1,4 @@
-package ixia.mgui;
+package ixia.defold.mgui;
 
 import Defold.hash;
 import defold.Gui;
@@ -6,9 +6,8 @@ import defold.Msg;
 import defold.support.ScriptOnInputAction;
 import defold.types.Hash;
 import defold.types.Message;
-import ixia.mgui.EventData;
 
-@:access(ixia.mgui.GuiTarget)
+@:access(ixia.defold.mgui.GuiTarget)
 class MGui {
 
     static final _guiTargetPool:Array<GuiTarget> = [];

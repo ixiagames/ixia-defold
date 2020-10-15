@@ -1,4 +1,4 @@
-package ixia.mgui;
+package ixia.defold.mgui;
 
 import haxe.ds.Either;
 using StringTools;
