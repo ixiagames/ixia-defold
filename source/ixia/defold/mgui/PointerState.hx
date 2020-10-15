@@ -1,6 +1,6 @@
 package ixia.defold.mgui;
 
-enum abstract PointerGlobalState(Int) to Int {
+enum abstract PointerState(Int) to Int {
     
     var PRESSED;
     var JUST_PRESSED;

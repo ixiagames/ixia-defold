@@ -19,7 +19,7 @@ class MGui {
     //
 
     public var actionIDs(default, null):ActionIDs;
-    public var pointerState(default, null):PointerGlobalState;
+    public var pointerState(default, null):PointerState;
     var _listenerSelections:Array<{ selector:Selector, events:Array<EventType>, listener:EventData->Void }> = [];
     var _targets:Array<GuiTarget> = [];
     

@@ -10,7 +10,7 @@ class GuiTarget {
     public var id(default, null):String;
     public var node(default, null):GuiNode;
     public var enabled(default, set):Bool = true;
-    public var pointerState(default, null):PointerTargetState = OUT;
+    public var pointerState(default, null):TargetPointerState = OUT;
     var _listeners:Map<EventType, Array<EventData->Void>> = [];
     var _tapInited:Bool = false;
     
@@ -84,6 +84,23 @@ class GuiTarget {
         enabled = value;
         dispatch(newEvent(enabled ? ENABLE : DISABLE));
         return enabled;
+    }
+
+}
+
+enum abstract TargetPointerState(Int) to Int {
+    
+    var OUT;
+    var HOVER;
+    var DOWN;
+    var DOWN_OUT;
+
+    public inline function isIn():Bool {
+        return this == HOVER || this == DOWN;
+    }
+    
+    public inline function isDown():Bool {
+        return this == DOWN || this == DOWN_OUT;
     }
 
 }
