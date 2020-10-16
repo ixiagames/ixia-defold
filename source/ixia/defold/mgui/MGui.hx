@@ -8,6 +8,7 @@ import defold.types.Hash;
 import defold.types.Message;
 
 @:access(ixia.defold.mgui.GuiTarget)
+@:access(ixia.defold.mgui.PointerData)
 class MGui {
 
     static final _guiTargetPool:Array<GuiTarget> = [];
@@ -19,7 +20,7 @@ class MGui {
     //
 
     public var actionIDs(default, null):ActionIDs;
-    public var pointerState(default, null):PointerState;
+    public var pointer(default, null):PointerData = new PointerData();
     var _listenerSelections:Array<{ selector:Selector, events:Array<EventType>, listener:EventData->Void }> = [];
     var _targets:Array<GuiTarget> = [];
     
@@ -124,16 +125,22 @@ class MGui {
 
     public function handleInput(actionID:Hash, action:ScriptOnInputAction, scriptData:Dynamic):Bool {
         if (actionID == null) {
+            pointer.x = action.x;
+            pointer.y = action.y;
+
             for (target in _targets) {
                 if (target.enabled)
                     target.handleTouchMove(action, scriptData);
             }
 
         } else if (actionID == actionIDs.touch) {
+            pointer.x = action.x;
+            pointer.y = action.y;
+            
             if (action.pressed)
-                pointerState = JUST_PRESSED;
+                pointer.state = JUST_PRESSED;
             else if (action.released)
-                pointerState = JUST_PRESSED;
+                pointer.state = JUST_PRESSED;
 
             for (target in _targets) {
                 if (target.enabled)
@@ -141,9 +148,9 @@ class MGui {
             }
 
             if (action.pressed)
-                pointerState = PRESSED;
+                pointer.state = PRESSED;
             else if (action.released)
-                pointerState = RELEASED;
+                pointer.state = RELEASED;
         }
 
         return false;
