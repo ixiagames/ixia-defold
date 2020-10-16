@@ -83,9 +83,17 @@ class GuiTarget {
     function set_enabled(value:Bool):Bool {
         if (enabled == value)
             return enabled;
-        
+
         enabled = value;
-        dispatch(newEvent(enabled ? ENABLE : DISABLE));
+        if (enabled) {
+            pointerState = node.pick_node(mgui.pointer.x, mgui.pointer.y) ? HOVER : OUT;
+            dispatch(newEvent(ENABLE));
+
+        } else {
+            pointerState = DISABLED;
+            dispatch(newEvent(DISABLE));
+        }
+        
         return enabled;
     }
 
