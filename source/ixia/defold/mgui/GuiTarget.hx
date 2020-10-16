@@ -81,6 +81,9 @@ class GuiTarget {
     }
 
     function set_enabled(value:Bool):Bool {
+        if (enabled == value)
+            return enabled;
+        
         enabled = value;
         dispatch(newEvent(enabled ? ENABLE : DISABLE));
         return enabled;
