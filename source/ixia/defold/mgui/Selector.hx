@@ -26,7 +26,7 @@ abstract Selector(Either<String, (target:GuiTarget)->Bool>) from Either<String, 
         return switch (this) {
             case Left(s):
                 for (s in s.split(',')) {
-                    if (matchID(target.id, s.trim()))
+                    if (matchID(target.id, s.replace('\n', '').replace('\r', '').trim()))
                         return true;
                 }
                 return false;
