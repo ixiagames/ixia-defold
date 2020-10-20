@@ -6,6 +6,7 @@ enum abstract EventType(Int) to Int {
     var REMOVE;
     var ENABLE;
     var DISABLE;
+    var NODE;
     var CLICK;
     var PRESS;
     var RELEASE;

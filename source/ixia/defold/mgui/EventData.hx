@@ -17,6 +17,9 @@ enum abstract EventDataPropKey(Int) {
     @prop
     var SCRIPT_DATA;
 
+    @prop(defold.Gui.GuiNode)
+    var PRV_NODE;
+
     @:prop(Bool, true, true)
     var CANCELLED;
 
@@ -43,6 +46,10 @@ abstract EventData(RawTable) to RawTable from RawTable {
     
     inline function get(key:EventDataPropKey):Dynamic {
         return this[key];
+    }
+
+    inline function set(key:EventDataPropKey, value:Dynamic):Void {
+        this[key] = value;
     }
 
     inline function put():Void {

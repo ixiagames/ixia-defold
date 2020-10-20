@@ -8,7 +8,7 @@ class GuiTarget {
     
     public var mgui(default, null):MGui;
     public var id(default, null):String;
-    public var node(default, null):GuiNode;
+    public var node(default, set):GuiNode;
     public var enabled(default, set):Bool = true;
     public var pointerState(default, null):TargetPointerState = OUT;
     var _listeners:Map<EventType, Array<EventData->Void>> = [];
@@ -80,6 +80,14 @@ class GuiTarget {
         return new EventData(this, type, action, scriptData);
     }
 
+    function set_node(value:GuiNode):GuiNode {
+        var event = newEvent(NODE);
+        event.set(PRV_NODE, node);
+        node = value;
+        dispatch(event);
+        return node;
+    }
+    
     function set_enabled(value:Bool):Bool {
         if (enabled == value)
             return enabled;
