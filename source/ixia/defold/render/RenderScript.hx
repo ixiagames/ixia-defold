@@ -89,26 +89,26 @@ class RenderScript<T:{}> extends defold.support.RenderScript<T> {
                 view = message.view;
                 projection = (cast message:Dynamic).projection;
 
-            case RenderScriptMessages.use_camera_projection:
+            case ProjectionModeMessages.use_camera_projection:
                 _projectionFunc = () -> return projection != null ? projection : projection = Vmath.matrix4();
             
-            case RenderScriptMessages.use_stretch_projection:
+            case ProjectionModeMessages.use_stretch_projection:
                 near = message.near != null ? message.near : -1;
                 far = message.far != null ? message.far : 1;
                 _projectionFunc = stretchProjection;
 
-            case RenderScriptMessages.use_fixed_projection:
+            case ProjectionModeMessages.use_fixed_projection:
                 near = message.near != null ? message.near : -1;
                 far = message.far != null ? message.far : 1;
                 zoom = message.far != null ? message.zoom : 1;
                 _projectionFunc = fixedProjection;
 
-            case RenderScriptMessages.use_fixed_fit_projection:
+            case ProjectionModeMessages.use_fixed_fit_projection:
                 near = message.near != null ? message.near : -1;
                 far = message.far != null ? message.far : 1;
                 _projectionFunc = fixedFitProjection;
 
-            case RenderScriptMessages.use_fixed_vfit_projection:
+            case ProjectionModeMessages.use_fixed_vfit_projection:
                 near = message.near != null ? message.near : -1;
                 far = message.far != null ? message.far : 1;
                 _projectionFunc = fixedVFitProjection;
@@ -147,7 +147,7 @@ class RenderScript<T:{}> extends defold.support.RenderScript<T> {
 
 }
 
-class RenderScriptMessages {
+class ProjectionModeMessages {
     
     public static final use_camera_projection = new Message<Void>("use_camera_projection");
     public static final use_stretch_projection = new Message<{ near:Float, far:Float }>("use_stretch_projection");
