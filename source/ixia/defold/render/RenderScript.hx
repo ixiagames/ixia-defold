@@ -13,9 +13,9 @@ import lua.Table;
 class RenderScript<T:{}> extends defold.support.RenderScript<T> {
 
     public var tilePred(default, null):RenderPredicate;
+    public var particlePred(default, null):RenderPredicate;
     public var guiPred(default, null):RenderPredicate;
     public var textPred(default, null):RenderPredicate;
-    public var particlePred(default, null):RenderPredicate;
     public var near:Float;
     public var far:Float;
     public var zoom:Float;

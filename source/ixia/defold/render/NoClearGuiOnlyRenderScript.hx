@@ -1,13 +1,19 @@
 package ixia.defold.render;
 
 import defold.Render;
+import defold.types.Matrix4;
 import defold.Vmath;
 import lua.Table;
 
 /**
  * Only render GUI without clearing.
  */
-class NoClearGuiOnlyRenderScript<T:{}> extends RenderScript<T> {
+class NoClearGuiOnlyRenderScript<T:{}> extends defold.support.RenderScript<T> {
+
+    public var guiPred(default, null):RenderPredicate;
+    public var textPred(default, null):RenderPredicate;
+    public var view:Matrix4;
+    public var projection:Matrix4;
 
     override function init(self:T) {
         guiPred = Render.predicate(Table.create([ "gui" ]));
