@@ -13,7 +13,7 @@ class MGui {
 
     static final _guiTargetPool:Array<GuiTarget> = [];
 
-    public static function acquireInputFocus():Void {
+    public static inline function acquireInputFocus():Void {
         Msg.post('.', new Message<Void>("acquire_input_focus"));
     }
 
