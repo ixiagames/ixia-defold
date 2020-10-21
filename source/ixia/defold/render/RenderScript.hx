@@ -107,7 +107,17 @@ class RenderScript<T:{}> extends defold.support.RenderScript<T> {
                 near = message.near != null ? message.near : -1;
                 far = message.far != null ? message.far : 1;
                 _projectionFunc = fixedFitProjection;
+
+            case RenderScriptMessages.use_fixed_vfit_projection:
+                near = message.near != null ? message.near : -1;
+                far = message.far != null ? message.far : 1;
+                _projectionFunc = fixedVFitProjection;
         }
+    }
+
+    // Projection that stretches content.
+    function stretchProjection():Matrix4 {
+        return Vmath.matrix4_orthographic(0, Render.get_width(), 0, Render.get_height(), near, far);
     }
 
     // Projection that centers content with maintained aspect ratio and optional zoom.
@@ -122,17 +132,17 @@ class RenderScript<T:{}> extends defold.support.RenderScript<T> {
     
     // Projection that centers and fits content with maintained aspect ratio.
     function fixedFitProjection():Matrix4 {
-        var width = Render.get_width();
-        var height = Render.get_height();
-        var windowWidth = Render.get_window_width();
-        var windowHeight = Render.get_window_height();
-        zoom = Math.min(windowWidth / width, windowHeight / height);
+        zoom = Math.min(
+            Render.get_window_width() / Render.get_width(),
+            Render.get_window_height() / Render.get_height()
+        );
         return fixedProjection();
     }
 
-    // Projection that stretches content.
-    function stretchProjection():Matrix4 {
-        return Vmath.matrix4_orthographic(0, Render.get_width(), 0, Render.get_height(), near, far);
+    // Projection that centers and vertically fits the content with maintained aspect ratio.
+    function fixedVFitProjection():Matrix4 {
+        zoom = Render.get_window_height() / Render.get_height();
+        return fixedProjection();
     }
 
 }
@@ -143,5 +153,6 @@ class RenderScriptMessages {
     public static final use_stretch_projection = new Message<{ near:Float, far:Float }>("use_stretch_projection");
     public static final use_fixed_projection = new Message<{ near:Float, far:Float, zoom:Float }>("use_fixed_projection");
     public static final use_fixed_fit_projection = new Message<{ near:Float, far:Float }>("use_fixed_fit_projection");
+    public static final use_fixed_vfit_projection = new Message<{ near:Float, far:Float }>("use_fixed_vfit_projection");
 
 }
