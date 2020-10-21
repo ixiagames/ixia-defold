@@ -16,7 +16,7 @@ class Projection {
     /**
      * Projection that centers content with maintained aspect ratio and optional zoom.
      */
-    public static inline function fixed(near:Float = -1, far:Float = 1, zoom:Float = -1):Matrix4 {
+    public static inline function fixed(near:Float = -1, far:Float = 1, zoom:Float = 1):Matrix4 {
         var projectedWidth = Render.get_window_width() / zoom;
         var projectedHeight = Render.get_window_height() / zoom;
         var xoffset = -(projectedWidth - Render.get_width()) / 2;
