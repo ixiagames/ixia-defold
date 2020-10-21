@@ -39,14 +39,7 @@ class RenderScript<T:{}> extends defold.support.RenderScript<T> {
         
         view = Vmath.matrix4();
 
-        // Default is stretch projection. copy from builtins and change for different projection
-        // or send a message to the Render script to change projection:
-        // - Msg.post("@Render:", "use_stretch_projection", { near: -1, far: 1 });
-        // - Msg.post("@Render:", "use_fixed_projection", { near: -1, far: 1, zoom: 2 });
-        // - Msg.post("@Render:", "use_fixed_fit_projection", { near: -1, far: 1 });
-        near = -1;
-        far = 1;
-        _projectionFunc = stretchProjection;
+        enableStretchProjection();
     }
 
     override function update(self:T, dt:Float):Void {
@@ -82,77 +75,100 @@ class RenderScript<T:{}> extends defold.support.RenderScript<T> {
     
     override function on_message<TMessage>(self:T, message_id:Message<TMessage>, message:TMessage, sender:Url):Void {
         switch (message_id) {
-            case RenderMessages.clear_color:
+            case RenderScriptMessages.clear_color:
                 clearColor = message.color;
 
-            case RenderMessages.set_view_projection:
+            case RenderScriptMessages.set_view_projection:
                 view = message.view;
-                projection = (cast message:Dynamic).projection;
+                if (message.projection != null)
+                    projection = message.projection;
+                else if (projection == null)
+                    projection = Vmath.matrix4();
 
-            case ProjectionModeMessages.use_camera_projection:
-                _projectionFunc = () -> return projection != null ? projection : projection = Vmath.matrix4();
+            case RenderScriptMessages.use_camera_projection:
+                if (message.projection != null)
+                    projection = message.projection;
+                else if (projection == null)
+                    projection = Vmath.matrix4();
+                _projectionFunc = () -> return projection;
             
-            case ProjectionModeMessages.use_stretch_projection:
-                near = message.near != null ? message.near : -1;
-                far = message.far != null ? message.far : 1;
-                _projectionFunc = stretchProjection;
+            case RenderScriptMessages.use_stretch_projection:
+                enableStretchProjection(message.near, message.far);
 
-            case ProjectionModeMessages.use_fixed_projection:
-                near = message.near != null ? message.near : -1;
-                far = message.far != null ? message.far : 1;
-                zoom = message.far != null ? message.zoom : 1;
-                _projectionFunc = fixedProjection;
+            case RenderScriptMessages.use_fixed_fit_projection:
+                enableFixedFitProjection(message.near, message.far);
 
-            case ProjectionModeMessages.use_fixed_fit_projection:
-                near = message.near != null ? message.near : -1;
-                far = message.far != null ? message.far : 1;
-                _projectionFunc = fixedFitProjection;
+            case RenderScriptMessages.use_fixed_hfit_projection:
+                enableFixedHFitProjection(message.near, message.far);
 
-            case ProjectionModeMessages.use_fixed_vfit_projection:
-                near = message.near != null ? message.near : -1;
-                far = message.far != null ? message.far : 1;
-                _projectionFunc = fixedVFitProjection;
+            case RenderScriptMessages.use_fixed_vfit_projection:
+                enableFixedVFitProjection(message.near, message.far);
+
+            case RenderScriptMessages.use_fixed_projection:
+                enableFixedProjection(message.near, message.far, message.zoom);
         }
     }
 
-    // Projection that stretches content.
-    function stretchProjection():Matrix4 {
-        return Vmath.matrix4_orthographic(0, Render.get_width(), 0, Render.get_height(), near, far);
+    /**
+     * Projection that stretches content.
+     */
+    public function enableStretchProjection(?near:Float, ?far:Float):Void {
+        near = near != null ? near : -1;
+        far = far != null ? far : 1;
+        _projectionFunc = () -> return Projection.stretch(near, far);
     }
 
-    // Projection that centers content with maintained aspect ratio and optional zoom.
-    function fixedProjection():Matrix4 {
-        var projectedWidth = Render.get_window_width() / zoom;
-        var projectedHeight = Render.get_window_height() / zoom;
-        var xoffset = -(projectedWidth - Render.get_width()) / 2;
-        var yoffset = -(projectedHeight - Render.get_height()) / 2;
-        return Vmath.matrix4_orthographic(xoffset, xoffset + projectedWidth, yoffset, yoffset + projectedHeight, near, far);
-    }
-    
-    
-    // Projection that centers and fits content with maintained aspect ratio.
-    function fixedFitProjection():Matrix4 {
-        zoom = Math.min(
-            Render.get_window_width() / Render.get_width(),
-            Render.get_window_height() / Render.get_height()
-        );
-        return fixedProjection();
+    /**
+     * Projection that centers content with maintained aspect ratio and optional zoom.
+     */
+    public function enableFixedProjection(?near:Float, ?far:Float, ?zoom:Float):Void {
+        near = near != null ? near : -1;
+        far = far != null ? far : 1;
+        zoom = zoom != null ? zoom : 1;
+        _projectionFunc = () -> return Projection.fixed(near, far, zoom);
     }
 
-    // Projection that centers and vertically fits the content with maintained aspect ratio.
-    function fixedVFitProjection():Matrix4 {
-        zoom = Render.get_window_height() / Render.get_height();
-        return fixedProjection();
+    /**
+     * Projection that centers and fits content with maintained aspect ratio.
+     */
+    public function enableFixedFitProjection(?near:Float, ?far:Float):Void {
+        near = near != null ? near : -1;
+        far = far != null ? far : 1;
+        zoom = zoom != null ? zoom : 1;
+        _projectionFunc = () -> return Projection.fixedFit(near, far);
+    }
+
+    /**
+     * Projection that centers and horizontally fits the content with maintained aspect ratio.
+     */
+    public function enableFixedHFitProjection(?near:Float, ?far:Float):Void {
+        near = near != null ? near : -1;
+        far = far != null ? far : 1;
+        zoom = zoom != null ? zoom : 1;
+        _projectionFunc = () -> return Projection.fixedHFit(near, far);
+    }
+
+    /**
+     * Projection that centers and vertically fits the content with maintained aspect ratio.
+     */
+     public function enableFixedVFitProjection(?near:Float, ?far:Float):Void {
+        near = near != null ? near : -1;
+        far = far != null ? far : 1;
+        zoom = zoom != null ? zoom : 1;
+        _projectionFunc = () -> return Projection.fixedVFit(near, far);
     }
 
 }
 
-class ProjectionModeMessages {
+class RenderScriptMessages {
     
-    public static final use_camera_projection = new Message<Void>("use_camera_projection");
-    public static final use_stretch_projection = new Message<{ near:Float, far:Float }>("use_stretch_projection");
-    public static final use_fixed_projection = new Message<{ near:Float, far:Float, zoom:Float }>("use_fixed_projection");
-    public static final use_fixed_fit_projection = new Message<{ near:Float, far:Float }>("use_fixed_fit_projection");
-    public static final use_fixed_vfit_projection = new Message<{ near:Float, far:Float }>("use_fixed_vfit_projection");
+    public static final clear_color = new Message<{ color:Rgba }>("clear_color");
+    public static final set_view_projection = new Message<{ view:Matrix4, ?projection:Matrix4 }>("set_view_projection");
+    public static final use_camera_projection = new Message<{ ?projection:Matrix4 }>("use_camera_projection");
+    public static final use_stretch_projection = new Message<{ ?near:Float, ?far:Float }>("use_stretch_projection");
+    public static final use_fixed_fit_projection = new Message<{ ?near:Float, ?far:Float }>("use_fixed_fit_projection");
+    public static final use_fixed_hfit_projection = new Message<{ ?near:Float, ?far:Float }>("use_fixed_hfit_projection");
+    public static final use_fixed_vfit_projection = new Message<{ ?near:Float, ?far:Float }>("use_fixed_vfit_projection");
+    public static final use_fixed_projection = new Message<{ ?near:Float, ?far:Float, ?zoom:Float }>("use_fixed_projection");
 
 }
