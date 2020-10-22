@@ -6,7 +6,7 @@ import defold.types.Matrix4;
 import defold.types.Message;
 import defold.types.Url;
 import defold.Vmath;
-import ixia.defold.types.RBGA;
+import ixia.defold.types.Rgba;
 import ixia.lua.RawTable;
 import lua.Table;
 
