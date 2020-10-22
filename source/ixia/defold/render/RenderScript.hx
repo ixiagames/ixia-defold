@@ -115,7 +115,7 @@ class RenderScript<T:{}> extends defold.support.RenderScript<T> {
     public function enableStretchProjection(?near:Float, ?far:Float):Void {
         near = near != null ? near : -1;
         far = far != null ? far : 1;
-        _projectionFunc = () -> return Projection.stretch(near, far);
+        _projectionFunc = () -> return Projector.stretch(near, far);
     }
 
     /**
@@ -125,7 +125,7 @@ class RenderScript<T:{}> extends defold.support.RenderScript<T> {
         near = near != null ? near : -1;
         far = far != null ? far : 1;
         zoom = zoom != null ? zoom : 1;
-        _projectionFunc = () -> return Projection.fixed(near, far, zoom);
+        _projectionFunc = () -> return Projector.fixed(near, far, zoom);
     }
 
     /**
@@ -135,7 +135,7 @@ class RenderScript<T:{}> extends defold.support.RenderScript<T> {
         near = near != null ? near : -1;
         far = far != null ? far : 1;
         zoom = zoom != null ? zoom : 1;
-        _projectionFunc = () -> return Projection.fixedFit(near, far);
+        _projectionFunc = () -> return Projector.fixedFit(near, far);
     }
 
     /**
@@ -145,7 +145,7 @@ class RenderScript<T:{}> extends defold.support.RenderScript<T> {
         near = near != null ? near : -1;
         far = far != null ? far : 1;
         zoom = zoom != null ? zoom : 1;
-        _projectionFunc = () -> return Projection.fixedHFit(near, far);
+        _projectionFunc = () -> return Projector.fixedHFit(near, far);
     }
 
     /**
@@ -155,7 +155,7 @@ class RenderScript<T:{}> extends defold.support.RenderScript<T> {
         near = near != null ? near : -1;
         far = far != null ? far : 1;
         zoom = zoom != null ? zoom : 1;
-        _projectionFunc = () -> return Projection.fixedVFit(near, far);
+        _projectionFunc = () -> return Projector.fixedVFit(near, far);
     }
 
 }
