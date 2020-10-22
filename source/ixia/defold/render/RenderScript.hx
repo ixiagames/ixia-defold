@@ -23,7 +23,7 @@ class RenderScript<T:{}> extends defold.support.RenderScript<T> {
     public var view:Matrix4;
     public var projection:Matrix4;
     var _projectionFunc:Void->Matrix4;
-    var _clearTable:RawTable;
+    var _clearTable:RawTable<RenderBufferType, Dynamic>;
 
     override function init(self:T):Void {
         tilePred = Render.predicate(Table.create([ "tile" ]));
@@ -151,7 +151,7 @@ class RenderScript<T:{}> extends defold.support.RenderScript<T> {
     /**
      * Projection that centers and vertically fits the content with maintained aspect ratio.
      */
-     public function enableFixedVFitProjection(?near:Float, ?far:Float):Void {
+    public function enableFixedVFitProjection(?near:Float, ?far:Float):Void {
         near = near != null ? near : -1;
         far = far != null ? far : 1;
         zoom = zoom != null ? zoom : 1;

@@ -28,7 +28,7 @@ enum abstract EventDataPropKey(Int) {
 }
 
 @:build(ixia.lua.RawTableBuilder.build(EventDataPropKey))
-abstract EventData(RawTable) to RawTable from RawTable {
+abstract EventData(RawTable<EventDataPropKey, Dynamic>) to RawTable<EventDataPropKey, Dynamic> from RawTable<EventDataPropKey, Dynamic> {
 
     public inline function new(target:GuiTarget, type:EventType, ?action:ScriptOnInputAction, ?scriptData:Dynamic) {
         this = new RawTable();
