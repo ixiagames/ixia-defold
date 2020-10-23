@@ -6,7 +6,7 @@ enum abstract TargetPointerState(Int) to Int {
     var HOVER;
     var DOWN;
     var DOWN_OUT;
-    var DISABLED;
+    var DEACTIVATED;
 
     public inline function isIn():Bool {
         return this == HOVER || this == DOWN;

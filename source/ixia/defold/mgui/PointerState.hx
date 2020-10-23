@@ -11,7 +11,7 @@ enum abstract PointerState(Int) to Int {
         return this == PRESSED || this == JUST_PRESSED;
     }
 
-    public inline function justNow():Bool {
+    public inline function justChanged():Bool {
         return this == JUST_PRESSED || this == JUST_RELEASED;
     }
 
