@@ -1,6 +1,5 @@
 package ixia.defold.mgui;
 
-import ixia.ds.OneOfTwo;
 import defold.support.ScriptOnInputAction;
 import defold.types.Hash;
 import haxe.ds.Either;
@@ -109,7 +108,7 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     function handleTargetPressOrRelease(id:Hash, action:ScriptOnInputAction, scriptData:Dynamic):Void {
-        if (pick(id, action.x, action.y)) {
+        if (pick(id, pointerX, pointerY)) {
             if (action.pressed) {
                 _targetsIDTapInited[id] = true;
                 _targetsIDState[id] = DOWN;
