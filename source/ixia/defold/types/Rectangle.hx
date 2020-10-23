@@ -6,7 +6,7 @@ import defold.Vmath;
 @:forward(x, y)
 abstract Rectangle(Vector4) {
 
-    public inline function new(x:Float, y:Float, w:Float, h:Float) {
+    public inline function new(x:Float = 0, y:Float = 0, w:Float = 0, h:Float = 0) {
         this = Vmath.vector4(x, y, w, h);
     }
 
