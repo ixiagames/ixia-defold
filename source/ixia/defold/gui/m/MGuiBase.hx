@@ -50,7 +50,7 @@ class MGuiBase<TTarget, TStyle> {
 
     function initTarget(id:Hash):Void {
         _targetsID.push(id);
-        _targetsState[id] = OUT;
+        _targetsState[id] = UNTOUCHED;
         _targetsTapInited[id] = false;
         _targetsListeners[id] = new RawTable();
         _targetsStateStyle[id] = new RawTable();
@@ -92,12 +92,12 @@ class MGuiBase<TTarget, TStyle> {
     function handleTargetPointerMove(id:Hash, action:ScriptOnInputAction, scriptData:Dynamic):Void {
         if (pick(id, pointerX, pointerY)) {
             if (!_targetsState[id].isIn()) {
-                setState(id, HOVER);
+                setState(id, HOVERED);
                 dispatch(id, ROLL_IN, action);
             }
         } else {
             if (_targetsState[id].isIn()) {
-                setState(id, OUT);
+                setState(id, UNTOUCHED);
                 dispatch(id, ROLL_OUT, action);
             }
         }
@@ -107,7 +107,7 @@ class MGuiBase<TTarget, TStyle> {
         if (pick(id, pointerX, pointerY)) {
             if (action.pressed) {
                 _targetsTapInited[id] = true;
-                setState(id, DOWN);
+                setState(id, PRESSED);
                 dispatch(id, PRESS, action);
             
             } else if (action.released) {
@@ -116,7 +116,7 @@ class MGuiBase<TTarget, TStyle> {
                     dispatch(id, TAP, action);
                 }
 
-                setState(id, HOVER);
+                setState(id, HOVERED);
                 dispatch(id, RELEASE, action);
             }
         }
@@ -132,25 +132,25 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     public inline function isActive(id:Hash):Bool {
-        return _targetsState[id] != null && _targetsState[id] != DEACTIVATED;
+        return _targetsState[id] != null && _targetsState[id] != SLEEPING;
     }
 
-    public function activate(id:Hash):Void {
+    public function wake(id:Hash):Void {
         if (_targetsState[id] == null)
             initTarget(id);
         
-        if (_targetsState[id] != DEACTIVATED)
+        if (_targetsState[id] != SLEEPING)
             return;
 
-        setState(id, pick(id, pointerX, pointerY) ? HOVER : OUT);
+        setState(id, pick(id, pointerX, pointerY) ? HOVERED : UNTOUCHED);
         dispatch(id, ACTIVATE);
     }
 
-    public function deactivate(id:Hash):Void {
-        if (_targetsState[id] == DEACTIVATED)
+    public function sleep(id:Hash):Void {
+        if (_targetsState[id] == SLEEPING)
             return;
 
-        setState(id, DEACTIVATED);
+        setState(id, SLEEPING);
         dispatch(id, DEACTIVATE);
     }
 

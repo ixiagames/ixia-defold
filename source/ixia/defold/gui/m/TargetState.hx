@@ -2,18 +2,17 @@ package ixia.defold.gui.m;
 
 enum abstract TargetState(Int) to Int {
     
-    var OUT;
-    var HOVER;
-    var DOWN;
-    var DOWN_OUT;
-    var DEACTIVATED;
+    var UNTOUCHED;
+    var HOVERED;
+    var PRESSED;
+    var SLEEPING;
 
     public inline function isIn():Bool {
-        return this == HOVER || this == DOWN;
+        return this == HOVERED || this == PRESSED;
     }
-    
-    public inline function isDown():Bool {
-        return this == DOWN || this == DOWN_OUT;
+
+    public inline function isAwake():Bool {
+        return this != SLEEPING;
     }
 
 }
