@@ -32,8 +32,7 @@ class MGuiBase<TTarget, TStyle> {
         var ids = ids.toArray();
         var events = events.toArray();
         for (id in ids) {
-            if (_targetsID.indexOf(id) == -1)
-                initTarget(id);
+            initTarget(id);
 
             for (event in events) {
                 if (_targetsListeners[id][event] == null)
@@ -50,6 +49,9 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     function initTarget(id:Hash):Void {
+        if (_targetsID.indexOf(id) > -1)
+            return;
+
         _targetsID.push(id);
         _targetsState[id] = UNTOUCHED;
         _targetsTapInited[id] = false;
@@ -133,8 +135,7 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     public function wake(id:HashOrString):Void {
-        if (_targetsState[id] == null)
-            initTarget(id);
+        initTarget(id);
         
         if (_targetsState[id] != SLEEPING)
             return;
@@ -154,8 +155,7 @@ class MGuiBase<TTarget, TStyle> {
     public function style(ids:OneOrMany<HashOrString>, stateToStyle:Map<TargetState, TStyle>):Void {
         var ids = ids.toArray();
         for (id in ids) {
-            if (_targetsID.indexOf(id) == -1)
-                initTarget(id);
+            initTarget(id);
 
             for (state => style in stateToStyle) {
                 _targetsStateStyle[id][state] = style;
