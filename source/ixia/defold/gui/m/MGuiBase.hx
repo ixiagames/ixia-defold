@@ -207,10 +207,10 @@ class MGuiBase<TTarget, TStyle> {
             return;
 
         _targetsID.push(id);
-        _targetsState[id] = UNTOUCHED;
         _targetsTapInited[id] = false;
         _targetsListeners[id] = new RawTable();
         _targetsStateStyle[id] = new RawTable();
+        setState(id, pick(id, pointerX, pointerY) ? HOVERED : UNTOUCHED);
     }
 
 }
