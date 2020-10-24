@@ -132,10 +132,6 @@ class MGuiBase<TTarget, TStyle> {
             listener(target, event, action);
     }
 
-    public inline function isActive(id:Hash):Bool {
-        return _targetsState[id] != null && _targetsState[id] != SLEEPING;
-    }
-
     public function wake(id:HashOrString):Void {
         if (_targetsState[id] == null)
             initTarget(id);
@@ -155,10 +151,6 @@ class MGuiBase<TTarget, TStyle> {
         dispatch(id, DEACTIVATE);
     }
 
-    public inline function getState(id:HashOrString):TargetState {
-        return _targetsState[id];
-    }
-
     public function style(ids:OneOrMany<HashOrString>, stateToStyle:Map<TargetState, TStyle>):Void {
         var ids = ids.toArray();
         for (id in ids) {
@@ -171,6 +163,14 @@ class MGuiBase<TTarget, TStyle> {
                     applyStyle(id, style);
             }
         }
+    }
+
+    public inline function isActive(id:Hash):Bool {
+        return _targetsState[id] != null && _targetsState[id] != SLEEPING;
+    }
+
+    public inline function getState(id:HashOrString):TargetState {
+        return _targetsState[id];
     }
 
     function setState(id:HashOrString, state:TargetState):Void {
