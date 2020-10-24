@@ -2,6 +2,7 @@ package ixia.defold.gui.m;
 
 import defold.support.ScriptOnInputAction;
 import defold.types.Hash;
+import defold.types.HashOrString;
 import ixia.defold.gui.m.TargetState;
 import ixia.ds.OneOrMany;
 import ixia.lua.RawTable;
@@ -21,13 +22,13 @@ class MGuiBase<TTarget, TStyle> {
     public function new() {}
 
     // Override these.
-    function idToTarget(id:Hash):TTarget return null;
-    function pick(id:Hash, x:Float, y:Float):Bool return false;
-    public function applyStyle(ids:OneOrMany<Hash>, style:TStyle):Void {}
+    function idToTarget(id:HashOrString):TTarget return null;
+    function pick(id:HashOrString, x:Float, y:Float):Bool return false;
+    public function applyStyle(ids:OneOrMany<HashOrString>, style:TStyle):Void {}
 
     //
 
-    public function sub(ids:OneOrMany<Hash>, events:OneOrMany<Event>, listener:Listener<TTarget>):MGuiBase<TTarget, TStyle> {
+    public function sub(ids:OneOrMany<HashOrString>, events:OneOrMany<Event>, listener:Listener<TTarget>):MGuiBase<TTarget, TStyle> {
         var ids = ids.toArray();
         var events = events.toArray();
         for (id in ids) {
@@ -135,7 +136,7 @@ class MGuiBase<TTarget, TStyle> {
         return _targetsState[id] != null && _targetsState[id] != SLEEPING;
     }
 
-    public function wake(id:Hash):Void {
+    public function wake(id:HashOrString):Void {
         if (_targetsState[id] == null)
             initTarget(id);
         
@@ -146,7 +147,7 @@ class MGuiBase<TTarget, TStyle> {
         dispatch(id, ACTIVATE);
     }
 
-    public function sleep(id:Hash):Void {
+    public function sleep(id:HashOrString):Void {
         if (_targetsState[id] == SLEEPING)
             return;
 
@@ -154,11 +155,11 @@ class MGuiBase<TTarget, TStyle> {
         dispatch(id, DEACTIVATE);
     }
 
-    public inline function getState(id:Hash):TargetState {
+    public inline function getState(id:HashOrString):TargetState {
         return _targetsState[id];
     }
 
-    public function style(ids:OneOrMany<Hash>, states:OneOrMany<TargetState>, style:TStyle):Void {
+    public function style(ids:OneOrMany<HashOrString>, states:OneOrMany<TargetState>, style:TStyle):Void {
         var ids = ids.toArray();
         var states = states.toArray();
         for (id in ids) {
@@ -173,7 +174,7 @@ class MGuiBase<TTarget, TStyle> {
         }
     }
 
-    function setState(id:Hash, state:TargetState):Void {
+    function setState(id:HashOrString, state:TargetState):Void {
         if (_targetsState[id] == state)
             return;
 
