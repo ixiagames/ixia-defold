@@ -28,13 +28,12 @@ class MGuiBase<TTarget, TStyle> {
 
     //
 
-    public function sub(ids:OneOrMany<HashOrString>, events:OneOrMany<Event>, listener:Listener<TTarget>):MGuiBase<TTarget, TStyle> {
+    public function sub(ids:OneOrMany<HashOrString>, listeners:Map<Event, Listener<TTarget>>):MGuiBase<TTarget, TStyle> {
         var ids = ids.toArray();
-        var events = events.toArray();
         for (id in ids) {
             initTarget(id);
 
-            for (event in events) {
+            for (event => listener in listeners) {
                 if (_targetsListeners[id][event] == null)
                     _targetsListeners[id][event] = [];
 
@@ -48,15 +47,18 @@ class MGuiBase<TTarget, TStyle> {
         return this;
     }
 
-    function initTarget(id:Hash):Void {
-        if (_targetsID.indexOf(id) > -1)
-            return;
+    public function style(ids:OneOrMany<HashOrString>, styles:Map<TargetState, TStyle>):MGuiBase<TTarget, TStyle> {
+        var ids = ids.toArray();
+        for (id in ids) {
+            initTarget(id);
 
-        _targetsID.push(id);
-        _targetsState[id] = UNTOUCHED;
-        _targetsTapInited[id] = false;
-        _targetsListeners[id] = new RawTable();
-        _targetsStateStyle[id] = new RawTable();
+            for (state => style in styles) {
+                _targetsStateStyle[id][state] = style;
+                if (_targetsState[id] == state)
+                    applyStyle(id, style);
+            }
+        }
+        return this;
     }
 
     public function handleInput(actionID:Hash, action:ScriptOnInputAction, scriptData:Dynamic):Bool {
@@ -152,20 +154,6 @@ class MGuiBase<TTarget, TStyle> {
         dispatch(id, DEACTIVATE);
     }
 
-    public function style(ids:OneOrMany<HashOrString>, stateToStyle:Map<TargetState, TStyle>):MGuiBase<TTarget, TStyle> {
-        var ids = ids.toArray();
-        for (id in ids) {
-            initTarget(id);
-
-            for (state => style in stateToStyle) {
-                _targetsStateStyle[id][state] = style;
-                if (_targetsState[id] == state)
-                    applyStyle(id, style);
-            }
-        }
-        return this;
-    }
-
     public inline function isActive(id:Hash):Bool {
         return _targetsState[id] != null && _targetsState[id] != SLEEPING;
     }
@@ -181,6 +169,17 @@ class MGuiBase<TTarget, TStyle> {
         _targetsState[id] = state;
         if (_targetsStateStyle[id][state] != null)
             applyStyle(id, _targetsStateStyle[id][state]);
+    }
+
+    function initTarget(id:Hash):Void {
+        if (_targetsID.indexOf(id) > -1)
+            return;
+
+        _targetsID.push(id);
+        _targetsState[id] = UNTOUCHED;
+        _targetsTapInited[id] = false;
+        _targetsListeners[id] = new RawTable();
+        _targetsStateStyle[id] = new RawTable();
     }
 
 }
