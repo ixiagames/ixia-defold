@@ -27,4 +27,11 @@ abstract OneOrMany<T>(Either<T, Array<T>>) from Either<T, Array<T>> to Either<T,
         }
     }
 
+    public function toArray():Array<T> {
+        return switch(this) {
+            case Left(one): [ one ];
+            case Right(many): many;
+        }
+    }
+
 }
