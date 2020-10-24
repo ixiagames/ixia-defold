@@ -159,14 +159,13 @@ class MGuiBase<TTarget, TStyle> {
         return _targetsState[id];
     }
 
-    public function style(ids:OneOrMany<HashOrString>, states:OneOrMany<TargetState>, style:TStyle):Void {
+    public function style(ids:OneOrMany<HashOrString>, stateToStyle:Map<TargetState, TStyle>):Void {
         var ids = ids.toArray();
-        var states = states.toArray();
         for (id in ids) {
             if (_targetsID.indexOf(id) == -1)
                 initTarget(id);
 
-            for (state in states) {
+            for (state => style in stateToStyle) {
                 _targetsStateStyle[id][state] = style;
                 if (_targetsState[id] == state)
                     applyStyle(id, style);
