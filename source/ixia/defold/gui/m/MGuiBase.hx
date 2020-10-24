@@ -9,6 +9,9 @@ import ixia.lua.RawTable;
 
 class MGuiBase<TTarget, TStyle> {
 
+    public var event(default, null):EventData<TTarget>;
+    var _eventData:EventData<TTarget> = new EventData();
+
     public var pointerX(default, null):Float = 0;
     public var pointerY(default, null):Float = 0;
     public var pointerState(default, null):PointerState = RELEASED;
@@ -16,7 +19,7 @@ class MGuiBase<TTarget, TStyle> {
     var _targetsID:Array<Hash> = [];
     var _targetsTapInited:RawTable<Hash, Bool> = new RawTable();
     var _targetsState:RawTable<Hash, TargetState> = new RawTable();
-    var _targetsListeners:RawTable<Hash, RawTable<Event, Array<Listener<TTarget>>>> = new RawTable();
+    var _targetsListeners:RawTable<Hash, RawTable<Event, Array<Void->Void>>> = new RawTable();
     var _targetsStateStyle:RawTable<Hash, RawTable<TargetState, TStyle>> = new RawTable();
 
     public function new() {}
@@ -28,7 +31,7 @@ class MGuiBase<TTarget, TStyle> {
 
     //
 
-    public function sub(ids:OneOrMany<HashOrString>, listeners:Map<Event, Listener<TTarget>>):MGuiBase<TTarget, TStyle> {
+    public function sub(ids:OneOrMany<HashOrString>, listeners:Map<Event, Void->Void>):MGuiBase<TTarget, TStyle> {
         var ids = ids.toArray();
         for (id in ids) {
             initTarget(id);
@@ -131,9 +134,15 @@ class MGuiBase<TTarget, TStyle> {
         if (_targetsListeners[id][event] == null)
             return;
 
-        var target = idToTarget(id);
+        _eventData.id = id;
+        _eventData.target = idToTarget(id);
+        _eventData.event = event;
+        _eventData.action = action;
+        this.event = _eventData;
         for (listener in _targetsListeners[id][event])
-            listener(target, event, action);
+            listener();
+        _eventData.clear();
+        this.event = null;
     }
 
     public function wake(id:HashOrString):Void {
