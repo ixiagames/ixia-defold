@@ -136,8 +136,10 @@ class MGuiBase<TTarget, TStyle> {
                     dispatch(id, TAP, action);
                 }
 
-                setState(id, HOVERED);
-                dispatch(id, RELEASE, action);
+                if (isAwake(id)) {
+                    setState(id, HOVERED);
+                    dispatch(id, RELEASE, action);
+                }
             }
         }
     }
