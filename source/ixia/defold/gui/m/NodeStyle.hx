@@ -4,6 +4,7 @@ import defold.types.HashOrString;
 
 typedef NodeStyle = {
 
-    flipbook:HashOrString
+    ?enabled:Bool,
+    ?flipbook:HashOrString
 
 }

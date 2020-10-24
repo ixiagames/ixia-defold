@@ -18,6 +18,8 @@ class MGui extends MGuiBase<GuiNode, NodeStyle> {
     override function applyStyle(ids:OneOrMany<HashOrString>, style:NodeStyle) {
         for (id in ids.toArray()) {
             var node = id.get_node();
+            if (style.enabled != null)
+                node.set_enabled(style.enabled);
             if (style.flipbook != null)
                 node.play_flipbook(style.flipbook);
         }
