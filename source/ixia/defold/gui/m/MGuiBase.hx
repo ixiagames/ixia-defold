@@ -152,7 +152,7 @@ class MGuiBase<TTarget, TStyle> {
         dispatch(id, DEACTIVATE);
     }
 
-    public function style(ids:OneOrMany<HashOrString>, stateToStyle:Map<TargetState, TStyle>):Void {
+    public function style(ids:OneOrMany<HashOrString>, stateToStyle:Map<TargetState, TStyle>):MGuiBase<TTarget, TStyle> {
         var ids = ids.toArray();
         for (id in ids) {
             initTarget(id);
@@ -163,6 +163,7 @@ class MGuiBase<TTarget, TStyle> {
                     applyStyle(id, style);
             }
         }
+        return this;
     }
 
     public inline function isActive(id:Hash):Bool {
