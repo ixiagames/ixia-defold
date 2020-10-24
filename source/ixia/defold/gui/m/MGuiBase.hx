@@ -70,7 +70,7 @@ class MGuiBase<TTarget, TStyle> {
             pointerY = action.y;
 
             for (id in _targetsID) {
-                if (isActive(id))
+                if (isAwake(id))
                     handleTargetPointerMove(id, action, scriptData);
             }
 
@@ -84,7 +84,7 @@ class MGuiBase<TTarget, TStyle> {
                 pointerState = JUST_PRESSED;
 
             for (id in _targetsID) {
-                if (isActive(id))
+                if (isAwake(id))
                     handleTargetPressOrRelease(id, action, scriptData);
             }
 
@@ -163,7 +163,7 @@ class MGuiBase<TTarget, TStyle> {
         dispatch(id, DEACTIVATE);
     }
 
-    public inline function isActive(id:Hash):Bool {
+    public inline function isAwake(id:Hash):Bool {
         return _targetsState[id] != null && _targetsState[id] != SLEEPING;
     }
 
