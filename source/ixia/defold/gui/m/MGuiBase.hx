@@ -14,9 +14,9 @@ class MGuiBase<TTarget, TStyle> {
     public var pointerState(default, null):PointerState = RELEASED;
     
     var _targetsID:Array<Hash> = [];
-    var _targetsIDState:RawTable<Hash, TargetPointerState> = new RawTable();
-    var _targetsIDListeners:RawTable<Hash, RawTable<Event, Array<Listener<TTarget>>>> = new RawTable();
-    var _targetsIDTapInited:RawTable<Hash, Bool> = new RawTable();
+    var _targetsState:RawTable<Hash, TargetPointerState> = new RawTable();
+    var _targetsListeners:RawTable<Hash, RawTable<Event, Array<Listener<TTarget>>>> = new RawTable();
+    var _targetsTapInited:RawTable<Hash, Bool> = new RawTable();
 
     public function new() {}
 
@@ -40,13 +40,13 @@ class MGuiBase<TTarget, TStyle> {
                 initTarget(id);
 
             for (event in events) {
-                if (_targetsIDListeners[id][event] == null)
-                    _targetsIDListeners[id][event] = [];
+                if (_targetsListeners[id][event] == null)
+                    _targetsListeners[id][event] = [];
 
-                var addedIndex = _targetsIDListeners[id][event].indexOf(listener);
+                var addedIndex = _targetsListeners[id][event].indexOf(listener);
                 if (addedIndex > -1)
-                    _targetsIDListeners[id][event].splice(addedIndex, 1);
-                _targetsIDListeners[id][event].push(listener);
+                    _targetsListeners[id][event].splice(addedIndex, 1);
+                _targetsListeners[id][event].push(listener);
             }
         }
 
@@ -55,9 +55,9 @@ class MGuiBase<TTarget, TStyle> {
 
     function initTarget(id:Hash):Void {
         _targetsID.push(id);
-        _targetsIDState[id] = OUT;
-        _targetsIDListeners[id] = new RawTable();
-        _targetsIDTapInited[id] = false;
+        _targetsState[id] = OUT;
+        _targetsListeners[id] = new RawTable();
+        _targetsTapInited[id] = false;
     }
 
     public function handleInput(actionID:Hash, action:ScriptOnInputAction, scriptData:Dynamic):Bool {
@@ -95,13 +95,13 @@ class MGuiBase<TTarget, TStyle> {
 
     function handleTargetPointerMove(id:Hash, action:ScriptOnInputAction, scriptData:Dynamic):Void {
         if (pick(id, pointerX, pointerY)) {
-            if (!_targetsIDState[id].isIn()) {
-                _targetsIDState[id] = HOVER;
+            if (!_targetsState[id].isIn()) {
+                _targetsState[id] = HOVER;
                 dispatch(id, ROLL_IN, action);
             }
         } else {
-            if (_targetsIDState[id].isIn()) {
-                _targetsIDState[id] = OUT;
+            if (_targetsState[id].isIn()) {
+                _targetsState[id] = OUT;
                 dispatch(id, ROLL_OUT, action);
             }
         }
@@ -110,56 +110,56 @@ class MGuiBase<TTarget, TStyle> {
     function handleTargetPressOrRelease(id:Hash, action:ScriptOnInputAction, scriptData:Dynamic):Void {
         if (pick(id, pointerX, pointerY)) {
             if (action.pressed) {
-                _targetsIDTapInited[id] = true;
-                _targetsIDState[id] = DOWN;
+                _targetsTapInited[id] = true;
+                _targetsState[id] = DOWN;
                 dispatch(id, PRESS, action);
             
             } else if (action.released) {
-                if (_targetsIDTapInited[id]) {
-                    _targetsIDTapInited[id] = false;
+                if (_targetsTapInited[id]) {
+                    _targetsTapInited[id] = false;
                     dispatch(id, TAP, action);
                 }
 
-                _targetsIDState[id] = HOVER;
+                _targetsState[id] = HOVER;
                 dispatch(id, RELEASE, action);
             }
         }
     }
 
     public function dispatch(id:Hash, event:Event, ?action:ScriptOnInputAction):Void {
-        if (_targetsIDListeners[id][event] == null)
+        if (_targetsListeners[id][event] == null)
             return;
 
         var target = idToTarget(id);
-        for (listener in _targetsIDListeners[id][event])
+        for (listener in _targetsListeners[id][event])
             listener(target, event, action);
     }
 
     public inline function isActive(id:Hash):Bool {
-        return _targetsIDState[id] != null && _targetsIDState[id] != DEACTIVATED;
+        return _targetsState[id] != null && _targetsState[id] != DEACTIVATED;
     }
 
     public function activate(id:Hash):Void {
-        if (_targetsIDState[id] == null)
+        if (_targetsState[id] == null)
             initTarget(id);
         
-        if (_targetsIDState[id] != DEACTIVATED)
+        if (_targetsState[id] != DEACTIVATED)
             return;
 
-        _targetsIDState[id] = pick(id, pointerX, pointerY) ? HOVER : OUT;
+        _targetsState[id] = pick(id, pointerX, pointerY) ? HOVER : OUT;
         dispatch(id, ACTIVATE);
     }
 
     public function deactivate(id:Hash):Void {
-        if (_targetsIDState[id] == DEACTIVATED)
+        if (_targetsState[id] == DEACTIVATED)
             return;
 
-        _targetsIDState[id] = DEACTIVATED;
+        _targetsState[id] = DEACTIVATED;
         dispatch(id, DEACTIVATE);
     }
 
     public inline function getState(id:Hash):TargetPointerState {
-        return _targetsIDState[id];
+        return _targetsState[id];
     }
 
 }
