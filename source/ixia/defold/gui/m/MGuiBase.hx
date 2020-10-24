@@ -3,6 +3,7 @@ package ixia.defold.gui.m;
 import defold.support.ScriptOnInputAction;
 import defold.types.Hash;
 import defold.types.HashOrString;
+import ixia.defold.gui.m.Event;
 import ixia.defold.gui.m.TargetState;
 import ixia.ds.OneOrMany;
 import ixia.lua.RawTable;
@@ -111,15 +112,12 @@ class MGuiBase<TTarget, TStyle> {
 
     function handleTargetPointerMove(id:Hash, action:ScriptOnInputAction, scriptData:Dynamic):Void {
         if (pick(id, pointerX, pointerY)) {
-            if (!_targetsState[id].isIn()) {
+            if (!_targetsState[id].isIn())
                 setState(id, HOVERED);
-                dispatch(id, ROLL_IN, action);
-            }
+
         } else {
-            if (_targetsState[id].isIn()) {
+            if (_targetsState[id].isIn())
                 setState(id, UNTOUCHED);
-                dispatch(id, ROLL_OUT, action);
-            }
         }
     }
 
@@ -128,18 +126,14 @@ class MGuiBase<TTarget, TStyle> {
             if (action.pressed) {
                 _targetsTapInited[id] = true;
                 setState(id, PRESSED);
-                dispatch(id, PRESS, action);
             
             } else if (action.released) {
                 if (_targetsTapInited[id]) {
                     _targetsTapInited[id] = false;
                     dispatch(id, TAP, action);
                 }
-
-                if (isAwake(id)) {
+                if (isAwake(id))
                     setState(id, HOVERED);
-                    dispatch(id, RELEASE, action);
-                }
             }
         }
     }
@@ -166,7 +160,7 @@ class MGuiBase<TTarget, TStyle> {
             return;
 
         setState(id, pick(id, pointerX, pointerY) ? HOVERED : UNTOUCHED);
-        dispatch(id, ACTIVATE);
+        dispatch(id, WAKE);
     }
 
     public function wakeGroup(group:HashOrString):Void {
@@ -179,7 +173,6 @@ class MGuiBase<TTarget, TStyle> {
             return;
 
         setState(id, SLEEPING);
-        dispatch(id, DEACTIVATE);
     }
 
     public function sleepGroup(group:HashOrString):Void {
@@ -202,6 +195,9 @@ class MGuiBase<TTarget, TStyle> {
         _targetsState[id] = state;
         if (_targetsStateStyle[id][state] != null)
             applyStyle(idToTarget(id), _targetsStateStyle[id][state]);
+
+        dispatch(id, STATE(null));
+        dispatch(id, STATE(state));
     }
 
     function initTarget(id:Hash):Void {

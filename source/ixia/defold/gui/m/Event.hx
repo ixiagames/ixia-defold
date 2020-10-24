@@ -1,13 +1,11 @@
 package ixia.defold.gui.m;
 
-enum abstract Event(Int) to Int {
+import ixia.defold.gui.m.TargetState;
+
+enum Event {
     
-    var ACTIVATE;
-    var DEACTIVATE;
-    var TAP;
-    var PRESS;
-    var RELEASE;
-    var ROLL_OUT;
-    var ROLL_IN;
+    WAKE;
+    TAP;
+    STATE(?state:TargetState);
 
 }
