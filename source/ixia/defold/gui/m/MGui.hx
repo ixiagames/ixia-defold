@@ -2,7 +2,6 @@ package ixia.defold.gui.m;
 
 import defold.types.Hash;
 import defold.types.HashOrString;
-import ixia.ds.OneOrMany;
 using defold.Gui;
 
 class MGui extends MGuiBase<GuiNode, NodeStyle> {
@@ -15,14 +14,12 @@ class MGui extends MGuiBase<GuiNode, NodeStyle> {
         return Gui.pick_node(id.get_node(), x, y);
     }
 
-    override function applyStyle(ids:OneOrMany<HashOrString>, style:NodeStyle) {
-        for (id in ids.toArray()) {
-            var node = id.get_node();
-            if (style.enabled != null)
-                node.set_enabled(style.enabled);
-            if (style.flipbook != null)
-                node.play_flipbook(style.flipbook);
-        }
+    override function applyStyle(id:HashOrString, style:NodeStyle) {
+        var node = id.get_node();
+        if (style.enabled != null)
+            node.set_enabled(style.enabled);
+        if (style.flipbook != null)
+            node.play_flipbook(style.flipbook);
     }
     
 }

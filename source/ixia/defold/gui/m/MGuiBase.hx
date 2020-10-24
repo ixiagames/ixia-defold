@@ -27,7 +27,7 @@ class MGuiBase<TTarget, TStyle> {
     // Override these.
     function idToTarget(id:HashOrString):TTarget return null;
     function pick(id:HashOrString, x:Float, y:Float):Bool return false;
-    public function applyStyle(ids:OneOrMany<HashOrString>, style:TStyle):Void {}
+    public function applyStyle(id:HashOrString, style:TStyle):Void {}
 
     //
 
