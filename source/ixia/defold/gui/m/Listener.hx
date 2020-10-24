@@ -1,4 +1,4 @@
-package ixia.defold.mgui;
+package ixia.defold.gui.m;
 
 import defold.support.ScriptOnInputAction;
 

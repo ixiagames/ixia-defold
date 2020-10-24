@@ -1,9 +1,9 @@
-package ixia.defold.mgui;
+package ixia.defold.gui.m;
 
 import defold.support.ScriptOnInputAction;
 import defold.types.Hash;
 import haxe.ds.Either;
-import ixia.defold.mgui.TargetPointerState;
+import ixia.defold.gui.m.TargetPointerState;
 import ixia.ds.OneOrMany;
 import ixia.lua.RawTable;
 
