@@ -21,6 +21,7 @@ class MGuiBase<TTarget, TStyle> {
     var _targetsState:RawTable<Hash, TargetState> = new RawTable();
     var _targetsListeners:RawTable<Hash, RawTable<Event, Array<Void->Void>>> = new RawTable();
     var _targetsStateStyle:RawTable<Hash, RawTable<TargetState, TStyle>> = new RawTable();
+    var _groups:RawTable<Hash, Array<Hash>> = new RawTable();
 
     public function new() {}
 
@@ -32,8 +33,7 @@ class MGuiBase<TTarget, TStyle> {
     //
 
     public function sub(ids:OneOrMany<HashOrString>, listeners:Map<Event, Void->Void>):MGuiBase<TTarget, TStyle> {
-        var ids = ids.toArray();
-        for (id in ids) {
+        for (id in ids.toArray()) {
             initTarget(id);
 
             for (event => listener in listeners) {
@@ -51,14 +51,26 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     public function style(ids:OneOrMany<HashOrString>, styles:Map<TargetState, TStyle>):MGuiBase<TTarget, TStyle> {
-        var ids = ids.toArray();
-        for (id in ids) {
+        for (id in ids.toArray()) {
             initTarget(id);
 
             for (state => style in styles) {
                 _targetsStateStyle[id][state] = style;
                 if (_targetsState[id] == state)
                     applyStyle(idToTarget(id), style);
+            }
+        }
+        return this;
+    }
+
+    public function group(groups:OneOrMany<HashOrString>, ids:OneOrMany<HashOrString>):MGuiBase<TTarget, TStyle> {
+        for (groupID in groups.toArray()) {
+            if (_groups[groupID] == null)
+                _groups[groupID] = [];
+            
+            for (id in ids.toArray()) {
+                if (_groups[groupID].indexOf(id) == -1)
+                    _groups[groupID].push(id);
             }
         }
         return this;
@@ -155,12 +167,22 @@ class MGuiBase<TTarget, TStyle> {
         dispatch(id, ACTIVATE);
     }
 
+    public function wakeGroup(group:HashOrString):Void {
+        for (id in _groups[group])
+            wake(id);
+    }
+
     public function sleep(id:HashOrString):Void {
         if (_targetsState[id] == SLEEPING)
             return;
 
         setState(id, SLEEPING);
         dispatch(id, DEACTIVATE);
+    }
+
+    public function sleepGroup(group:HashOrString):Void {
+        for (id in _groups[group])
+            sleep(id);
     }
 
     public inline function isAwake(id:Hash):Bool {
