@@ -2,7 +2,6 @@ package ixia.defold.gui.m;
 
 import defold.support.ScriptOnInputAction;
 import defold.types.Hash;
-import haxe.ds.Either;
 import ixia.defold.gui.m.TargetPointerState;
 import ixia.ds.OneOrMany;
 import ixia.lua.RawTable;
@@ -14,27 +13,23 @@ class MGuiBase<TTarget, TStyle> {
     public var pointerState(default, null):PointerState = RELEASED;
     
     var _targetsID:Array<Hash> = [];
+    var _targetsTapInited:RawTable<Hash, Bool> = new RawTable();
     var _targetsState:RawTable<Hash, TargetPointerState> = new RawTable();
     var _targetsListeners:RawTable<Hash, RawTable<Event, Array<Listener<TTarget>>>> = new RawTable();
-    var _targetsTapInited:RawTable<Hash, Bool> = new RawTable();
+    var _targetsStateStyle:RawTable<Hash, RawTable<TargetPointerState, TStyle>> = new RawTable();
 
     public function new() {}
 
     // Override these.
     function idToTarget(id:Hash):TTarget return null;
     function pick(id:Hash, x:Float, y:Float):Bool return false;
+    public function applyStyle(ids:OneOrMany<Hash>, style:TStyle):Void {}
 
     //
 
     public function sub(ids:OneOrMany<Hash>, events:OneOrMany<Event>, listener:Listener<TTarget>):MGuiBase<TTarget, TStyle> {
-        var ids:Array<Hash> = switch(ids) {
-            case Left(id): [ id ];
-            case Right(ids): ids;
-        }
-        var events:Array<Event> = switch(events) {
-            case Left(event): [ event ];
-            case Right(events): events;
-        }
+        var ids = ids.toArray();
+        var events = events.toArray();
         for (id in ids) {
             if (_targetsID.indexOf(id) == -1)
                 initTarget(id);
@@ -56,8 +51,9 @@ class MGuiBase<TTarget, TStyle> {
     function initTarget(id:Hash):Void {
         _targetsID.push(id);
         _targetsState[id] = OUT;
-        _targetsListeners[id] = new RawTable();
         _targetsTapInited[id] = false;
+        _targetsListeners[id] = new RawTable();
+        _targetsStateStyle[id] = new RawTable();
     }
 
     public function handleInput(actionID:Hash, action:ScriptOnInputAction, scriptData:Dynamic):Bool {
@@ -96,12 +92,12 @@ class MGuiBase<TTarget, TStyle> {
     function handleTargetPointerMove(id:Hash, action:ScriptOnInputAction, scriptData:Dynamic):Void {
         if (pick(id, pointerX, pointerY)) {
             if (!_targetsState[id].isIn()) {
-                _targetsState[id] = HOVER;
+                setState(id, HOVER);
                 dispatch(id, ROLL_IN, action);
             }
         } else {
             if (_targetsState[id].isIn()) {
-                _targetsState[id] = OUT;
+                setState(id, OUT);
                 dispatch(id, ROLL_OUT, action);
             }
         }
@@ -111,7 +107,7 @@ class MGuiBase<TTarget, TStyle> {
         if (pick(id, pointerX, pointerY)) {
             if (action.pressed) {
                 _targetsTapInited[id] = true;
-                _targetsState[id] = DOWN;
+                setState(id, DOWN);
                 dispatch(id, PRESS, action);
             
             } else if (action.released) {
@@ -120,7 +116,7 @@ class MGuiBase<TTarget, TStyle> {
                     dispatch(id, TAP, action);
                 }
 
-                _targetsState[id] = HOVER;
+                setState(id, HOVER);
                 dispatch(id, RELEASE, action);
             }
         }
@@ -146,7 +142,7 @@ class MGuiBase<TTarget, TStyle> {
         if (_targetsState[id] != DEACTIVATED)
             return;
 
-        _targetsState[id] = pick(id, pointerX, pointerY) ? HOVER : OUT;
+        setState(id, pick(id, pointerX, pointerY) ? HOVER : OUT);
         dispatch(id, ACTIVATE);
     }
 
@@ -154,12 +150,36 @@ class MGuiBase<TTarget, TStyle> {
         if (_targetsState[id] == DEACTIVATED)
             return;
 
-        _targetsState[id] = DEACTIVATED;
+        setState(id, DEACTIVATED);
         dispatch(id, DEACTIVATE);
     }
 
     public inline function getState(id:Hash):TargetPointerState {
         return _targetsState[id];
+    }
+
+    public function style(ids:OneOrMany<Hash>, states:OneOrMany<TargetPointerState>, style:TStyle):Void {
+        var ids = ids.toArray();
+        var states = states.toArray();
+        for (id in ids) {
+            if (_targetsID.indexOf(id) == -1)
+                initTarget(id);
+
+            for (state in states) {
+                _targetsStateStyle[id][state] = style;
+                if (_targetsState[id] == state)
+                    applyStyle(id, style);
+            }
+        }
+    }
+
+    function setState(id:Hash, state:TargetPointerState):Void {
+        if (_targetsState[id] == state)
+            return;
+
+        _targetsState[id] = state;
+        if (_targetsStateStyle[id][state] != null)
+            applyStyle(id, _targetsStateStyle[id][state]);
     }
 
 }
