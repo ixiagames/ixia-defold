@@ -27,7 +27,7 @@ class MGuiBase<TTarget, TStyle> {
     // Override these.
     function idToTarget(id:HashOrString):TTarget return null;
     function pick(id:HashOrString, x:Float, y:Float):Bool return false;
-    public function applyStyle(id:HashOrString, style:TStyle):Void {}
+    public function applyStyle(target:TTarget, style:TStyle):Void {}
 
     //
 
@@ -58,7 +58,7 @@ class MGuiBase<TTarget, TStyle> {
             for (state => style in styles) {
                 _targetsStateStyle[id][state] = style;
                 if (_targetsState[id] == state)
-                    applyStyle(id, style);
+                    applyStyle(idToTarget(id), style);
             }
         }
         return this;
@@ -177,7 +177,7 @@ class MGuiBase<TTarget, TStyle> {
 
         _targetsState[id] = state;
         if (_targetsStateStyle[id][state] != null)
-            applyStyle(id, _targetsStateStyle[id][state]);
+            applyStyle(idToTarget(id), _targetsStateStyle[id][state]);
     }
 
     function initTarget(id:Hash):Void {

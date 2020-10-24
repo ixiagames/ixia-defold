@@ -14,12 +14,17 @@ class MGui extends MGuiBase<GuiNode, NodeStyle> {
         return Gui.pick_node(id.get_node(), x, y);
     }
 
-    override function applyStyle(id:HashOrString, style:NodeStyle) {
-        var node = id.get_node();
+    override function applyStyle(node:GuiNode, style:NodeStyle) {
         if (style.enabled != null)
             node.set_enabled(style.enabled);
+
         if (style.flipbook != null)
             node.play_flipbook(style.flipbook);
+
+        if (style.nodes != null) {
+            for (id => style in style.nodes)
+                applyStyle(id.get_node(), style);
+        }
     }
     
 }
