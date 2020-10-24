@@ -1,6 +1,6 @@
 package ixia.defold.gui.m;
 
-enum abstract TargetPointerState(Int) to Int {
+enum abstract TargetState(Int) to Int {
     
     var OUT;
     var HOVER;

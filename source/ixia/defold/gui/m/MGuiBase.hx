@@ -2,7 +2,7 @@ package ixia.defold.gui.m;
 
 import defold.support.ScriptOnInputAction;
 import defold.types.Hash;
-import ixia.defold.gui.m.TargetPointerState;
+import ixia.defold.gui.m.TargetState;
 import ixia.ds.OneOrMany;
 import ixia.lua.RawTable;
 
@@ -14,9 +14,9 @@ class MGuiBase<TTarget, TStyle> {
     
     var _targetsID:Array<Hash> = [];
     var _targetsTapInited:RawTable<Hash, Bool> = new RawTable();
-    var _targetsState:RawTable<Hash, TargetPointerState> = new RawTable();
+    var _targetsState:RawTable<Hash, TargetState> = new RawTable();
     var _targetsListeners:RawTable<Hash, RawTable<Event, Array<Listener<TTarget>>>> = new RawTable();
-    var _targetsStateStyle:RawTable<Hash, RawTable<TargetPointerState, TStyle>> = new RawTable();
+    var _targetsStateStyle:RawTable<Hash, RawTable<TargetState, TStyle>> = new RawTable();
 
     public function new() {}
 
@@ -154,11 +154,11 @@ class MGuiBase<TTarget, TStyle> {
         dispatch(id, DEACTIVATE);
     }
 
-    public inline function getState(id:Hash):TargetPointerState {
+    public inline function getState(id:Hash):TargetState {
         return _targetsState[id];
     }
 
-    public function style(ids:OneOrMany<Hash>, states:OneOrMany<TargetPointerState>, style:TStyle):Void {
+    public function style(ids:OneOrMany<Hash>, states:OneOrMany<TargetState>, style:TStyle):Void {
         var ids = ids.toArray();
         var states = states.toArray();
         for (id in ids) {
@@ -173,7 +173,7 @@ class MGuiBase<TTarget, TStyle> {
         }
     }
 
-    function setState(id:Hash, state:TargetPointerState):Void {
+    function setState(id:Hash, state:TargetState):Void {
         if (_targetsState[id] == state)
             return;
 
