@@ -4,7 +4,7 @@ abstract RawTable<TKey, TValue>(Dynamic) {
     
     static var _pool(default, never):Array<AnyRawTable> = [];
 
-    public function recycle<TKey, TValue>():RawTable<TKey, TValue> {
+    public static function recycle<TKey, TValue>():RawTable<TKey, TValue> {
         return _pool.length > 0 ? cast _pool.pop() : untyped __lua__("{}");
     }
 
