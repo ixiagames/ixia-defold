@@ -7,22 +7,22 @@ import ixia.defold.gui.m.Event;
 import ixia.defold.gui.m.TargetState;
 import ixia.ds.OneOrMany;
 import ixia.lua.RawTable;
+using Defold;
 
 class MGuiBase<TTarget, TStyle> {
-
-    public var event(default, null):EventData<TTarget>;
-    var _eventData:EventData<TTarget> = new EventData();
 
     public var pointerX(default, null):Float = 0;
     public var pointerY(default, null):Float = 0;
     public var pointerState(default, null):PointerState = RELEASED;
-    
+    public var event(default, null):EventData<TTarget>;
+    var _eventData:EventData<TTarget> = new EventData();
     var _targetsID:Array<Hash> = [];
     var _targetsTapInited:RawTable<Hash, Bool> = new RawTable();
     var _targetsState:RawTable<Hash, TargetState> = new RawTable();
     var _targetsListeners:RawTable<Hash, RawTable<Event, Array<Void->Void>>> = new RawTable();
     var _targetsStateStyle:RawTable<Hash, RawTable<TargetState, TStyle>> = new RawTable();
     var _groups:RawTable<Hash, Array<Hash>> = new RawTable();
+    var _userdata:RawTable<Hash, Dynamic> = new RawTable();
 
     public function new() {}
 
@@ -75,6 +75,21 @@ class MGuiBase<TTarget, TStyle> {
             }
         }
         return this;
+    }
+
+    public function map(dataMap:UserDataMap):MGuiBase<TTarget, TStyle> {
+        for (id => data in dataMap)
+            _userdata[id] = data;
+        return this;
+    }
+
+    public function set(dataID:HashOrString, data:Dynamic):MGuiBase<TTarget, TStyle> {
+        _userdata[dataID] = data;
+        return this;
+    }
+
+    public inline function get<T>(dataID:HashOrString):T {
+        return _userdata[dataID];
     }
 
     public function handleInput(actionID:Hash, action:ScriptOnInputAction, scriptData:Dynamic):Bool {
@@ -211,4 +226,13 @@ class MGuiBase<TTarget, TStyle> {
         setState(id, pick(id, pointerX, pointerY) ? HOVERED : UNTOUCHED);
     }
 
+}
+
+@:forward
+abstract UserDataMap(Map<Hash, Dynamic>) from Map<Hash, Dynamic> {
+
+    @:from static inline function fromStringMap(map:Map<String, Dynamic>):UserDataMap {
+        return [ for (key => style in map) key.hash() => style ];
+    }
+    
 }
