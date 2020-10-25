@@ -3,6 +3,9 @@ package ixia.defold.gui.m;
 import defold.support.ScriptOnInputAction;
 import defold.types.Hash;
 import defold.types.HashOrString;
+import defold.types.Message;
+import defold.types.Url;
+import haxe.extern.EitherType;
 import ixia.defold.gui.m.Event;
 import ixia.defold.gui.m.TargetState;
 import ixia.ds.OneOrMany;
@@ -21,6 +24,7 @@ class MGuiBase<TTarget, TStyle> {
     var _targetsState:RawTable<Hash, TargetState> = new RawTable();
     var _targetsListeners:RawTable<Hash, RawTable<Event, Array<Void->Void>>> = new RawTable();
     var _targetsStateStyle:RawTable<Hash, RawTable<TargetState, TStyle>> = new RawTable();
+    var _messagesListeners:RawTable<Hash, Array<Dynamic->Void>> = new RawTable();
     var _groups:RawTable<Hash, Array<Hash>> = new RawTable();
     var _userdata:RawTable<Hash, Dynamic> = new RawTable();
 
@@ -51,6 +55,18 @@ class MGuiBase<TTarget, TStyle> {
         return this;
     }
 
+    public function subMes<T>(message:Message<T>, listener:EitherType<Void->Void, T->Void>):MGuiBase<TTarget, TStyle> {
+        if (_messagesListeners[cast message] == null)
+            _messagesListeners[cast message] = [];
+
+        var addedIndex = _messagesListeners[cast message].indexOf(listener);
+        if (addedIndex > -1)
+            _messagesListeners[cast message].splice(addedIndex, 1);
+        _messagesListeners[cast message].push(listener);
+
+        return this;
+    }
+
     public function style(ids:OneOrMany<HashOrString>, styles:Map<TargetState, TStyle>):MGuiBase<TTarget, TStyle> {
         for (id in ids.toArray()) {
             initTarget(id);
@@ -61,6 +77,7 @@ class MGuiBase<TTarget, TStyle> {
                     applyStyle(idToTarget(id), style);
             }
         }
+
         return this;
     }
 
@@ -74,6 +91,7 @@ class MGuiBase<TTarget, TStyle> {
                     _groups[groupID].push(id);
             }
         }
+
         return this;
     }
 
@@ -150,6 +168,13 @@ class MGuiBase<TTarget, TStyle> {
                 if (isAwake(id))
                     setState(id, HOVERED);
             }
+        }
+    }
+
+    public function handleMessage<T>(messageID:Message<T>, message:T, sender:Url):Void {
+        if (_messagesListeners[cast messageID] != null) {
+            for (listener in _messagesListeners[cast messageID])
+                listener(message);
         }
     }
 
