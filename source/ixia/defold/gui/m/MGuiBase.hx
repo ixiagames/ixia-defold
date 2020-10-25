@@ -14,6 +14,7 @@ using Defold;
 
 class MGuiBase<TTarget, TStyle> {
 
+    public var touchActionID(default, null):Hash;
     public var pointerX(default, null):Float = 0;
     public var pointerY(default, null):Float = 0;
     public var pointerState(default, null):PointerState = RELEASED;
@@ -26,7 +27,14 @@ class MGuiBase<TTarget, TStyle> {
     var _groups:RawTable<Hash, Array<Hash>> = new RawTable();
     var _userdata:RawTable<Hash, Dynamic> = new RawTable();
 
-    public function new() {}
+    public function new(?touchActionID:HashOrString) {
+        if (touchActionID == null)
+            this.touchActionID = "touch".hash();
+        else if (Std.isOfType(touchActionID, String))
+            this.touchActionID = touchActionID.hash();
+        else
+            this.touchActionID = touchActionID;
+    }
 
     // Override these.
     function idToTarget(id:HashOrString):TTarget return null;
