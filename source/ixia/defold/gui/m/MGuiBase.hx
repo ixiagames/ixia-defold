@@ -110,7 +110,7 @@ class MGuiBase<TTarget, TStyle> {
         return _userdata[dataID];
     }
 
-    public function handleInput(actionID:Hash, action:ScriptOnInputAction, scriptData:Dynamic):Bool {
+    public function input(actionID:Hash, action:ScriptOnInputAction, ?scriptData:Dynamic):Bool {
         if (actionID == null) {
             pointerX = action.x;
             pointerY = action.y;
@@ -171,7 +171,7 @@ class MGuiBase<TTarget, TStyle> {
         }
     }
 
-    public function handleMessage<T>(messageID:Message<T>, message:T, sender:Url):Void {
+    public function message<T>(messageID:Message<T>, ?message:T, ?sender:Url):Void {
         if (_messagesListeners[cast messageID] != null) {
             for (listener in _messagesListeners[cast messageID])
                 listener(message);
