@@ -195,8 +195,10 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     public function wakeGroup(group:HashOrString):Void {
-        for (id in _groups[group])
-            wake(id);
+        if (_groups[group] != null) {
+            for (id in _groups[group])
+                wake(id);
+        }
     }
 
     public function sleep(id:HashOrString):Void {
@@ -207,8 +209,10 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     public function sleepGroup(group:HashOrString):Void {
-        for (id in _groups[group])
-            sleep(id);
+        if (_groups[group] != null) {
+            for (id in _groups[group])
+                sleep(id);
+        }
     }
 
     public inline function isAwake(id:Hash):Bool {
