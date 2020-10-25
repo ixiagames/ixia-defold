@@ -17,12 +17,10 @@ class MGuiBase<TTarget, TStyle> {
     public var pointerX(default, null):Float = 0;
     public var pointerY(default, null):Float = 0;
     public var pointerState(default, null):PointerState = RELEASED;
-    public var event(default, null):EventData<TTarget>;
-    var _eventData:EventData<TTarget> = new EventData();
     var _targetsID:Array<Hash> = [];
     var _targetsTapInited:RawTable<Hash, Bool> = new RawTable();
     var _targetsState:RawTable<Hash, TargetState> = new RawTable();
-    var _targetsListeners:RawTable<Hash, RawTable<Event, Array<Void->Void>>> = new RawTable();
+    var _targetsListeners:RawTable<Hash, RawTable<Event, Array<EventListener>>> = new RawTable();
     var _targetsStateStyle:RawTable<Hash, RawTable<TargetState, TStyle>> = new RawTable();
     var _messagesListeners:RawTable<Hash, Array<Dynamic->Void>> = new RawTable();
     var _groups:RawTable<Hash, Array<Hash>> = new RawTable();
@@ -37,7 +35,7 @@ class MGuiBase<TTarget, TStyle> {
 
     //
 
-    public function sub(ids:OneOrMany<HashOrString>, listeners:Map<Event, Void->Void>):MGuiBase<TTarget, TStyle> {
+    public function sub(ids:OneOrMany<HashOrString>, listeners:Map<Event, EventListener>):MGuiBase<TTarget, TStyle> {
         for (id in ids.toArray()) {
             initTarget(id);
 
@@ -182,15 +180,8 @@ class MGuiBase<TTarget, TStyle> {
         if (_targetsListeners[id][event] == null)
             return;
 
-        _eventData.id = id;
-        _eventData.target = idToTarget(id);
-        _eventData.event = event;
-        _eventData.action = action;
-        this.event = _eventData;
         for (listener in _targetsListeners[id][event])
-            listener();
-        _eventData.clear();
-        this.event = null;
+            listener.call(id, event, action);
     }
 
     public function wake(id:HashOrString):Void {
