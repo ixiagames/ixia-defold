@@ -79,6 +79,12 @@ class MGuiBase<TTarget, TStyle> {
         return this;
     }
 
+    public function styleGroup(group:HashOrString, styles:Map<TargetState, TStyle>):MGuiBase<TTarget, TStyle> {
+        if (_groups[group] != null)
+            style(_groups[group], styles);
+        return this;
+    }
+
     public function group(groups:OneOrMany<HashOrString>, ids:OneOrMany<HashOrString>):MGuiBase<TTarget, TStyle> {
         for (groupID in groups.toArray()) {
             if (_groups[groupID] == null)
