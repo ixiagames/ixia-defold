@@ -27,7 +27,7 @@ class MGuiBase<TTarget, TStyle> {
     var _targetsDragStartPos:RawTable<Hash, Vector3> = new RawTable();
     var _targetsDragRelPos:RawTable<Hash, Vector3> = new RawTable();
     var _targetsDragMaxDistance:RawTable<Hash, Float> = new RawTable();
-    var _targetsDragAxis:RawTable<Hash, DragAxis> = new RawTable();
+    var _targetsDragDirection:RawTable<Hash, DragDirection> = new RawTable();
     var _messagesListeners:RawTable<Hash, Array<Dynamic->Void>> = new RawTable();
     var _groups:RawTable<Hash, Array<Hash>> = new RawTable();
     var _userdata:RawTable<Hash, Dynamic> = new RawTable();
@@ -122,10 +122,10 @@ class MGuiBase<TTarget, TStyle> {
         return _userdata[dataID];
     }
 
-    public function slider(id:HashOrString, length:Float, ?axis:DragAxis = X, ?thumbStyles:Map<TargetState, TStyle>):MGuiBase<TTarget, TStyle> {
+    public function slider(id:HashOrString, length:Float, ?direction:DragDirection = X_RIGHT, ?thumbStyles:Map<TargetState, TStyle>):MGuiBase<TTarget, TStyle> {
         initTarget(id);
         _targetsDragMaxDistance[id] = length;
-        _targetsDragAxis[id] = axis;
+        _targetsDragDirection[id] = direction;
         _targetsDragStartPos[id] = getPos(id);
         if (thumbStyles != null)
             style(id, thumbStyles);
@@ -184,7 +184,7 @@ class MGuiBase<TTarget, TStyle> {
             if (pointerPick(id)) {
                 _targetsTapInited[id] = true;
                 setState(id, PRESSED);
-                if (_targetsDragAxis[id] != null)
+                if (_targetsDragDirection[id] != null)
                     startDrag(id);
             }
         } else if (action.released) {
@@ -217,9 +217,25 @@ class MGuiBase<TTarget, TStyle> {
 
     function updateDrag(id:Hash):Void {
         var pos = Vmath.vector3();
-        pos.x = pointerX - _targetsDragRelPos[id].x;
-        pos.y = pointerY - _targetsDragRelPos[id].y;
-        setPos(id, pos);
+        var start = _targetsDragStartPos[id];
+        var maxDistance = _targetsDragMaxDistance[id];
+        switch (_targetsDragDirection[id]) {
+            case X_RIGHT:
+                pos.x = pointerX - _targetsDragRelPos[id].x;
+                if (pos.x < start.x)
+                    pos.x = start.x;
+                else if (pos.x > start.x + maxDistance)
+                    pos.x = start.x + maxDistance;
+                setPos(id, pos);
+                
+            case X_LEFT:
+                pos.x = pointerX - _targetsDragRelPos[id].x;
+                if (pos.x > start.x)
+                    pos.x = start.x;
+                else if (pos.x < start.x - maxDistance)
+                    pos.x = start.x - maxDistance;
+                setPos(id, pos);
+        }
     }
 
     public function message<T>(messageID:Message<T>, ?message:T, ?sender:Url):Void {
