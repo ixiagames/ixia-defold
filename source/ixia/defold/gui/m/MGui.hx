@@ -1,13 +1,13 @@
 package ixia.defold.gui.m;
 
-import defold.types.Vector3;
 import defold.types.Hash;
 import defold.types.HashOrString;
+import defold.types.Vector3;
 using defold.Gui;
 
 class MGui extends MGuiBase<GuiNode, NodeStyle> {
 
-    override function idToTarget(id:HashOrString):GuiNode {
+    override function idToTarget(id:Hash):GuiNode {
         return id.get_node();
     }
 
@@ -15,9 +15,19 @@ class MGui extends MGuiBase<GuiNode, NodeStyle> {
         return Gui.pick_node(id.get_node(), x, y);
     }
 
-    override function applyStyle(id:HashOrString, style:NodeStyle) {
-        var node = id.get_node();
+    override function getPos(id:Hash):Vector3 {
+        return id.get_node().get_position();
+    }
 
+    override function setPos(id:Hash, pos:Vector3) {
+        id.get_node().set_position(pos);
+    }
+
+    override function applyStateStyle(id:HashOrString, style:NodeStyle) {
+        if (style == null)
+            return;
+
+        var node = id.get_node();
         if (style.enabled != null)
             node.set_enabled(style.enabled);
 
@@ -26,16 +36,8 @@ class MGui extends MGuiBase<GuiNode, NodeStyle> {
 
         if (style.nodes != null) {
             for (id => style in style.nodes)
-                applyStyle(id, style);
+                applyStateStyle(id, style);
         }
-    }
-
-    override function getPos(id:HashOrString):Vector3 {
-        return id.get_node().get_position();
-    }
-
-    override function setPos(id:HashOrString, pos:Vector3) {
-        id.get_node().set_position(pos);
     }
     
 }
