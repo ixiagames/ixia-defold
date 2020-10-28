@@ -5,6 +5,8 @@ import defold.types.Hash;
 import defold.types.HashOrString;
 import defold.types.Message;
 import defold.types.Url;
+import defold.types.Vector3;
+import defold.Vmath;
 import haxe.extern.EitherType;
 import ixia.defold.gui.m.Event;
 import ixia.defold.gui.m.TargetState;
@@ -22,7 +24,11 @@ class MGuiBase<TTarget, TStyle> {
     var _targetsTapInited:RawTable<Hash, Bool> = new RawTable();
     var _targetsState:RawTable<Hash, TargetState> = new RawTable();
     var _targetsListeners:RawTable<Hash, RawTable<Event, Array<EventListener>>> = new RawTable();
-    var _targetsStateStyle:RawTable<Hash, RawTable<TargetState, TStyle>> = new RawTable();
+    var _targetsStateStyle:RawTable<Hash, TargetStyle<TStyle>> = new RawTable();
+    var _targetsStartPos:RawTable<Hash, Vector3> = new RawTable();
+    var _targetsHeldPos:RawTable<Hash, Vector3> = new RawTable();
+    var _targetsMaxDistance:RawTable<Hash, Float> = new RawTable();
+    var _targetsDirection:RawTable<Hash, DragDirection> = new RawTable();
     var _messagesListeners:RawTable<Hash, Array<Dynamic->Void>> = new RawTable();
     var _groups:RawTable<Hash, Array<Hash>> = new RawTable();
     var _userdata:RawTable<Hash, Dynamic> = new RawTable();
@@ -37,9 +43,11 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     // Override these.
+    public function applyStateStyle(id:HashOrString, style:TStyle):Void {}
     function idToTarget(id:HashOrString):TTarget return null;
     function pick(id:HashOrString, x:Float, y:Float):Bool return false;
-    public function applyStyle(target:TTarget, style:TStyle):Void {}
+    function getPos(id:HashOrString):Vector3 return null;
+    function setPos(id:HashOrString, pos:Vector3):Void {}
 
     //
 
@@ -73,17 +81,20 @@ class MGuiBase<TTarget, TStyle> {
         return this;
     }
 
-    public function style(ids:OneOrMany<HashOrString>, styles:Map<TargetState, TStyle>):MGuiBase<TTarget, TStyle> {
+    public function style(ids:OneOrMany<HashOrString>, style:TargetStyle<TStyle>):MGuiBase<TTarget, TStyle> {
         for (id in ids.toArray()) {
             initTarget(id);
 
-            for (state => style in styles) {
-                _targetsStateStyle[id][state] = style;
-                if (_targetsState[id] == state)
-                    applyStyle(idToTarget(id), style);
-            }
+            _targetsStateStyle[id] = style;
+            applyStateStyle(id, Reflect.field(style, _targetsState[id].toString()));
         }
 
+        return this;
+    }
+
+    public function styleGroup(group:HashOrString, style:TargetStyle<TStyle>):MGuiBase<TTarget, TStyle> {
+        if (_groups[group] != null)
+            this.style(_groups[group], style);
         return this;
     }
 
@@ -114,6 +125,16 @@ class MGuiBase<TTarget, TStyle> {
 
     public inline function get<T>(dataID:HashOrString):T {
         return _userdata[dataID];
+    }
+
+    public function slider(id:HashOrString, length:Float, ?direction:DragDirection = X_RIGHT, ?thumbStyle:TargetStyle<TStyle>):MGuiBase<TTarget, TStyle> {
+        initTarget(id);
+        _targetsMaxDistance[id] = length;
+        _targetsDirection[id] = direction;
+        _targetsStartPos[id] = getPos(id);
+        if (thumbStyle != null)
+            style(id, thumbStyle);
+        return this;
     }
 
     public function input(actionID:Hash, action:ScriptOnInputAction, ?scriptData:Dynamic):Bool {
@@ -150,23 +171,29 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     function handleTargetPointerMove(id:Hash, action:ScriptOnInputAction, scriptData:Dynamic):Void {
-        if (pick(id, pointerX, pointerY)) {
-            if (!_targetsState[id].isIn())
+        if (_targetsState[id].dragged) {
+            updateDrag(id);
+
+        } else if (pointerPick(id)) {
+            if (!_targetsState[id].touched)
                 setState(id, HOVERED);
 
         } else {
-            if (_targetsState[id].isIn())
+            if (_targetsState[id].touched)
                 setState(id, UNTOUCHED);
         }
     }
 
     function handleTargetPressOrRelease(id:Hash, action:ScriptOnInputAction, scriptData:Dynamic):Void {
-        if (pick(id, pointerX, pointerY)) {
-            if (action.pressed) {
+        if (action.pressed) {
+            if (pointerPick(id)) {
                 _targetsTapInited[id] = true;
                 setState(id, PRESSED);
-            
-            } else if (action.released) {
+                if (_targetsDirection[id] != null)
+                    startDrag(id);
+            }
+        } else if (action.released) {
+            if (pointerPick(id)) {
                 if (_targetsTapInited[id]) {
                     _targetsTapInited[id] = false;
                     dispatch(id, TAP, action);
@@ -174,6 +201,49 @@ class MGuiBase<TTarget, TStyle> {
                 if (isAwake(id))
                     setState(id, HOVERED);
             }
+
+            if (_targetsState[id].dragged)
+                setState(id, pointerPick(id) ? HOVERED : UNTOUCHED);
+        }
+    }
+
+    function startDrag(id:Hash):Void {
+        if (_targetsStartPos[id] == null)
+            _targetsStartPos[id] = getPos(id);
+        if (_targetsHeldPos[id] == null)
+            _targetsHeldPos[id] = Vmath.vector3();
+
+        var pos = getPos(id);
+        _targetsHeldPos[id].x = pointerX - pos.x;
+        _targetsHeldPos[id].y = pointerY - pos.y;
+
+        setState(id, DRAGGED);
+    }
+
+    function updateDrag(id:Hash):Void {
+        var pos = Vmath.vector3();
+        var start = _targetsStartPos[id];
+        var maxDistance = _targetsMaxDistance[id];
+        switch (_targetsDirection[id]) {
+            case X_RIGHT:
+                pos.x = pointerX - _targetsHeldPos[id].x;
+                if (start != null) {
+                    if (pos.x < start.x)
+                        pos.x = start.x;
+                    else if (maxDistance != null && pos.x > start.x + maxDistance)
+                        pos.x = start.x + maxDistance;
+                }
+                setPos(id, pos);
+                
+            case X_LEFT:
+                pos.x = pointerX - _targetsHeldPos[id].x;
+                if (start != null) {
+                    if (pos.x > start.x)
+                        pos.x = start.x;
+                    else if (maxDistance != null && pos.x < start.x - maxDistance)
+                        pos.x = start.x - maxDistance;
+                }
+                setPos(id, pos);
         }
     }
 
@@ -198,7 +268,7 @@ class MGuiBase<TTarget, TStyle> {
         if (_targetsState[id] != SLEEPING)
             return;
 
-        setState(id, pick(id, pointerX, pointerY) ? HOVERED : UNTOUCHED);
+        setState(id, pointerPick(id) ? HOVERED : UNTOUCHED);
         dispatch(id, WAKE);
     }
 
@@ -236,8 +306,7 @@ class MGuiBase<TTarget, TStyle> {
             return;
 
         _targetsState[id] = state;
-        if (_targetsStateStyle[id][state] != null)
-            applyStyle(idToTarget(id), _targetsStateStyle[id][state]);
+        applyStateStyle(id, getStateStyle(id));
 
         dispatch(id, STATE(null));
         dispatch(id, STATE(state));
@@ -250,8 +319,25 @@ class MGuiBase<TTarget, TStyle> {
         _targetsID.push(id);
         _targetsTapInited[id] = false;
         _targetsListeners[id] = new RawTable();
-        _targetsStateStyle[id] = new RawTable();
-        setState(id, pick(id, pointerX, pointerY) ? HOVERED : UNTOUCHED);
+        setState(id, pointerPick(id) ? HOVERED : UNTOUCHED);
+    }
+
+    public inline function pointerPick(id:Hash):Bool {
+        return pick(id, pointerX, pointerY);
+    }
+
+    function getStateStyle(id:Hash):TStyle {
+        var style = _targetsStateStyle[id];
+        if (style == null)
+            return null;
+
+        return switch (_targetsState[id]) {
+            case UNTOUCHED: style.untouched;
+            case HOVERED:   style.hovered;
+            case PRESSED:   style.pressed;
+            case DRAGGED:   style.dragged;
+            case SLEEPING:  style.sleeping;
+        }
     }
 
 }
