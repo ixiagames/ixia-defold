@@ -5,6 +5,8 @@ import defold.types.Hash;
 import defold.types.HashOrString;
 import defold.types.Message;
 import defold.types.Url;
+import defold.types.Vector3;
+import defold.Vmath;
 import haxe.extern.EitherType;
 import ixia.defold.gui.m.Event;
 import ixia.defold.gui.m.TargetState;
@@ -22,6 +24,10 @@ class MGuiBase<TTarget, TStyle> {
     var _targetsState:RawTable<Hash, TargetState> = new RawTable();
     var _targetsListeners:RawTable<Hash, RawTable<Event, Array<EventListener>>> = new RawTable();
     var _targetsStateStyle:RawTable<Hash, RawTable<TargetState, TStyle>> = new RawTable();
+    var _targetsDragStartPos:RawTable<Hash, Vector3> = new RawTable();
+    var _targetsDragRelPos:RawTable<Hash, Vector3> = new RawTable();
+    var _targetsDragMaxDistance:RawTable<Hash, Float> = new RawTable();
+    var _targetsDragAxis:RawTable<Hash, DragAxis> = new RawTable();
     var _messagesListeners:RawTable<Hash, Array<Dynamic->Void>> = new RawTable();
     var _groups:RawTable<Hash, Array<Hash>> = new RawTable();
     var _userdata:RawTable<Hash, Dynamic> = new RawTable();
@@ -29,9 +35,11 @@ class MGuiBase<TTarget, TStyle> {
     public function new() {}
 
     // Override these.
+    public function applyStyle(id:HashOrString, style:TStyle):Void {}
     function idToTarget(id:HashOrString):TTarget return null;
     function pick(id:HashOrString, x:Float, y:Float):Bool return false;
-    public function applyStyle(target:TTarget, style:TStyle):Void {}
+    function getPos(id:HashOrString):Vector3 return null;
+    function setPos(id:HashOrString, pos:Vector3):Void {}
 
     //
 
@@ -72,7 +80,7 @@ class MGuiBase<TTarget, TStyle> {
             for (state => style in styles) {
                 _targetsStateStyle[id][state] = style;
                 if (_targetsState[id] == state)
-                    applyStyle(idToTarget(id), style);
+                    applyStyle(id, style);
             }
         }
 
@@ -114,6 +122,16 @@ class MGuiBase<TTarget, TStyle> {
         return _userdata[dataID];
     }
 
+    public function slider(id:HashOrString, length:Float, ?axis:DragAxis = X, ?thumbStyles:Map<TargetState, TStyle>):MGuiBase<TTarget, TStyle> {
+        initTarget(id);
+        _targetsDragMaxDistance[id] = length;
+        _targetsDragAxis[id] = axis;
+        _targetsDragStartPos[id] = getPos(id);
+        if (thumbStyles != null)
+            style(id, thumbStyles);
+        return this;
+    }
+
     public function input(actionID:Hash, action:ScriptOnInputAction, ?scriptData:Dynamic):Bool {
         if (actionID == null) {
             pointerX = action.x;
@@ -148,7 +166,10 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     function handleTargetPointerMove(id:Hash, action:ScriptOnInputAction, scriptData:Dynamic):Void {
-        if (pick(id, pointerX, pointerY)) {
+        if (_targetsState[id].dragged) {
+            updateDrag(id);
+
+        } else if (pointerPick(id)) {
             if (!_targetsState[id].isIn())
                 setState(id, HOVERED);
 
@@ -159,12 +180,15 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     function handleTargetPressOrRelease(id:Hash, action:ScriptOnInputAction, scriptData:Dynamic):Void {
-        if (pick(id, pointerX, pointerY)) {
-            if (action.pressed) {
+        if (action.pressed) {
+            if (pointerPick(id)) {
                 _targetsTapInited[id] = true;
                 setState(id, PRESSED);
-            
-            } else if (action.released) {
+                if (_targetsDragAxis[id] != null)
+                    startDrag(id);
+            }
+        } else if (action.released) {
+            if (pointerPick(id)) {
                 if (_targetsTapInited[id]) {
                     _targetsTapInited[id] = false;
                     dispatch(id, TAP, action);
@@ -172,7 +196,30 @@ class MGuiBase<TTarget, TStyle> {
                 if (isAwake(id))
                     setState(id, HOVERED);
             }
+
+            if (_targetsState[id].dragged)
+                setState(id, pointerPick(id) ? HOVERED : UNTOUCHED);
         }
+    }
+
+    function startDrag(id:Hash):Void {
+        if (_targetsDragStartPos[id] == null)
+            _targetsDragStartPos[id] = getPos(id);
+        if (_targetsDragRelPos[id] == null)
+            _targetsDragRelPos[id] = Vmath.vector3();
+
+        var pos = getPos(id);
+        _targetsDragRelPos[id].x = pointerX - pos.x;
+        _targetsDragRelPos[id].y = pointerY - pos.y;
+
+        setState(id, DRAGGED);
+    }
+
+    function updateDrag(id:Hash):Void {
+        var pos = Vmath.vector3();
+        pos.x = pointerX - _targetsDragRelPos[id].x;
+        pos.y = pointerY - _targetsDragRelPos[id].y;
+        setPos(id, pos);
     }
 
     public function message<T>(messageID:Message<T>, ?message:T, ?sender:Url):Void {
@@ -196,7 +243,7 @@ class MGuiBase<TTarget, TStyle> {
         if (_targetsState[id] != SLEEPING)
             return;
 
-        setState(id, pick(id, pointerX, pointerY) ? HOVERED : UNTOUCHED);
+        setState(id, pointerPick(id) ? HOVERED : UNTOUCHED);
         dispatch(id, WAKE);
     }
 
@@ -235,7 +282,7 @@ class MGuiBase<TTarget, TStyle> {
 
         _targetsState[id] = state;
         if (_targetsStateStyle[id][state] != null)
-            applyStyle(idToTarget(id), _targetsStateStyle[id][state]);
+            applyStyle(id, _targetsStateStyle[id][state]);
 
         dispatch(id, STATE(null));
         dispatch(id, STATE(state));
@@ -249,7 +296,11 @@ class MGuiBase<TTarget, TStyle> {
         _targetsTapInited[id] = false;
         _targetsListeners[id] = new RawTable();
         _targetsStateStyle[id] = new RawTable();
-        setState(id, pick(id, pointerX, pointerY) ? HOVERED : UNTOUCHED);
+        setState(id, pointerPick(id) ? HOVERED : UNTOUCHED);
+    }
+
+    public inline function pointerPick(id:Hash):Bool {
+        return pick(id, pointerX, pointerY);
     }
 
 }
