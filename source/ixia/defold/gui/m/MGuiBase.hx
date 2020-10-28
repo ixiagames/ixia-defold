@@ -1,6 +1,6 @@
 package ixia.defold.gui.m;
 
-import ixia.defold.gui.m.TargetEventListener.TargetEventListeners;
+import defold.Msg;
 import defold.support.ScriptOnInputAction;
 import defold.types.Hash;
 import defold.types.HashOrString;
@@ -10,6 +10,7 @@ import defold.types.Vector3;
 import defold.Vmath;
 import haxe.extern.EitherType;
 import ixia.defold.gui.m.TargetEvent;
+import ixia.defold.gui.m.TargetEventListener.TargetEventListeners;
 import ixia.defold.gui.m.TargetState;
 import ixia.ds.OneOrMany;
 import ixia.lua.RawTable;
@@ -359,6 +360,10 @@ class MGuiBase<TTarget, TStyle> {
             case DRAGGED:   style.dragged;
             case SLEEPING:  style.sleeping;
         }
+    }
+
+    public inline function acquireInputFocus():Void {
+        Msg.post('.', new Message<Void>("acquire_input_focus"));
     }
 
 }
