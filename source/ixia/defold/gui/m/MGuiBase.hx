@@ -29,7 +29,7 @@ class MGuiBase<TTarget, TStyle> {
     var _targetsStateStyle:RawTable<Hash, TargetStyle<TStyle>> = new RawTable();
     var _targetsStartPos:RawTable<Hash, Vector3> = new RawTable();
     var _targetsHeldPos:RawTable<Hash, Vector3> = new RawTable();
-    var _targetsMaxDistance:RawTable<Hash, Float> = new RawTable();
+    var _targetsTrackLength:RawTable<Hash, Float> = new RawTable();
     var _targetsDirection:RawTable<Hash, DragDirection> = new RawTable();
     var _messagesListeners:RawTable<Hash, Array<Dynamic->Void>> = new RawTable();
     var _groups:RawTable<Hash, Array<Hash>> = new RawTable();
@@ -143,11 +143,11 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     public function slider(
-        id:HashOrString, length:Float, ?direction:DragDirection = X_RIGHT,
+        id:HashOrString, length:Float, ?direction:DragDirection = LEFT_RIGHT,
         ?thumbStyle:TargetStyle<TStyle>, listeners:TargetEventListeners
     ):MGuiBase<TTarget, TStyle> {
         initTarget(id);
-        _targetsMaxDistance[id] = length;
+        _targetsTrackLength[id] = length;
         _targetsDirection[id] = direction;
         _targetsStartPos[id] = getPos(id);
         if (thumbStyle != null)
@@ -262,9 +262,9 @@ class MGuiBase<TTarget, TStyle> {
     function updateDrag(id:Hash):Void {
         var pos = Vmath.vector3();
         var start = _targetsStartPos[id];
-        var maxDistance = _targetsMaxDistance[id];
+        var maxDistance = _targetsTrackLength[id];
         switch (_targetsDirection[id]) {
-            case X_RIGHT:
+            case LEFT_RIGHT:
                 pos.x = pointerX - _targetsHeldPos[id].x;
                 if (start != null) {
                     if (pos.x < start.x)
@@ -274,7 +274,7 @@ class MGuiBase<TTarget, TStyle> {
                 }
                 setPos(id, pos);
                 
-            case X_LEFT:
+            case RIGHT_LEFT:
                 pos.x = pointerX - _targetsHeldPos[id].x;
                 if (start != null) {
                     if (pos.x > start.x)
@@ -293,7 +293,7 @@ class MGuiBase<TTarget, TStyle> {
         }
     }
 
-    public function dispatch(id:Hash, event:TargetEvent, ?action:ScriptOnInputAction):Void {
+    public function dispatch(id:HashOrString, event:TargetEvent, ?action:ScriptOnInputAction):Void {
         if (_targetsListeners[id][event] == null)
             return;
 
@@ -359,12 +359,24 @@ class MGuiBase<TTarget, TStyle> {
         }
     }
 
-    public inline function isAwake(id:Hash):Bool {
+    public inline function isAwake(id:HashOrString):Bool {
         return _targetsState[id] != null && _targetsState[id] != SLEEPING;
     }
 
-    public inline function pointerPick(id:Hash):Bool {
+    public inline function pointerPick(id:HashOrString):Bool {
         return pick(id, pointerX, pointerY);
+    }
+
+    public function getPercent(id:HashOrString):Float {
+        if (_targetsDirection[id] == null || _targetsStartPos[id] == null || _targetsTrackLength[id] == null)
+            return 0;
+
+        return switch (_targetsDirection[id]) {
+            case LEFT_RIGHT:
+                (getPos(id).x - _targetsStartPos[id].x) / _targetsTrackLength[id];
+            case RIGHT_LEFT:
+                (_targetsStartPos[id].x - getPos(id).x) / _targetsTrackLength[id];
+        }
     }
 
     public inline function acquireInputFocus():Void {
