@@ -219,18 +219,22 @@ class MGuiBase<TTarget, TStyle> {
         switch (_targetsDirection[id]) {
             case X_RIGHT:
                 pos.x = pointerX - _targetsHeldPos[id].x;
-                if (pos.x < start.x)
-                    pos.x = start.x;
-                else if (pos.x > start.x + maxDistance)
-                    pos.x = start.x + maxDistance;
+                if (start != null) {
+                    if (pos.x < start.x)
+                        pos.x = start.x;
+                    else if (maxDistance != null && pos.x > start.x + maxDistance)
+                        pos.x = start.x + maxDistance;
+                }
                 setPos(id, pos);
                 
             case X_LEFT:
                 pos.x = pointerX - _targetsHeldPos[id].x;
-                if (pos.x > start.x)
-                    pos.x = start.x;
-                else if (pos.x < start.x - maxDistance)
-                    pos.x = start.x - maxDistance;
+                if (start != null) {
+                    if (pos.x > start.x)
+                        pos.x = start.x;
+                    else if (maxDistance != null && pos.x < start.x - maxDistance)
+                        pos.x = start.x - maxDistance;
+                }
                 setPos(id, pos);
         }
     }
