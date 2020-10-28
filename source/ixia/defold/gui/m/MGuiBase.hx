@@ -24,10 +24,10 @@ class MGuiBase<TTarget, TStyle> {
     var _targetsState:RawTable<Hash, TargetState> = new RawTable();
     var _targetsListeners:RawTable<Hash, RawTable<Event, Array<EventListener>>> = new RawTable();
     var _targetsStateStyle:RawTable<Hash, TargetStyle<TStyle>> = new RawTable();
-    var _targetsDragStartPos:RawTable<Hash, Vector3> = new RawTable();
-    var _targetsDragRelPos:RawTable<Hash, Vector3> = new RawTable();
-    var _targetsDragMaxDistance:RawTable<Hash, Float> = new RawTable();
-    var _targetsDragDirection:RawTable<Hash, DragDirection> = new RawTable();
+    var _targetsStartPos:RawTable<Hash, Vector3> = new RawTable();
+    var _targetsHeldPos:RawTable<Hash, Vector3> = new RawTable();
+    var _targetsMaxDistance:RawTable<Hash, Float> = new RawTable();
+    var _targetsDirection:RawTable<Hash, DragDirection> = new RawTable();
     var _messagesListeners:RawTable<Hash, Array<Dynamic->Void>> = new RawTable();
     var _groups:RawTable<Hash, Array<Hash>> = new RawTable();
     var _userdata:RawTable<Hash, Dynamic> = new RawTable();
@@ -121,9 +121,9 @@ class MGuiBase<TTarget, TStyle> {
 
     public function slider(id:HashOrString, length:Float, ?direction:DragDirection = X_RIGHT, ?thumbStyle:TargetStyle<TStyle>):MGuiBase<TTarget, TStyle> {
         initTarget(id);
-        _targetsDragMaxDistance[id] = length;
-        _targetsDragDirection[id] = direction;
-        _targetsDragStartPos[id] = getPos(id);
+        _targetsMaxDistance[id] = length;
+        _targetsDirection[id] = direction;
+        _targetsStartPos[id] = getPos(id);
         if (thumbStyle != null)
             style(id, thumbStyle);
         return this;
@@ -181,7 +181,7 @@ class MGuiBase<TTarget, TStyle> {
             if (pointerPick(id)) {
                 _targetsTapInited[id] = true;
                 setState(id, PRESSED);
-                if (_targetsDragDirection[id] != null)
+                if (_targetsDirection[id] != null)
                     startDrag(id);
             }
         } else if (action.released) {
@@ -200,25 +200,25 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     function startDrag(id:Hash):Void {
-        if (_targetsDragStartPos[id] == null)
-            _targetsDragStartPos[id] = getPos(id);
-        if (_targetsDragRelPos[id] == null)
-            _targetsDragRelPos[id] = Vmath.vector3();
+        if (_targetsStartPos[id] == null)
+            _targetsStartPos[id] = getPos(id);
+        if (_targetsHeldPos[id] == null)
+            _targetsHeldPos[id] = Vmath.vector3();
 
         var pos = getPos(id);
-        _targetsDragRelPos[id].x = pointerX - pos.x;
-        _targetsDragRelPos[id].y = pointerY - pos.y;
+        _targetsHeldPos[id].x = pointerX - pos.x;
+        _targetsHeldPos[id].y = pointerY - pos.y;
 
         setState(id, DRAGGED);
     }
 
     function updateDrag(id:Hash):Void {
         var pos = Vmath.vector3();
-        var start = _targetsDragStartPos[id];
-        var maxDistance = _targetsDragMaxDistance[id];
-        switch (_targetsDragDirection[id]) {
+        var start = _targetsStartPos[id];
+        var maxDistance = _targetsMaxDistance[id];
+        switch (_targetsDirection[id]) {
             case X_RIGHT:
-                pos.x = pointerX - _targetsDragRelPos[id].x;
+                pos.x = pointerX - _targetsHeldPos[id].x;
                 if (pos.x < start.x)
                     pos.x = start.x;
                 else if (pos.x > start.x + maxDistance)
@@ -226,7 +226,7 @@ class MGuiBase<TTarget, TStyle> {
                 setPos(id, pos);
                 
             case X_LEFT:
-                pos.x = pointerX - _targetsDragRelPos[id].x;
+                pos.x = pointerX - _targetsHeldPos[id].x;
                 if (pos.x > start.x)
                     pos.x = start.x;
                 else if (pos.x < start.x - maxDistance)
