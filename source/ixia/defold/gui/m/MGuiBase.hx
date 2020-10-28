@@ -53,6 +53,16 @@ class MGuiBase<TTarget, TStyle> {
 
     //
 
+    function initTarget(id:Hash):Void {
+        if (_targetsID.indexOf(id) > -1)
+            return;
+
+        _targetsID.push(id);
+        _targetsTapInited[id] = false;
+        _targetsListeners[id] = new RawTable();
+        setState(id, pointerPick(id) ? HOVERED : UNTOUCHED);
+    }
+
     public function sub(ids:OneOrMany<HashOrString>, listeners:TargetEventListeners):MGuiBase<TTarget, TStyle> {
         for (id in ids.toArray()) {
             initTarget(id);
@@ -291,6 +301,32 @@ class MGuiBase<TTarget, TStyle> {
             listener.call(id, event, action);
     }
 
+    public inline function getState(id:HashOrString):TargetState {
+        return _targetsState[id];
+    }
+
+    function setState(id:HashOrString, state:TargetState):Void {
+        if (_targetsState[id] == state)
+            return;
+
+        _targetsState[id] = state;
+        applyStateStyle(id, getStateStyle(id));
+    }
+
+    function getStateStyle(id:Hash):TStyle {
+        var style = _targetsStateStyle[id];
+        if (style == null)
+            return null;
+
+        return switch (_targetsState[id]) {
+            case UNTOUCHED: style.untouched;
+            case HOVERED:   style.hovered;
+            case PRESSED:   style.pressed;
+            case DRAGGED:   style.dragged;
+            case SLEEPING:  style.sleeping;
+        }
+    }
+
     public function wake(id:HashOrString):Void {
         initTarget(id);
         
@@ -327,44 +363,8 @@ class MGuiBase<TTarget, TStyle> {
         return _targetsState[id] != null && _targetsState[id] != SLEEPING;
     }
 
-    public inline function getState(id:HashOrString):TargetState {
-        return _targetsState[id];
-    }
-
-    function setState(id:HashOrString, state:TargetState):Void {
-        if (_targetsState[id] == state)
-            return;
-
-        _targetsState[id] = state;
-        applyStateStyle(id, getStateStyle(id));
-    }
-
-    function initTarget(id:Hash):Void {
-        if (_targetsID.indexOf(id) > -1)
-            return;
-
-        _targetsID.push(id);
-        _targetsTapInited[id] = false;
-        _targetsListeners[id] = new RawTable();
-        setState(id, pointerPick(id) ? HOVERED : UNTOUCHED);
-    }
-
     public inline function pointerPick(id:Hash):Bool {
         return pick(id, pointerX, pointerY);
-    }
-
-    function getStateStyle(id:Hash):TStyle {
-        var style = _targetsStateStyle[id];
-        if (style == null)
-            return null;
-
-        return switch (_targetsState[id]) {
-            case UNTOUCHED: style.untouched;
-            case HOVERED:   style.hovered;
-            case PRESSED:   style.pressed;
-            case DRAGGED:   style.dragged;
-            case SLEEPING:  style.sleeping;
-        }
     }
 
     public inline function acquireInputFocus():Void {
