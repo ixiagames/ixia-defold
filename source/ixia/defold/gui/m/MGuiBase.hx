@@ -132,13 +132,18 @@ class MGuiBase<TTarget, TStyle> {
         return _userdata[dataID];
     }
 
-    public function slider(id:HashOrString, length:Float, ?direction:DragDirection = X_RIGHT, ?thumbStyle:TargetStyle<TStyle>):MGuiBase<TTarget, TStyle> {
+    public function slider(
+        id:HashOrString, length:Float, ?direction:DragDirection = X_RIGHT,
+        ?thumbStyle:TargetStyle<TStyle>, listeners:TargetEventListeners
+    ):MGuiBase<TTarget, TStyle> {
         initTarget(id);
         _targetsMaxDistance[id] = length;
         _targetsDirection[id] = direction;
         _targetsStartPos[id] = getPos(id);
         if (thumbStyle != null)
             style(id, thumbStyle);
+        if (listeners != null)
+            sub(id, listeners);
         return this;
     }
 
