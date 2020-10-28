@@ -1,5 +1,6 @@
 package ixia.defold.gui.m;
 
+import ixia.defold.gui.m.TargetEventListener.TargetEventListeners;
 import defold.support.ScriptOnInputAction;
 import defold.types.Hash;
 import defold.types.HashOrString;
@@ -8,7 +9,7 @@ import defold.types.Url;
 import defold.types.Vector3;
 import defold.Vmath;
 import haxe.extern.EitherType;
-import ixia.defold.gui.m.Event;
+import ixia.defold.gui.m.TargetEvent;
 import ixia.defold.gui.m.TargetState;
 import ixia.ds.OneOrMany;
 import ixia.lua.RawTable;
@@ -23,7 +24,7 @@ class MGuiBase<TTarget, TStyle> {
     var _targetsID:Array<Hash> = [];
     var _targetsTapInited:RawTable<Hash, Bool> = new RawTable();
     var _targetsState:RawTable<Hash, TargetState> = new RawTable();
-    var _targetsListeners:RawTable<Hash, RawTable<Event, Array<EventListener>>> = new RawTable();
+    var _targetsListeners:RawTable<Hash, RawTable<TargetEvent, Array<TargetEventListener>>> = new RawTable();
     var _targetsStateStyle:RawTable<Hash, TargetStyle<TStyle>> = new RawTable();
     var _targetsStartPos:RawTable<Hash, Vector3> = new RawTable();
     var _targetsHeldPos:RawTable<Hash, Vector3> = new RawTable();
@@ -51,11 +52,14 @@ class MGuiBase<TTarget, TStyle> {
 
     //
 
-    public function sub(ids:OneOrMany<HashOrString>, listeners:Map<Event, EventListener>):MGuiBase<TTarget, TStyle> {
+    public function sub(ids:OneOrMany<HashOrString>, listeners:TargetEventListeners):MGuiBase<TTarget, TStyle> {
         for (id in ids.toArray()) {
             initTarget(id);
 
-            for (event => listener in listeners) {
+            for (field in Reflect.fields(listeners)) {
+                var event = TargetEvent.fromString(field);
+                var listener = Reflect.field(listeners, field);
+
                 if (_targetsListeners[id][event] == null)
                     _targetsListeners[id][event] = [];
 
@@ -173,14 +177,18 @@ class MGuiBase<TTarget, TStyle> {
     function handleTargetPointerMove(id:Hash, action:ScriptOnInputAction, scriptData:Dynamic):Void {
         if (_targetsState[id].dragged) {
             updateDrag(id);
+            dispatch(id, DRAG, action);
 
         } else if (pointerPick(id)) {
-            if (!_targetsState[id].touched)
+            if (!_targetsState[id].touched) {
                 setState(id, HOVERED);
-
+                dispatch(id, ENTER, action);
+            }
         } else {
-            if (_targetsState[id].touched)
+            if (_targetsState[id].touched) {
                 setState(id, UNTOUCHED);
+                dispatch(id, LEAVE, action);
+            }
         }
     }
 
@@ -188,22 +196,36 @@ class MGuiBase<TTarget, TStyle> {
         if (action.pressed) {
             if (pointerPick(id)) {
                 _targetsTapInited[id] = true;
+
                 setState(id, PRESSED);
-                if (_targetsDirection[id] != null)
+                dispatch(id, PRESS, action);
+
+                if (_targetsDirection[id] != null) {
                     startDrag(id);
+                    dispatch(id, DRAG, action);
+                }
             }
         } else if (action.released) {
+            var releaseDispatched = false;
+
             if (pointerPick(id)) {
                 if (_targetsTapInited[id]) {
                     _targetsTapInited[id] = false;
                     dispatch(id, TAP, action);
                 }
-                if (isAwake(id))
+                
+                if (isAwake(id)) {
                     setState(id, HOVERED);
+                    dispatch(id, RELEASE, action);
+                    releaseDispatched = true;
+                }
             }
 
-            if (_targetsState[id].dragged)
+            if (_targetsState[id].dragged) {
                 setState(id, pointerPick(id) ? HOVERED : UNTOUCHED);
+                if (!releaseDispatched)
+                    dispatch(id, RELEASE, action);
+            }
         }
     }
 
@@ -218,6 +240,7 @@ class MGuiBase<TTarget, TStyle> {
         _targetsHeldPos[id].y = pointerY - pos.y;
 
         setState(id, DRAGGED);
+        updateDrag(id);
     }
 
     function updateDrag(id:Hash):Void {
@@ -254,7 +277,7 @@ class MGuiBase<TTarget, TStyle> {
         }
     }
 
-    public function dispatch(id:Hash, event:Event, ?action:ScriptOnInputAction):Void {
+    public function dispatch(id:Hash, event:TargetEvent, ?action:ScriptOnInputAction):Void {
         if (_targetsListeners[id][event] == null)
             return;
 
@@ -284,6 +307,7 @@ class MGuiBase<TTarget, TStyle> {
             return;
 
         setState(id, SLEEPING);
+        dispatch(id, SLEEP);
     }
 
     public function sleepGroup(group:HashOrString):Void {
@@ -307,9 +331,6 @@ class MGuiBase<TTarget, TStyle> {
 
         _targetsState[id] = state;
         applyStateStyle(id, getStateStyle(id));
-
-        dispatch(id, STATE(null));
-        dispatch(id, STATE(state));
     }
 
     function initTarget(id:Hash):Void {
