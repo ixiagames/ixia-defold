@@ -170,11 +170,11 @@ class MGuiBase<TTarget, TStyle> {
             updateDrag(id);
 
         } else if (pointerPick(id)) {
-            if (!_targetsState[id].isIn())
+            if (!_targetsState[id].touched)
                 setState(id, HOVERED);
 
         } else {
-            if (_targetsState[id].isIn())
+            if (_targetsState[id].touched)
                 setState(id, UNTOUCHED);
         }
     }

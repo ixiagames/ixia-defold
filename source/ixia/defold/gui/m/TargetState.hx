@@ -7,16 +7,14 @@ enum abstract TargetState(Int) to Int {
     var PRESSED;
     var DRAGGED;
     var SLEEPING;
+    
+    public var awake(get, never):Bool;
+    inline function get_awake() return this != SLEEPING;
 
     public var dragged(get, never):Bool;
     inline function get_dragged() return this == DRAGGED;
 
-    public inline function isIn():Bool {
-        return this == HOVERED || this == PRESSED;
-    }
-
-    public inline function isAwake():Bool {
-        return this != SLEEPING;
-    }
+    public var touched(get, never):Bool;
+    inline function get_touched() return this == HOVERED || this == PRESSED;
 
 }
