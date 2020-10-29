@@ -15,6 +15,8 @@ import ixia.defold.gui.m.TargetState;
 import ixia.ds.OneOrMany;
 import ixia.lua.RawTable;
 using Defold;
+using ixia.math.Math;
+using Math;
 
 class MGuiBase<TTarget, TStyle> {
 
@@ -22,15 +24,23 @@ class MGuiBase<TTarget, TStyle> {
     public var pointerX(default, null):Float = 0;
     public var pointerY(default, null):Float = 0;
     public var pointerState(default, null):PointerState = RELEASED;
+
     var _targetsID:Array<Hash> = [];
     var _targetsTapInited:RawTable<Hash, Bool> = new RawTable();
     var _targetsState:RawTable<Hash, TargetState> = new RawTable();
-    var _targetsListeners:RawTable<Hash, RawTable<TargetEvent, Array<TargetEventListener>>> = new RawTable();
     var _targetsStateStyle:RawTable<Hash, TargetStyle<TStyle>> = new RawTable();
+    var _targetsListeners:RawTable<Hash, RawTable<TargetEvent, Array<TargetEventListener>>> = new RawTable();
+    
     var _targetsStartPos:RawTable<Hash, Vector3> = new RawTable();
     var _targetsHeldPos:RawTable<Hash, Vector3> = new RawTable();
     var _targetsTrackLength:RawTable<Hash, Float> = new RawTable();
     var _targetsDirection:RawTable<Hash, DragDirection> = new RawTable();
+
+    var _targetsMin:RawTable<Hash, Float> = new RawTable();
+    var _targetsMax:RawTable<Hash, Float> = new RawTable();
+    var _targetsStepValue:RawTable<Hash, Float> = new RawTable();
+    var _targetsStepIndex:RawTable<Hash, Int> = new RawTable();
+    
     var _messagesListeners:RawTable<Hash, Array<Dynamic->Void>> = new RawTable();
     var _groups:RawTable<Hash, Array<Hash>> = new RawTable();
     var _userdata:RawTable<Hash, Dynamic> = new RawTable();
@@ -144,16 +154,18 @@ class MGuiBase<TTarget, TStyle> {
 
     public function slider(
         id:HashOrString, length:Float, ?direction:DragDirection = LEFT_RIGHT,
+        ?min:Float, ?max:Float, ?step:Float,
         ?thumbStyle:TargetStyle<TStyle>, listeners:TargetEventListeners
     ):MGuiBase<TTarget, TStyle> {
         initTarget(id);
         _targetsTrackLength[id] = length;
         _targetsDirection[id] = direction;
         _targetsStartPos[id] = getPos(id);
-        if (thumbStyle != null)
-            style(id, thumbStyle);
-        if (listeners != null)
-            sub(id, listeners);
+        if (min != null) _targetsMin[id] = min;
+        if (max != null) _targetsMax[id] = max;
+        if (step != null) _targetsStepValue[id] = step;
+        if (thumbStyle != null) style(id, thumbStyle);
+        if (listeners != null) sub(id, listeners);
         return this;
     }
 
@@ -260,30 +272,52 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     function updateDrag(id:Hash):Void {
-        var pos = Vmath.vector3();
         var start = _targetsStartPos[id];
-        var maxDistance = _targetsTrackLength[id];
+        var trackLength = _targetsTrackLength[id];
+        var heldPos = _targetsHeldPos[id];
+        var tx = pointerX - heldPos.x;
+        //var ty = pointerY - heldPos.y;
+        if (start != null && trackLength != null && _targetsMin[id] != null && _targetsMax[id] != null && _targetsStepValue[id] != null) {
+            var percent = switch (_targetsDirection[id]) {
+                case LEFT_RIGHT: (tx - start.x) / trackLength;
+                case RIGHT_LEFT: (start.x - tx) / trackLength;
+            }
+            var maxDistance = _targetsMax[id] - _targetsMin[id];
+            var distance = _targetsMin[id] + maxDistance * percent;
+            var steps = distance / _targetsStepValue[id];
+            var downSteps = steps.floor();
+            var upSteps = steps.ceil();
+            _targetsStepIndex[id] = Math.abs(downSteps - steps) < Math.abs(upSteps - steps) ? downSteps : upSteps;
+            steps = _targetsStepIndex[id];
+            percent = (steps * _targetsStepValue[id]) / maxDistance;
+            switch (_targetsDirection[id]) {
+                case LEFT_RIGHT: tx = start.x + trackLength * percent;
+                case RIGHT_LEFT: tx = start.x - trackLength * percent;
+            }
+        }
+
+        var pos = getPos(id);
         switch (_targetsDirection[id]) {
-            case LEFT_RIGHT:
-                pos.x = pointerX - _targetsHeldPos[id].x;
+            case LEFT_RIGHT: 
                 if (start != null) {
-                    if (pos.x < start.x)
-                        pos.x = start.x;
-                    else if (maxDistance != null && pos.x > start.x + maxDistance)
-                        pos.x = start.x + maxDistance;
+                    if (tx < start.x)
+                        tx = start.x;
+                    else if (trackLength != null && tx > start.x + trackLength)
+                        tx = start.x + trackLength;
                 }
-                setPos(id, pos);
+                pos.x = tx;
                 
             case RIGHT_LEFT:
-                pos.x = pointerX - _targetsHeldPos[id].x;
                 if (start != null) {
-                    if (pos.x > start.x)
-                        pos.x = start.x;
-                    else if (maxDistance != null && pos.x < start.x - maxDistance)
-                        pos.x = start.x - maxDistance;
+                    if (tx > start.x)
+                        tx = start.x;
+                    else if (trackLength != null && tx < start.x - trackLength)
+                        tx = start.x - trackLength;
                 }
-                setPos(id, pos);
+                pos.x = tx;
         }
+
+        setPos(id, pos);
     }
 
     public function message<T>(messageID:Message<T>, ?message:T, ?sender:Url):Void {
@@ -363,11 +397,7 @@ class MGuiBase<TTarget, TStyle> {
         return _targetsState[id] != null && _targetsState[id] != SLEEPING;
     }
 
-    public inline function pointerPick(id:HashOrString):Bool {
-        return pick(id, pointerX, pointerY);
-    }
-
-    public function getPercent(id:HashOrString):Float {
+    public function sliderPercent(id:HashOrString):Float {
         if (_targetsDirection[id] == null || _targetsStartPos[id] == null || _targetsTrackLength[id] == null)
             return 0;
 
@@ -377,6 +407,56 @@ class MGuiBase<TTarget, TStyle> {
             case RIGHT_LEFT:
                 (_targetsStartPos[id].x - getPos(id).x) / _targetsTrackLength[id];
         }
+    }
+
+    public function sliderValue(id:HashOrString):Float {
+        return sliderPercent(id).valueBetween(_targetsMin[id], _targetsMax[id]);
+    }
+
+    public function sliderValueInt(id:HashOrString):Int {
+        return Std.int(sliderPercent(id).valueBetween(_targetsMin[id], _targetsMax[id]));
+    }
+
+    public inline function min(id:HashOrString):Float {
+        return _targetsMin[id];
+    }
+
+    public inline function setMin(id:HashOrString, value:Float):MGuiBase<TTarget, TStyle> {
+        _targetsMin[id] = value;
+        return this;
+    }
+
+    public inline function max(id:HashOrString):Float {
+        return _targetsMax[id];
+    }
+
+    public inline function setMax(id:HashOrString, value:Float):MGuiBase<TTarget, TStyle> {
+        _targetsMax[id] = value;
+        return this;
+    }
+
+    public inline function stepValue(id:HashOrString):Float {
+        return _targetsStepValue[id];
+    }
+
+    public inline function stepIndex(id:HashOrString):Int {
+        return _targetsStepIndex[id];
+    }
+    
+    public inline function setStepValue(id:HashOrString, value:Float):MGuiBase<TTarget, TStyle> {
+        _targetsStepValue[id] = value;
+        return this;
+    }
+
+    public function setMinMaxStep(id:HashOrString, min:Float, max:Float, step:Float):MGuiBase<TTarget, TStyle> {
+        _targetsMin[id] = min;
+        _targetsMax[id] = max;
+        _targetsStepValue[id] = step;
+        return this;
+    }
+
+    public inline function pointerPick(id:HashOrString):Bool {
+        return pick(id, pointerX, pointerY);
     }
 
     public inline function acquireInputFocus():Void {
