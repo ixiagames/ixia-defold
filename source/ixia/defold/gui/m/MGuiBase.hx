@@ -155,7 +155,7 @@ class MGuiBase<TTarget, TStyle> {
     public function slider(
         id:HashOrString, length:Float, ?direction:DragDirection = LEFT_RIGHT,
         ?min:Float, ?max:Float, ?step:Float,
-        ?thumbStyle:TargetStyle<TStyle>, listeners:TargetEventListeners
+        ?thumbStyle:TargetStyle<TStyle>, ?listeners:TargetEventListeners
     ):MGuiBase<TTarget, TStyle> {
         initTarget(id);
         _targetsTrackLength[id] = length;
