@@ -94,6 +94,12 @@ class MGuiBase<TTarget, TStyle> {
         return this;
     }
 
+    public function subGroup(group:HashOrString, listeners:TargetEventListeners):MGuiBase<TTarget, TStyle> {
+        if (_groups[group] != null)
+            sub(_groups[group], listeners);
+        return this;
+    }
+
     public function subMes<T>(message:Message<T>, listener:EitherType<Void->Void, T->Void>):MGuiBase<TTarget, TStyle> {
         if (_messagesListeners[cast message] == null)
             _messagesListeners[cast message] = [];
