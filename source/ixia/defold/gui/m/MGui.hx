@@ -39,5 +39,12 @@ class MGui extends MGuiBase<GuiNode, NodeStyle> {
                 applyStateStyle(id, style);
         }
     }
+
+    public function setGroupEnabled(group:HashOrString, enabled:Bool):Void {
+        if (_groups[group] != null) {
+            for (id in _groups[group])
+                Gui.set_enabled(id.get_node(), enabled);
+        }
+    }
     
 }
