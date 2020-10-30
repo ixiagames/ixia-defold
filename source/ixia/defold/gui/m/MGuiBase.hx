@@ -1,5 +1,6 @@
 package ixia.defold.gui.m;
 
+import haxe.ds.Either;
 import defold.Msg;
 import defold.support.ScriptOnInputAction;
 import defold.types.Hash;
@@ -25,6 +26,7 @@ class MGuiBase<TTarget, TStyle> {
     public var pointerY(default, null):Float = 0;
     public var pointerState(default, null):PointerState = RELEASED;
 
+    var _groups:RawTable<Hash, Array<Hash>> = new RawTable();
     var _targetsID:Array<Hash> = [];
     var _targetsTapInited:RawTable<Hash, Bool> = new RawTable();
     var _targetsState:RawTable<Hash, TargetState> = new RawTable();
@@ -42,8 +44,8 @@ class MGuiBase<TTarget, TStyle> {
     var _targetsStepIndex:RawTable<Hash, Int> = new RawTable();
     
     var _messagesListeners:RawTable<Hash, Array<Dynamic->Void>> = new RawTable();
-    var _groups:RawTable<Hash, Array<Hash>> = new RawTable();
     var _userdata:RawTable<Hash, Dynamic> = new RawTable();
+    var _dataListeners:RawTable<Hash, Array<DataListener>> = new RawTable();
 
     public function new(?touchActionID:HashOrString) {
         if (touchActionID == null)
@@ -83,14 +85,14 @@ class MGuiBase<TTarget, TStyle> {
 
                 if (_targetsListeners[id][event] == null)
                     _targetsListeners[id][event] = [];
-
-                var addedIndex = _targetsListeners[id][event].indexOf(listener);
-                if (addedIndex > -1)
-                    _targetsListeners[id][event].splice(addedIndex, 1);
+                else {
+                    var addedIndex = _targetsListeners[id][event].indexOf(listener);
+                    if (addedIndex > -1)
+                        _targetsListeners[id][event].splice(addedIndex, 1);
+                }
                 _targetsListeners[id][event].push(listener);
             }
         }
-
         return this;
     }
 
@@ -103,12 +105,26 @@ class MGuiBase<TTarget, TStyle> {
     public function subMes<T>(message:Message<T>, listener:EitherType<Void->Void, T->Void>):MGuiBase<TTarget, TStyle> {
         if (_messagesListeners[cast message] == null)
             _messagesListeners[cast message] = [];
-
-        var addedIndex = _messagesListeners[cast message].indexOf(listener);
-        if (addedIndex > -1)
-            _messagesListeners[cast message].splice(addedIndex, 1);
+        else {
+            var addedIndex = _messagesListeners[cast message].indexOf(listener);
+            if (addedIndex > -1)
+                _messagesListeners[cast message].splice(addedIndex, 1);
+        }
         _messagesListeners[cast message].push(listener);
+        return this;
+    }
 
+    public function subData(dataIDs:OneOrMany<HashOrString>, listener:DataListener):MGuiBase<TTarget, TStyle> {
+        for (id in dataIDs.toArray()) {
+            if (_dataListeners[id] == null)
+                _dataListeners[id] = [];
+            else {
+                var addedIndex = _dataListeners[id].indexOf(listener);
+                if (addedIndex > -1)
+                    _dataListeners[id].splice(addedIndex, 1);
+            }
+            _dataListeners[id].push(listener);
+        }
         return this;
     }
 
@@ -150,7 +166,14 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     public function set(dataID:HashOrString, data:Dynamic):MGuiBase<TTarget, TStyle> {
+        if (_userdata[dataID] == data)
+            return this;
+
         _userdata[dataID] = data;
+        if (_dataListeners[dataID] != null) {
+            for (listener in _dataListeners[dataID])
+                listener.call(data, dataID);
+        }
         return this;
     }
 
