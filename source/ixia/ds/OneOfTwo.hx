@@ -13,14 +13,14 @@ abstract OneOfTwo<A, B>(Either<A, B>) from Either<A, B> to Either<A, B> {
         return Right(b);  
     }
 
-    @:to inline function toA():Null<A> {
+    @:to public inline function toA():Null<A> {
         return switch(this) {
             case Left(a): a; 
             case _: null;
         }
     }
 
-    @:to inline function toB():Null<B> {
+    @:to public inline function toB():Null<B> {
         return switch(this) {
             case Right(b): b;
             case _: null;
