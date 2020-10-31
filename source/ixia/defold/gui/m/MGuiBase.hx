@@ -1,23 +1,26 @@
 package ixia.defold.gui.m;
 
-import haxe.ds.Either;
 import defold.Msg;
+import defold.Timer;
+import defold.Vmath;
 import defold.support.ScriptOnInputAction;
 import defold.types.Hash;
 import defold.types.HashOrString;
 import defold.types.Message;
 import defold.types.Url;
 import defold.types.Vector3;
-import defold.Vmath;
+import haxe.ds.Either;
 import haxe.extern.EitherType;
 import ixia.defold.gui.m.TargetEvent;
 import ixia.defold.gui.m.TargetEventListener.TargetEventListeners;
 import ixia.defold.gui.m.TargetState;
+import ixia.ds.OneOfTwo;
 import ixia.ds.OneOrMany;
 import ixia.lua.RawTable;
+
 using Defold;
-using ixia.math.Math;
 using Math;
+using ixia.math.Math;
 
 class MGuiBase<TTarget, TStyle> {
 
@@ -43,9 +46,9 @@ class MGuiBase<TTarget, TStyle> {
     var _targetsStepValue:RawTable<Hash, Float> = new RawTable();
     var _targetsStepIndex:RawTable<Hash, Int> = new RawTable();
     
-    var _messagesListeners:RawTable<Hash, Array<Dynamic->Void>> = new RawTable();
     var _userdata:RawTable<Hash, Dynamic> = new RawTable();
     var _dataListeners:RawTable<Hash, Array<DataListener>> = new RawTable();
+    var _messagesListeners:RawTable<Hash, Array<Dynamic->Void>> = new RawTable();
 
     public function new(?touchActionID:HashOrString) {
         if (touchActionID == null)
@@ -157,6 +160,48 @@ class MGuiBase<TTarget, TStyle> {
         }
 
         return this;
+    }
+
+    public function timer(
+        duration:Float,
+        ?onUpdate:OneOfTwo<
+            (handle:TimerHandle, progress:Float)->Void,
+            (handle:TimerHandle, elapsedTime:Float, duration:Float)->Void
+        >,
+        ?onComplete:()->Void
+    ):Void {
+        if (onUpdate != null) {
+            var elapsedTime = 0.;
+            switch (onUpdate) {
+                case Left(onUpdate): 
+                    Timer.delay(0, true, (_, handle, delta) -> {
+                        elapsedTime += delta;
+                        if (elapsedTime < duration)
+                            onUpdate(handle, elapsedTime / duration);
+                        else {
+                            Timer.cancel(handle);
+                            onUpdate(handle, 1);
+                            if (onComplete != null)
+                                onComplete();
+                        }
+                    });
+                    
+                case Right(onUpdate):
+                    Timer.delay(0, true, (_, handle, delta) -> {
+                        elapsedTime += delta;
+                        if (elapsedTime < duration)
+                            onUpdate(handle, elapsedTime, duration);
+                        else {
+                            Timer.cancel(handle);
+                            onUpdate(handle, duration, duration);
+                            if (onComplete != null)
+                                onComplete();
+                        }
+                    });
+            }
+        } else if (onComplete != null) {
+            Timer.delay(duration, false, cast onComplete);
+        }
     }
 
     public function map(dataMap:UserDataMap):MGuiBase<TTarget, TStyle> {
@@ -501,4 +546,12 @@ abstract UserDataMap(Map<Hash, Dynamic>) from Map<Hash, Dynamic> {
         return [ for (key => style in map) key.hash() => style ];
     }
     
+}
+
+abstract TimerHandle(defold.Timer.TimerHandle) from defold.Timer.TimerHandle to defold.Timer.TimerHandle {
+    
+    public inline function cancel():Void {
+        Timer.cancel(this);
+    }
+
 }
