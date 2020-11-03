@@ -8,19 +8,19 @@ class TimerRunner {
     public var time(default, null):Float = 0;
     public var percent(default, null):Float = 0;
     public var handle(default, null):TimerHandle;
-    public var listener:TimerRunner->Void;
+    public var onUpdate:TimerRunner->Void;
+    public var onComplete:TimerRunner->Void;
 
-    public function new(duration:Float = 0, ?listener:TimerRunner->Void) {
+    public function new(duration:Float = 0, ?onUpdate:TimerRunner->Void, ?onComplete:TimerRunner->Void) {
         this.duration = duration;
-        if (listener != null)
-            this.listener = listener;
+        this.onUpdate = onUpdate;
+        this.onComplete = onComplete;
     }
 
-    public function start(?duration:Float, ?listener:TimerRunner->Void):Void {
-        if (duration != null)
-            this.duration = duration;
-        if (listener != null)
-            this.listener = listener;
+    public function start(?duration:Float, ?onUpdate:TimerRunner->Void, ?onComplete:TimerRunner->Void):Void {
+        if (duration != null) this.duration = duration;
+        if (onUpdate != null) this.onUpdate = onUpdate;
+        if (onComplete != null) this.onComplete = onComplete;
         stop();
         resume();
     }
@@ -28,7 +28,8 @@ class TimerRunner {
     public function resume():Void {
         if (duration == 0) {
             percent = 1;
-            listener(this);
+            if (onUpdate != null)
+                onUpdate(this);
             return;
         }
 
@@ -41,8 +42,11 @@ class TimerRunner {
                 handle = null;
                 time = duration;
                 percent = 1;
+                if (onComplete != null)
+                    onComplete(this);
             }
-            listener(this);
+            if (onUpdate != null)
+                onUpdate(this);
         });
     }
 
