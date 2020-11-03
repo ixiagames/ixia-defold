@@ -484,11 +484,11 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     public function sliderValue(id:HashOrString):Float {
-        return sliderPercent(id).valueBetween(_targetsMin[id], _targetsMax[id]);
+        return sliderPercent(id).between(_targetsMin[id], _targetsMax[id]);
     }
 
     public function sliderValueInt(id:HashOrString):Int {
-        return Std.int(sliderPercent(id).valueBetween(_targetsMin[id], _targetsMax[id]));
+        return Std.int(sliderPercent(id).between(_targetsMin[id], _targetsMax[id]));
     }
 
     public inline function min(id:HashOrString):Float {
