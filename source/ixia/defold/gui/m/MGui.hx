@@ -1,11 +1,23 @@
 package ixia.defold.gui.m;
 
+import defold.Msg;
 import defold.types.Hash;
 import defold.types.HashOrString;
+import defold.types.Message;
 import defold.types.Vector3;
+
 using defold.Gui;
 
 class MGui extends MGuiBase<GuiNode, NodeStyle> {
+
+    public function new(?touchActionID:HashOrString, ?acquiresInputFocus:Bool = true, ?renderOrder:Int) {
+        super(touchActionID);
+        
+        if (acquiresInputFocus)
+            acquireInputFocus();
+        if (renderOrder != null)
+            Gui.set_render_order(renderOrder);
+    }
 
     override function idToTarget(id:Hash):GuiNode {
         return id.get_node();
@@ -34,6 +46,20 @@ class MGui extends MGuiBase<GuiNode, NodeStyle> {
         if (style.flipbook != null)
             node.play_flipbook(style.flipbook);
 
+        if (style.animations != null) {
+            for (prop => configs in style.animations) {
+                node.animate(
+                    prop,
+                    configs.to,
+                    configs.easing != null ? configs.easing : GuiEasing.EASING_LINEAR,
+                    configs.duration,
+                    configs.delay != null ? configs.delay : 0,
+                    configs.onComplete,
+                    configs.playback
+                );
+            }
+        }
+
         if (style.nodes != null) {
             for (id => style in style.nodes)
                 applyStateStyle(id, style);
@@ -43,8 +69,12 @@ class MGui extends MGuiBase<GuiNode, NodeStyle> {
     public function setGroupEnabled(group:HashOrString, enabled:Bool):Void {
         if (_groups[group] != null) {
             for (id in _groups[group])
-                Gui.set_enabled(id.get_node(), enabled);
+                id.get_node().set_enabled(enabled);
         }
+    }
+
+    public inline function acquireInputFocus():Void {
+        Msg.post('.', new Message<Void>("acquire_input_focus"));
     }
     
 }

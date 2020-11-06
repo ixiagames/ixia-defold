@@ -1,6 +1,5 @@
 package ixia.defold.gui.m;
 
-import defold.Msg;
 import defold.Timer;
 import defold.Vmath;
 import defold.support.ScriptOnInputAction;
@@ -562,10 +561,6 @@ class MGuiBase<TTarget, TStyle> {
 
     public inline function pointerPick(id:HashOrString):Bool {
         return pick(id, pointerX, pointerY);
-    }
-
-    public inline function acquireInputFocus():Void {
-        Msg.post('.', new Message<Void>("acquire_input_focus"));
     }
 
 }
