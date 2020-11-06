@@ -49,9 +49,9 @@ class MGuiBase<TTarget, TStyle> {
     var _userdata:RawTable<Hash, Dynamic> = new RawTable();
     var _dataListeners:RawTable<Hash, Array<DataListener>> = new RawTable();
     var _messagesListeners:RawTable<Hash, Array<Dynamic->Void>> = new RawTable();
-    var _actionsListeners:RawTable<Hash, Array<Dynamic->Void>> = new RawTable();
-    var _pressesListeners:RawTable<Hash, Array<Dynamic->Void>> = new RawTable();
-    var _releasesListeners:RawTable<Hash, Array<Dynamic->Void>> = new RawTable();
+    var _actionsListeners:RawTable<Hash, Array<InputActionListener>> = new RawTable();
+    var _pressesListeners:RawTable<Hash, Array<InputActionListener>> = new RawTable();
+    var _releasesListeners:RawTable<Hash, Array<InputActionListener>> = new RawTable();
 
     public function new(?touchActionID:HashOrString) {
         if (touchActionID == null)
@@ -120,7 +120,7 @@ class MGuiBase<TTarget, TStyle> {
         return this;
     }
 
-    public function subAction(actionID:HashOrString, ?pressed:Null<Bool> = true, listener:EitherType<Void->Bool, Hash->Bool>):MGuiBase<TTarget, TStyle> {
+    public function subAction(actionID:HashOrString, ?pressed:Null<Bool> = true, listener:InputActionListener):MGuiBase<TTarget, TStyle> {
         var listeners = pressed == null ? _actionsListeners : (pressed ? _pressesListeners : _releasesListeners);
         if (listeners[actionID] == null)
             listeners[actionID] = [];
@@ -288,20 +288,20 @@ class MGuiBase<TTarget, TStyle> {
             else if (action.released)
                 pointerState = RELEASED;
         }
-
+        
         if (_actionsListeners[actionID] != null) {
             for (listener in _actionsListeners[actionID])
-                listener(action);
+                listener.call(actionID, action);
         }
         if (action.pressed) {
             if (_pressesListeners[actionID] != null) {
                 for (listener in _pressesListeners[actionID])
-                    listener(action);
+                    listener.call(actionID, action);
             }
         } else if (action.released) {
             if (_releasesListeners[actionID] != null) {
                 for (listener in _releasesListeners[actionID])
-                    listener(action);
+                    listener.call(actionID, action);
             }
         }
     }
