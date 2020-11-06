@@ -31,6 +31,7 @@ class MGuiBase<TTarget, TStyle> {
 
     var _groups:RawTable<Hash, Array<Hash>> = new RawTable();
     var _targetsID:Array<Hash> = [];
+
     var _targetsTapInited:RawTable<Hash, Bool> = new RawTable();
     var _targetsState:RawTable<Hash, TargetState> = new RawTable();
     var _targetsStateStyle:RawTable<Hash, TargetStyle<TStyle>> = new RawTable();
@@ -49,6 +50,9 @@ class MGuiBase<TTarget, TStyle> {
     var _userdata:RawTable<Hash, Dynamic> = new RawTable();
     var _dataListeners:RawTable<Hash, Array<DataListener>> = new RawTable();
     var _messagesListeners:RawTable<Hash, Array<Dynamic->Void>> = new RawTable();
+    var _actionsListeners:RawTable<Hash, Array<Dynamic->Void>> = new RawTable();
+    var _pressesListeners:RawTable<Hash, Array<Dynamic->Void>> = new RawTable();
+    var _releasesListeners:RawTable<Hash, Array<Dynamic->Void>> = new RawTable();
 
     public function new(?touchActionID:HashOrString) {
         if (touchActionID == null)
@@ -114,6 +118,19 @@ class MGuiBase<TTarget, TStyle> {
                 _messagesListeners[cast message].splice(addedIndex, 1);
         }
         _messagesListeners[cast message].push(listener);
+        return this;
+    }
+
+    public function subAction(actionID:HashOrString, ?pressed:Null<Bool> = true, listener:EitherType<Void->Bool, Hash->Bool>):MGuiBase<TTarget, TStyle> {
+        var listeners = pressed == null ? _actionsListeners : (pressed ? _pressesListeners : _releasesListeners);
+        if (listeners[actionID] == null)
+            listeners[actionID] = [];
+        else {
+            var addedIndex = listeners[actionID].indexOf(listener);
+            if (addedIndex > -1)
+                listeners[actionID].splice(addedIndex, 1);
+        }
+        listeners[actionID].push(listener);
         return this;
     }
 
@@ -243,7 +260,7 @@ class MGuiBase<TTarget, TStyle> {
         return this;
     }
 
-    public function input(actionID:Hash, action:ScriptOnInputAction, ?scriptData:Dynamic):Bool {
+    public function input(actionID:Hash, action:ScriptOnInputAction, ?scriptData:Dynamic):Void {
         if (actionID == null) {
             pointerX = action.x;
             pointerY = action.y;
@@ -273,7 +290,21 @@ class MGuiBase<TTarget, TStyle> {
                 pointerState = RELEASED;
         }
 
-        return false;
+        if (_actionsListeners[actionID] != null) {
+            for (listener in _actionsListeners[actionID])
+                listener(action);
+        }
+        if (action.pressed) {
+            if (_pressesListeners[actionID] != null) {
+                for (listener in _pressesListeners[actionID])
+                    listener(action);
+            }
+        } else if (action.released) {
+            if (_releasesListeners[actionID] != null) {
+                for (listener in _releasesListeners[actionID])
+                    listener(action);
+            }
+        }
     }
 
     function handleTargetPointerMove(id:Hash, action:ScriptOnInputAction, scriptData:Dynamic):Void {
