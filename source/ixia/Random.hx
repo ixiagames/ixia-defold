@@ -38,4 +38,9 @@ class Random {
         }
     }
 
+    /** Pick a random element from array. **/
+    public static inline function pick<T>(array:Array<T>):T {
+        return array[int0(array.length)];
+    }
+
 }
