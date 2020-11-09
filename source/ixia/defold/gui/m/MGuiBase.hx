@@ -79,6 +79,12 @@ class MGuiBase<TTarget, TStyle> {
         setState(id, pointerPick(id) ? HOVERED : UNTOUCHED);
     }
 
+    public function config(ids:OneOrManyID, style:TargetStyle<TStyle>, listeners:TargetEventListeners):MGuiBase<TTarget, TStyle> {
+        this.style(ids, style);
+        sub(ids, listeners);
+        return this;
+    }
+
     public function sub(ids:OneOrManyID, listeners:TargetEventListeners):MGuiBase<TTarget, TStyle> {
         for (id in ids.toArray()) {
             initTarget(id);
