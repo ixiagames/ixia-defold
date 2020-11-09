@@ -4,7 +4,6 @@ import defold.Timer;
 import defold.Vmath;
 import defold.support.ScriptOnInputAction;
 import defold.types.Hash;
-import defold.types.HashOrString;
 import defold.types.Message;
 import defold.types.Url;
 import defold.types.Vector3;
@@ -13,8 +12,9 @@ import haxe.extern.EitherType;
 import ixia.defold.gui.m.TargetEvent;
 import ixia.defold.gui.m.TargetEventListener.TargetEventListeners;
 import ixia.defold.gui.m.TargetState;
+import ixia.defold.types.HashOrString;
+import ixia.defold.types.OneOrManyID;
 import ixia.ds.OneOfTwo;
-import ixia.ds.OneOrMany;
 import ixia.lua.RawTable;
 
 using Defold;
@@ -56,8 +56,6 @@ class MGuiBase<TTarget, TStyle> {
     public function new(?touchActionID:HashOrString) {
         if (touchActionID == null)
             this.touchActionID = "touch".hash();
-        else if (Std.isOfType(touchActionID, String))
-            this.touchActionID = touchActionID.hash();
         else
             this.touchActionID = touchActionID;
     }
@@ -81,7 +79,7 @@ class MGuiBase<TTarget, TStyle> {
         setState(id, pointerPick(id) ? HOVERED : UNTOUCHED);
     }
 
-    public function sub(ids:OneOrMany<HashOrString>, listeners:TargetEventListeners):MGuiBase<TTarget, TStyle> {
+    public function sub(ids:OneOrManyID, listeners:TargetEventListeners):MGuiBase<TTarget, TStyle> {
         for (id in ids.toArray()) {
             initTarget(id);
 
@@ -103,8 +101,8 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     public function subGroup(group:HashOrString, listeners:TargetEventListeners):MGuiBase<TTarget, TStyle> {
-        if (_groups[group] != null)
-            sub(_groups[group], listeners);
+        if (_groups[group.toHash()] != null)
+            sub(cast _groups[group.toHash()], listeners);
         return this;
     }
 
@@ -133,7 +131,7 @@ class MGuiBase<TTarget, TStyle> {
         return this;
     }
 
-    public function subData(dataIDs:OneOrMany<HashOrString>, listener:DataListener):MGuiBase<TTarget, TStyle> {
+    public function subData(dataIDs:OneOrManyID, listener:DataListener):MGuiBase<TTarget, TStyle> {
         for (id in dataIDs.toArray()) {
             if (_dataListeners[id] == null)
                 _dataListeners[id] = [];
@@ -147,7 +145,7 @@ class MGuiBase<TTarget, TStyle> {
         return this;
     }
 
-    public function style(ids:OneOrMany<HashOrString>, style:TargetStyle<TStyle>):MGuiBase<TTarget, TStyle> {
+    public function style(ids:OneOrManyID, style:TargetStyle<TStyle>):MGuiBase<TTarget, TStyle> {
         for (id in ids.toArray()) {
             initTarget(id);
 
@@ -160,11 +158,11 @@ class MGuiBase<TTarget, TStyle> {
 
     public function styleGroup(group:HashOrString, style:TargetStyle<TStyle>):MGuiBase<TTarget, TStyle> {
         if (_groups[group] != null)
-            this.style(_groups[group], style);
+            this.style(cast _groups[group], style);
         return this;
     }
 
-    public function group(groups:OneOrMany<HashOrString>, ids:OneOrMany<HashOrString>):MGuiBase<TTarget, TStyle> {
+    public function group(groups:OneOrManyID, ids:OneOrManyID):MGuiBase<TTarget, TStyle> {
         for (groupID in groups.toArray()) {
             if (_groups[groupID] == null)
                 _groups[groupID] = [];
@@ -269,7 +267,7 @@ class MGuiBase<TTarget, TStyle> {
                     handleTargetPointerMove(id, action, scriptData);
             }
 
-        } else if (actionID == Defold.hash("touch")) {
+        } else if (actionID == touchActionID) {
             pointerX = action.x;
             pointerY = action.y;
             

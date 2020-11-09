@@ -2,9 +2,9 @@ package ixia.defold.gui.m;
 
 import defold.Msg;
 import defold.types.Hash;
-import defold.types.HashOrString;
 import defold.types.Message;
 import defold.types.Vector3;
+import ixia.defold.types.HashOrString;
 
 using defold.Gui;
 
