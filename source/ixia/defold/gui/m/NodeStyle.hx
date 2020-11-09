@@ -2,11 +2,11 @@ package ixia.defold.gui.m;
 
 import defold.Go.GoAnimatedProperty;
 import defold.Gui;
-import defold.types.Hash;
+import defold.types.HashOrString;
 import defold.types.Vector3;
 import defold.types.Vector4;
 import haxe.extern.EitherType;
-import ixia.defold.types.HashOrString;
+import ixia.defold.types.Hash;
 
 using Defold;
 
@@ -23,7 +23,7 @@ typedef NodeStyle = {
 abstract NodeStyleMap(Map<Hash, NodeStyle>) from Map<Hash, NodeStyle> {
 
     @:from static inline function fromStringMap(map:Map<String, NodeStyle>):NodeStyleMap {
-        return [ for (key => style in map) key.hash() => style ];
+        return cast [ for (key => style in map) key.hash() => style ];
     }
     
 }

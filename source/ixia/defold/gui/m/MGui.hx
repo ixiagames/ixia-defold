@@ -4,13 +4,13 @@ import defold.Msg;
 import defold.types.Hash;
 import defold.types.Message;
 import defold.types.Vector3;
-import ixia.defold.types.HashOrString;
+import ixia.defold.types.Hash;
 
 using defold.Gui;
 
 class MGui extends MGuiBase<GuiNode, NodeStyle> {
 
-    public function new(?touchActionID:HashOrString, ?acquiresInputFocus:Bool = true, ?renderOrder:Int) {
+    public function new(?touchActionID:Hash, ?acquiresInputFocus:Bool = true, ?renderOrder:Int) {
         super(touchActionID);
         
         if (acquiresInputFocus)
@@ -20,26 +20,26 @@ class MGui extends MGuiBase<GuiNode, NodeStyle> {
     }
 
     override function idToTarget(id:Hash):GuiNode {
-        return id.get_node();
+        return Gui.get_node(id);
     }
 
     override function pick(id:Hash, x:Float, y:Float):Bool {
-        return Gui.pick_node(id.get_node(), x, y);
+        return Gui.pick_node(Gui.get_node(id), x, y);
     }
 
     override function getPos(id:Hash):Vector3 {
-        return id.get_node().get_position();
+        return Gui.get_node(id).get_position();
     }
 
     override function setPos(id:Hash, pos:Vector3) {
-        id.get_node().set_position(pos);
+        Gui.get_node(id).set_position(pos);
     }
 
-    override function applyStateStyle(id:HashOrString, style:NodeStyle) {
+    override function applyStateStyle(id:Hash, style:NodeStyle) {
         if (style == null)
             return;
 
-        var node = id.get_node();
+        var node = Gui.get_node(id);
         if (style.enabled != null)
             node.set_enabled(style.enabled);
 
@@ -66,10 +66,10 @@ class MGui extends MGuiBase<GuiNode, NodeStyle> {
         }
     }
 
-    public function setGroupEnabled(group:HashOrString, enabled:Bool):Void {
+    public function setGroupEnabled(group:Hash, enabled:Bool):Void {
         if (_groups[group] != null) {
             for (id in _groups[group])
-                id.get_node().set_enabled(enabled);
+                Gui.get_node(id).set_enabled(enabled);
         }
     }
 

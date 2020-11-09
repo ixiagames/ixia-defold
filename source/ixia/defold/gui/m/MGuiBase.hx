@@ -3,7 +3,6 @@ package ixia.defold.gui.m;
 import defold.Timer;
 import defold.Vmath;
 import defold.support.ScriptOnInputAction;
-import defold.types.Hash;
 import defold.types.Message;
 import defold.types.Url;
 import defold.types.Vector3;
@@ -12,8 +11,8 @@ import haxe.extern.EitherType;
 import ixia.defold.gui.m.TargetEvent;
 import ixia.defold.gui.m.TargetEventListener.TargetEventListeners;
 import ixia.defold.gui.m.TargetState;
-import ixia.defold.types.HashOrString;
-import ixia.defold.types.OneOrManyID;
+import ixia.defold.types.Hash;
+import ixia.defold.types.Hashes;
 import ixia.ds.OneOfTwo;
 import ixia.lua.RawTable;
 
@@ -53,7 +52,7 @@ class MGuiBase<TTarget, TStyle> {
     var _pressesListeners:RawTable<Hash, Array<InputActionListener>> = new RawTable();
     var _releasesListeners:RawTable<Hash, Array<InputActionListener>> = new RawTable();
 
-    public function new(?touchActionID:HashOrString) {
+    public function new(?touchActionID:Hash) {
         if (touchActionID == null)
             this.touchActionID = "touch".hash();
         else
@@ -61,11 +60,11 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     // Override these.
-    public function applyStateStyle(id:HashOrString, style:TStyle):Void {}
-    function idToTarget(id:HashOrString):TTarget return null;
-    function pick(id:HashOrString, x:Float, y:Float):Bool return false;
-    function getPos(id:HashOrString):Vector3 return null;
-    function setPos(id:HashOrString, pos:Vector3):Void {}
+    public function applyStateStyle(id:Hash, style:TStyle):Void {}
+    function idToTarget(id:Hash):TTarget return null;
+    function pick(id:Hash, x:Float, y:Float):Bool return false;
+    function getPos(id:Hash):Vector3 return null;
+    function setPos(id:Hash, pos:Vector3):Void {}
 
     //
 
@@ -79,14 +78,14 @@ class MGuiBase<TTarget, TStyle> {
         setState(id, pointerPick(id) ? HOVERED : UNTOUCHED);
     }
 
-    public function config(ids:OneOrManyID, style:TargetStyle<TStyle>, listeners:TargetEventListeners):MGuiBase<TTarget, TStyle> {
+    public function config(ids:Hashes, style:TargetStyle<TStyle>, listeners:TargetEventListeners):MGuiBase<TTarget, TStyle> {
         this.style(ids, style);
         sub(ids, listeners);
         return this;
     }
 
-    public function sub(ids:OneOrManyID, listeners:TargetEventListeners):MGuiBase<TTarget, TStyle> {
-        for (id in ids.toArray()) {
+    public function sub(ids:Hashes, listeners:TargetEventListeners):MGuiBase<TTarget, TStyle> {
+        for (id in ids) {
             initTarget(id);
 
             for (field in Reflect.fields(listeners)) {
@@ -106,9 +105,9 @@ class MGuiBase<TTarget, TStyle> {
         return this;
     }
 
-    public function subGroup(group:HashOrString, listeners:TargetEventListeners):MGuiBase<TTarget, TStyle> {
-        if (_groups[group.toHash()] != null)
-            sub(cast _groups[group.toHash()], listeners);
+    public function subGroup(group:Hash, listeners:TargetEventListeners):MGuiBase<TTarget, TStyle> {
+        if (_groups[group] != null)
+            sub(cast _groups[group], listeners);
         return this;
     }
 
@@ -124,7 +123,7 @@ class MGuiBase<TTarget, TStyle> {
         return this;
     }
 
-    public function subAction(actionID:HashOrString, ?pressed:Null<Bool> = true, listener:InputActionListener):MGuiBase<TTarget, TStyle> {
+    public function subAction(actionID:Hash, ?pressed:Null<Bool> = true, listener:InputActionListener):MGuiBase<TTarget, TStyle> {
         var listeners = pressed == null ? _actionsListeners : (pressed ? _pressesListeners : _releasesListeners);
         if (listeners[actionID] == null)
             listeners[actionID] = [];
@@ -137,8 +136,8 @@ class MGuiBase<TTarget, TStyle> {
         return this;
     }
 
-    public function subData(dataIDs:OneOrManyID, listener:DataListener):MGuiBase<TTarget, TStyle> {
-        for (id in dataIDs.toArray()) {
+    public function subData(dataIDs:Hashes, listener:DataListener):MGuiBase<TTarget, TStyle> {
+        for (id in dataIDs) {
             if (_dataListeners[id] == null)
                 _dataListeners[id] = [];
             else {
@@ -151,8 +150,8 @@ class MGuiBase<TTarget, TStyle> {
         return this;
     }
 
-    public function style(ids:OneOrManyID, style:TargetStyle<TStyle>):MGuiBase<TTarget, TStyle> {
-        for (id in ids.toArray()) {
+    public function style(ids:Hashes, style:TargetStyle<TStyle>):MGuiBase<TTarget, TStyle> {
+        for (id in ids) {
             initTarget(id);
 
             _targetsStateStyle[id] = style;
@@ -162,18 +161,18 @@ class MGuiBase<TTarget, TStyle> {
         return this;
     }
 
-    public function styleGroup(group:HashOrString, style:TargetStyle<TStyle>):MGuiBase<TTarget, TStyle> {
+    public function styleGroup(group:Hash, style:TargetStyle<TStyle>):MGuiBase<TTarget, TStyle> {
         if (_groups[group] != null)
             this.style(cast _groups[group], style);
         return this;
     }
 
-    public function group(groups:OneOrManyID, ids:OneOrManyID):MGuiBase<TTarget, TStyle> {
-        for (groupID in groups.toArray()) {
+    public function group(groups:Hashes, ids:Hashes):MGuiBase<TTarget, TStyle> {
+        for (groupID in groups) {
             if (_groups[groupID] == null)
                 _groups[groupID] = [];
             
-            for (id in ids.toArray()) {
+            for (id in ids) {
                 if (_groups[groupID].indexOf(id) == -1)
                     _groups[groupID].push(id);
             }
@@ -230,7 +229,7 @@ class MGuiBase<TTarget, TStyle> {
         return this;
     }
 
-    public function set(dataID:HashOrString, data:Dynamic):MGuiBase<TTarget, TStyle> {
+    public function set(dataID:Hash, data:Dynamic):MGuiBase<TTarget, TStyle> {
         if (_userdata[dataID] == data)
             return this;
 
@@ -242,12 +241,12 @@ class MGuiBase<TTarget, TStyle> {
         return this;
     }
 
-    public inline function get<T>(dataID:HashOrString):T {
+    public inline function get<T>(dataID:Hash):T {
         return _userdata[dataID];
     }
 
     public function slider(
-        id:HashOrString, length:Float, ?direction:DragDirection = LEFT_RIGHT,
+        id:Hash, length:Float, ?direction:DragDirection = LEFT_RIGHT,
         ?min:Float, ?max:Float, ?step:Float,
         ?thumbStyle:TargetStyle<TStyle>, ?listeners:TargetEventListeners
     ):MGuiBase<TTarget, TStyle> {
@@ -435,7 +434,7 @@ class MGuiBase<TTarget, TStyle> {
         }
     }
 
-    public function dispatch(id:HashOrString, event:TargetEvent, ?action:ScriptOnInputAction):Void {
+    public function dispatch(id:Hash, event:TargetEvent, ?action:ScriptOnInputAction):Void {
         if (_targetsListeners[id][event] == null)
             return;
 
@@ -443,11 +442,11 @@ class MGuiBase<TTarget, TStyle> {
             listener.call(id, event, action);
     }
 
-    public inline function getState(id:HashOrString):TargetState {
+    public inline function getState(id:Hash):TargetState {
         return _targetsState[id];
     }
 
-    function setState(id:HashOrString, state:TargetState):Void {
+    function setState(id:Hash, state:TargetState):Void {
         if (_targetsState[id] == state)
             return;
 
@@ -469,7 +468,7 @@ class MGuiBase<TTarget, TStyle> {
         }
     }
 
-    public function wake(id:HashOrString):Void {
+    public function wake(id:Hash):Void {
         initTarget(id);
         
         if (_targetsState[id] != SLEEPING)
@@ -479,14 +478,14 @@ class MGuiBase<TTarget, TStyle> {
         dispatch(id, WAKE);
     }
 
-    public function wakeGroup(group:HashOrString):Void {
+    public function wakeGroup(group:Hash):Void {
         if (_groups[group] != null) {
             for (id in _groups[group])
                 wake(id);
         }
     }
 
-    public function sleep(id:HashOrString):Void {
+    public function sleep(id:Hash):Void {
         if (_targetsState[id] == SLEEPING)
             return;
 
@@ -494,18 +493,18 @@ class MGuiBase<TTarget, TStyle> {
         dispatch(id, SLEEP);
     }
 
-    public function sleepGroup(group:HashOrString):Void {
+    public function sleepGroup(group:Hash):Void {
         if (_groups[group] != null) {
             for (id in _groups[group])
                 sleep(id);
         }
     }
 
-    public inline function isAwake(id:HashOrString):Bool {
+    public inline function isAwake(id:Hash):Bool {
         return _targetsState[id] != null && _targetsState[id] != SLEEPING;
     }
 
-    public function sliderPercent(id:HashOrString):Float {
+    public function sliderPercent(id:Hash):Float {
         if (_targetsDirection[id] == null || _targetsStartPos[id] == null || _targetsTrackLength[id] == null)
             return 0;
 
@@ -517,53 +516,53 @@ class MGuiBase<TTarget, TStyle> {
         }
     }
 
-    public function sliderValue(id:HashOrString):Float {
+    public function sliderValue(id:Hash):Float {
         return sliderPercent(id).between(_targetsMin[id], _targetsMax[id]);
     }
 
-    public function sliderValueInt(id:HashOrString):Int {
+    public function sliderValueInt(id:Hash):Int {
         return Std.int(sliderPercent(id).between(_targetsMin[id], _targetsMax[id]));
     }
 
-    public inline function min(id:HashOrString):Float {
+    public inline function min(id:Hash):Float {
         return _targetsMin[id];
     }
 
-    public inline function setMin(id:HashOrString, value:Float):MGuiBase<TTarget, TStyle> {
+    public inline function setMin(id:Hash, value:Float):MGuiBase<TTarget, TStyle> {
         _targetsMin[id] = value;
         return this;
     }
 
-    public inline function max(id:HashOrString):Float {
+    public inline function max(id:Hash):Float {
         return _targetsMax[id];
     }
 
-    public inline function setMax(id:HashOrString, value:Float):MGuiBase<TTarget, TStyle> {
+    public inline function setMax(id:Hash, value:Float):MGuiBase<TTarget, TStyle> {
         _targetsMax[id] = value;
         return this;
     }
 
-    public inline function stepValue(id:HashOrString):Float {
+    public inline function stepValue(id:Hash):Float {
         return _targetsStepValue[id];
     }
 
-    public inline function stepIndex(id:HashOrString):Int {
+    public inline function stepIndex(id:Hash):Int {
         return _targetsStepIndex[id];
     }
     
-    public inline function setStepValue(id:HashOrString, value:Float):MGuiBase<TTarget, TStyle> {
+    public inline function setStepValue(id:Hash, value:Float):MGuiBase<TTarget, TStyle> {
         _targetsStepValue[id] = value;
         return this;
     }
 
-    public function setMinMaxStep(id:HashOrString, min:Float, max:Float, step:Float):MGuiBase<TTarget, TStyle> {
+    public function setMinMaxStep(id:Hash, min:Float, max:Float, step:Float):MGuiBase<TTarget, TStyle> {
         _targetsMin[id] = min;
         _targetsMax[id] = max;
         _targetsStepValue[id] = step;
         return this;
     }
 
-    public inline function pointerPick(id:HashOrString):Bool {
+    public inline function pointerPick(id:Hash):Bool {
         return pick(id, pointerX, pointerY);
     }
 
@@ -573,7 +572,7 @@ class MGuiBase<TTarget, TStyle> {
 abstract UserDataMap(Map<Hash, Dynamic>) from Map<Hash, Dynamic> {
 
     @:from static inline function fromStringMap(map:Map<String, Dynamic>):UserDataMap {
-        return [ for (key => style in map) key.hash() => style ];
+        return cast [ for (key => style in map) key.hash() => style ];
     }
     
 }
