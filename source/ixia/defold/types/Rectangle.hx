@@ -25,10 +25,12 @@ abstract Rectangle(Vector4) from Vector4 to Vector4 {
         this.w = h;
     }
 
-    public var w(get, never):Float;
+    public var w(get, set):Float;
     inline function get_w() return this.z;
+    inline function set_w(value) return this.z = value;
 
-    public var h(get, never):Float;
+    public var h(get, set):Float;
     inline function get_h() return this.w;
+    inline function set_h(value) return this.w = value;
     
 }
