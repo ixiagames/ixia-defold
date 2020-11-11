@@ -1,8 +1,5 @@
 package ixia.defold.gui.m;
 
-import defold.Msg;
-import defold.types.Hash;
-import defold.types.Message;
 import defold.types.Vector3;
 import ixia.defold.types.Hash;
 
@@ -11,10 +8,8 @@ using defold.Gui;
 class MGui extends MGuiBase<GuiNode, NodeStyle> {
 
     public function new(?touchActionID:Hash, ?acquiresInputFocus:Bool = true, ?renderOrder:Int) {
-        super(touchActionID);
+        super(touchActionID, acquiresInputFocus);
         
-        if (acquiresInputFocus)
-            acquireInputFocus();
         if (renderOrder != null)
             Gui.set_render_order(renderOrder);
     }
@@ -71,10 +66,6 @@ class MGui extends MGuiBase<GuiNode, NodeStyle> {
             for (id in _groups[group])
                 Gui.get_node(id).set_enabled(enabled);
         }
-    }
-
-    public inline function acquireInputFocus():Void {
-        Msg.post('.', new Message<Void>("acquire_input_focus"));
     }
     
 }

@@ -1,5 +1,6 @@
 package ixia.defold.gui.m;
 
+import defold.Msg;
 import defold.Timer;
 import defold.Vmath;
 import defold.support.ScriptOnInputAction;
@@ -52,11 +53,14 @@ class MGuiBase<TTarget, TStyle> {
     var _pressesListeners:RawTable<Hash, Array<InputActionListener>> = new RawTable();
     var _releasesListeners:RawTable<Hash, Array<InputActionListener>> = new RawTable();
 
-    public function new(?touchActionID:Hash) {
+    public function new(?touchActionID:Hash, ?acquiresInputFocus:Bool = true) {
         if (touchActionID == null)
             this.touchActionID = "touch".hash();
         else
             this.touchActionID = touchActionID;
+
+        if (acquiresInputFocus)
+            acquireInputFocus();
     }
 
     // Override these.
@@ -564,6 +568,10 @@ class MGuiBase<TTarget, TStyle> {
 
     public inline function pointerPick(id:Hash):Bool {
         return pick(id, pointerX, pointerY);
+    }
+
+    public inline function acquireInputFocus():Void {
+        Msg.post('.', new Message<Void>("acquire_input_focus"));
     }
 
 }
