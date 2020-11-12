@@ -266,10 +266,14 @@ class MGuiBase<TTarget, TStyle> {
         return this;
     }
 
-    public function input(actionID:Hash, action:ScriptOnInputAction, ?scriptData:Dynamic):Void {
+    public inline function input(actionID:Hash, action:ScriptOnInputAction, ?scriptData:Dynamic):Void {
+        inputXY(actionID, action, action.x, action.y, scriptData);
+    }
+
+    public function inputXY(actionID:Hash, action:ScriptOnInputAction, x:Float, y:Float, ?scriptData:Dynamic):Void {
         if (actionID == null) {
-            pointerX = action.x;
-            pointerY = action.y;
+            pointerX = x;
+            pointerY = y;
 
             for (id in _targetsID) {
                 if (isAwake(id))
@@ -277,8 +281,8 @@ class MGuiBase<TTarget, TStyle> {
             }
 
         } else if (actionID == touchActionID) {
-            pointerX = action.x;
-            pointerY = action.y;
+            pointerX = x;
+            pointerY = y;
             
             if (action.pressed)
                 pointerState = JUST_PRESSED;
