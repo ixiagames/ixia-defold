@@ -18,6 +18,9 @@ class Locale {
     #end
     
     public static var getTSVString:String->String = (id) -> return Resource.getString(id);
+    #if debug
+    static var _parsingID:String;
+    #end
 
     static function getRows(tsv:String):Array<String> {
         var rows = tsv.replace('\r\n', '\n').replace('\r', '\n').split('\n');
@@ -42,7 +45,7 @@ class Locale {
         var cols = row.split('\t');
         #if debug
         if (cols.length != 2)
-            Error.error('Invalid number of cols (${cols.length}) in record: $row');
+            Error.error('$_parsingID - Invalid number of cols (${cols.length}) in record: $row');
         #end
         return cols;
     }
@@ -65,6 +68,10 @@ class Locale {
     }
 
     function parse(id:String, overwritableKeys:Array<String>):Void {
+        #if debug
+        _parsingID = id;
+        #end
+        
         var tsv = getTSVString(id);
         
         #if debug
@@ -85,7 +92,7 @@ class Locale {
             if (baseID == null) {
                 #if debug
                 if (!cols[0].startsWith('base:'))
-                    Error.error('The first record needs to indice a base template (eg: "base:en-us" or "base:none"). Got: ${cols[0]}');
+                    Error.error('$_parsingID - The first record needs to indice a base template (eg: "base:en-us" or "base:none"). Got: ${cols[0]}');
                 #end
 
                 baseID = cols[0].split(':')[1];
@@ -94,7 +101,7 @@ class Locale {
 
             #if debug
             if (foundRecordKeys.indexOf(cols[0]) > -1)
-                Error.error('Duplicated record key: ${cols[0]}');
+                Error.error('$_parsingID - Duplicated record key: ${cols[0]}');
             foundRecordKeys.push(cols[0]);
             #end
 
@@ -115,7 +122,7 @@ class Locale {
 
         #if debug
         if (baseID == null)
-            Error.error("No record found.");
+            Error.error('$_parsingID - No record found.');
         #end
 
         if (baseID != 'none' && baseID != id)
