@@ -42,7 +42,7 @@ class Locale {
         var cols = row.split('\t');
         #if debug
         if (cols.length != 2)
-            throw 'Invalid record: $row';
+            Error.error('Invalid record: $row');
         #end
         return cols;
     }
@@ -69,7 +69,7 @@ class Locale {
         
         #if debug
         if (tsv == null)
-            throw 'Cannot found TSV string for $id.';
+            Error.error('Cannot found TSV string for $id.');
         #end
 
         var baseID:String = null;
@@ -85,7 +85,7 @@ class Locale {
             if (baseID == null) {
                 #if debug
                 if (!cols[0].startsWith('base:'))
-                    throw 'The first record needs to indice a base template (eg: "base:en-us" or "base:none"). Got: ${cols[0]}';
+                    Error.error('The first record needs to indice a base template (eg: "base:en-us" or "base:none"). Got: ${cols[0]}');
                 #end
 
                 baseID = cols[0].split(':')[1];
@@ -94,7 +94,7 @@ class Locale {
 
             #if debug
             if (foundRecordKeys.indexOf(cols[0]) > -1)
-                throw 'Duplicated record key: ${cols[0]}';
+                Error.error('Duplicated record key: ${cols[0]}');
             foundRecordKeys.push(cols[0]);
             #end
 
@@ -115,7 +115,7 @@ class Locale {
 
         #if debug
         if (baseID == null)
-            throw "No record found.";
+            Error.error("No record found.");
         #end
 
         if (baseID != 'none' && baseID != id)
@@ -126,7 +126,7 @@ class Locale {
         var data = map[key];
         if (data == null) {
             #if debug
-            throw 'Key not found: "$key"';
+            Error.error('Key not found: "$key"');
             #end
             return TEXT_NOT_FOUND;
         }
@@ -139,7 +139,7 @@ class Locale {
                 
                 case Right(_):
                     #if debug
-                    throw 'context required for key: "$key"';
+                    Error.error('context required for key: "$key"');
                     #end
                     return CONTEXT_REQUIRED + ': $key';
             }
@@ -151,7 +151,7 @@ class Locale {
         switch (data) {
             case Left(s):
                 #if debug
-                throw 'Unused context for key: "$key"';
+                Error.error('Unused context for key: "$key"');
                 #end
                 return s; 
 
@@ -189,9 +189,9 @@ class Locale {
     public function baseToAmount(amount:Int):Float {
         #if debug
         if ((cast amount:Dynamic) == null)
-            throw "null value";
+            Error.error("null value");
         if (Math.isNaN(amount))
-            throw "NaN value";
+            Error.error("NaN value");
         #end
         if (currencyEnabled)
             return baseToCurrency(amount);
@@ -201,9 +201,9 @@ class Locale {
     public function baseToAmountText(amount:Int):String {
         #if debug
         if ((cast amount:Dynamic) == null)
-            throw "null value";
+            Error.error("null value");
         if (Math.isNaN(amount))
-            throw "NaN value";
+            Error.error("NaN value");
         #end
         if (currencyEnabled)
             return baseToCurrencyText(amount);

@@ -22,7 +22,8 @@ enum abstract TargetEvent(Int) to Int {
             case "wake":    WAKE;
             case "sleep":   SLEEP;
             case _:
-                throw 'Invalid string $s.'; 
+                Error.error('Invalid string $s.');
+                null;
         }
     }
 

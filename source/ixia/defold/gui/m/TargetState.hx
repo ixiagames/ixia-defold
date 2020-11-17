@@ -16,7 +16,8 @@ enum abstract TargetState(Int) to Int {
             case "dragged":     DRAGGED;
             case "sleeping":    SLEEPING;
             case _:
-                throw 'Invalid string $s.'; 
+                Error.error('Invalid string $s.');
+                null; 
         }
     }
 
