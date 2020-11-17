@@ -42,7 +42,7 @@ class Locale {
         var cols = row.split('\t');
         #if debug
         if (cols.length != 2)
-            Error.error('Invalid record: $row');
+            Error.error('Invalid number of cols (${cols.length}) in record: $row');
         #end
         return cols;
     }
