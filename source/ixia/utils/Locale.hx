@@ -17,7 +17,7 @@ class Locale {
     static inline var CONTEXT_REQUIRED = "CONTEXT_REQUIRED";
     #end
     
-    public var getTSVString:String->String = (id) -> return Resource.getString(id);
+    public static var getTSVString:String->String = (id) -> return Resource.getString(id);
 
     static function getRows(tsv:String):Array<String> {
         var rows = tsv.replace('\r\n', '\n').replace('\r', '\n').split('\n');
