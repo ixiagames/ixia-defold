@@ -1,9 +1,11 @@
 package ixia.utils;
 
 import haxe.Resource;
+#if use_template
 import haxe.Template;
 import haxe.ds.Either;
 import ixia.ds.OneOfTwo;
+#end
 
 using StringTools;
 using ixia.math.Math;
@@ -11,7 +13,9 @@ using ixia.math.Math;
 class Locale {
 
     static inline var TEXT_NOT_FOUND = "TEXT_NOT_FOUND";
+    #if use_template
     static inline var CONTEXT_REQUIRED = "CONTEXT_REQUIRED";
+    #end
     
     public var getTSVString:String->String = (id) -> return Resource.getString(id);
 
@@ -47,7 +51,12 @@ class Locale {
 
     public var id(default, null):String;
     public var currencyRate(default, null):Float;
+
+    #if use_template
     var map:Map<String, OneOfTwo<String, Template>> = [];
+    #else
+    var map:Map<String, String> = [];
+    #end
     
     public function new(id:String, currencyRate:Float = 1) {
         this.id = id;
@@ -94,7 +103,13 @@ class Locale {
                     cols[1] = cols[0];
                     emptyValueKeys.push(cols[0]);
                 }
-                map[cols[0]] = cols[1].indexOf("::") < 0 ? Left(cols[1]) : Right(new Template(cols[1]));
+
+                map[cols[0]] = 
+                #if use_template
+                    cols[1].indexOf("::") < 0 ? Left(cols[1]) : Right(new Template(cols[1]));
+                #else
+                    cols[1];
+                #end
             }
         }
 
@@ -117,6 +132,7 @@ class Locale {
         }
 
         if (context == null) {
+            #if use_template
             switch (data) {
                 case Left(s):
                     return s;
@@ -127,9 +143,11 @@ class Locale {
                     #end
                     return CONTEXT_REQUIRED + ': $key';
             }
+            #end
             return data;
         }
 
+        #if use_template
         switch (data) {
             case Left(s):
                 #if debug
@@ -140,6 +158,11 @@ class Locale {
             case Right(template):
                 return template.execute(context);
         }
+        #else
+        for (field in Reflect.fields(context))
+            data = data.replace('::$field::', Std.string(Reflect.field(context, field)));
+        return data;
+        #end
     }
 
     public var currencyEnabled:Bool = true;
