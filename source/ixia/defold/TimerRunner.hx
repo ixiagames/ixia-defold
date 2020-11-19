@@ -30,24 +30,30 @@ class TimerRunner {
             percent = 1;
             if (onUpdate != null)
                 onUpdate(this);
+            if (onComplete != null)
+                onComplete(this);
             return;
         }
 
-        handle = Timer.delay(0, true, (_, handle, delta) -> {
-            time += delta;
-            if (time < duration)
-                percent = time / duration
-            else {
-                Timer.cancel(handle);
-                handle = null;
-                time = duration;
-                percent = 1;
-                if (onComplete != null)
-                    onComplete(this);
-            }
+        handle = Timer.delay(0, true, _update);
+    }
+    function _update(_, _, delta:Float):Void {
+        time += delta;
+        if (time < duration) {
+            percent = time / duration;
             if (onUpdate != null)
                 onUpdate(this);
-        });
+
+        } else {
+            Timer.cancel(handle);
+            handle = null;
+            time = duration;
+            percent = 1;
+            if (onUpdate != null)
+                onUpdate(this);
+            if (onComplete != null)
+                onComplete(this);
+        }
     }
 
     public inline function pause():Void {
