@@ -263,6 +263,7 @@ class MGuiBase<TTarget, TStyle> {
         if (step != null) _targetsStepValue[id] = step;
         if (thumbStyle != null) style(id, thumbStyle);
         if (listeners != null) sub(id, listeners);
+        dispatch(id, VALUE);
         return this;
     }
 
@@ -321,6 +322,8 @@ class MGuiBase<TTarget, TStyle> {
         if (_targetsState[id].dragged) {
             updateDrag(id);
             dispatch(id, DRAG, action);
+            if (isSlider(id))
+                dispatch(id, VALUE, action);
 
         } else if (pointerPick(id)) {
             if (!_targetsState[id].touched) {
@@ -512,8 +515,12 @@ class MGuiBase<TTarget, TStyle> {
         return _targetsState[id] != null && _targetsState[id] != SLEEPING;
     }
 
+    public function isSlider(id:Hash):Bool {
+        return _targetsDirection[id] != null && _targetsStartPos[id] != null && _targetsTrackLength[id] != null;
+    }
+
     public function sliderPercent(id:Hash):Float {
-        if (_targetsDirection[id] == null || _targetsStartPos[id] == null || _targetsTrackLength[id] == null)
+        if (!isSlider(id))
             return 0;
 
         return switch (_targetsDirection[id]) {
@@ -525,7 +532,7 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     public function setSliderPercent(id:Hash, percent:Float):Void {
-        if (_targetsDirection[id] == null || _targetsStartPos[id] == null || _targetsTrackLength[id] == null)
+        if (!isSlider(id))
             Error.error('$id is not a slider.');
 
         if (percent < 0) percent = 0;

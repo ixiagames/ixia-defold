@@ -23,6 +23,7 @@ typedef TargetEventListeners = {
     ?release:TargetEventListener,
     ?tap:TargetEventListener,
     ?drag:TargetEventListener,
+    ?value:TargetEventListener,
     ?wake:TargetEventListener,
     ?sleep:TargetEventListener
 

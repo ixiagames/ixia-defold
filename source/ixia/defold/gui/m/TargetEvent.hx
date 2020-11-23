@@ -8,6 +8,7 @@ enum abstract TargetEvent(Int) to Int {
     var RELEASE;
     var TAP;
     var DRAG;
+    var VALUE;
     var WAKE;
     var SLEEP;
 
@@ -19,6 +20,7 @@ enum abstract TargetEvent(Int) to Int {
             case "release": RELEASE;
             case "tap":     TAP;
             case "drag":    DRAG;
+            case "value":   VALUE;
             case "wake":    WAKE;
             case "sleep":   SLEEP;
             case _:
@@ -35,6 +37,7 @@ enum abstract TargetEvent(Int) to Int {
             case RELEASE:   "release";
             case TAP:       "tap";
             case DRAG:      "drag";
+            case VALUE:     "value";
             case WAKE:      "wake";
             case SLEEP:     "sleep";
         }
