@@ -524,6 +524,23 @@ class MGuiBase<TTarget, TStyle> {
         }
     }
 
+    public function setSliderPercent(id:Hash, percent:Float):Void {
+        if (_targetsDirection[id] == null || _targetsStartPos[id] == null || _targetsTrackLength[id] == null)
+            Error.error('$id is not a slider.');
+
+        if (percent < 0) percent = 0;
+        else if (percent > 1) percent = 1;
+
+        var pos = getPos(id);
+        switch (_targetsDirection[id]) {
+            case LEFT_RIGHT:
+                pos.x = _targetsStartPos[id].x + percent * _targetsTrackLength[id];
+            case RIGHT_LEFT:
+                pos.x = _targetsStartPos[id].x + _targetsTrackLength[id] * (1 - percent);
+        }
+        setPos(id, pos);
+    }
+
     public function sliderValue(id:Hash):Float {
         return sliderPercent(id).between(_targetsMin[id], _targetsMax[id]);
     }
