@@ -40,9 +40,8 @@ abstract Math(std.Math) {
     public static inline function normalizeDeg(angle:Float):Float {
         return angle < 0 || angle > 360 ? (360 - (-angle % 360)) % 360 : (angle == 360 ? 0 : angle);
     }
-
-    /** To string with thousand separators. **/
-    public static function toFormatedString(number:Float, ?precision:Int, ?separator:String = ','):String {
+    
+    public static function separateThousands(number:Float, ?precision:Int, ?separator:String = ','):String {
         var negative = number < 0;
         var abs = Math.abs(number);
         var flooredAbs = Math.floor(abs); 

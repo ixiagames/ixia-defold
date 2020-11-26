@@ -184,7 +184,7 @@ class Locale {
 
     public function baseToCurrencyText(amount:Int):String {
         var amount = amount / currencyRate;
-        var text = amount.toFormatedString(2);
+        var text = amount.separateThousands(2);
         var dotIndex = text.indexOf('.');
         if (dotIndex == -1)
             text += ".00";
@@ -214,7 +214,7 @@ class Locale {
         #end
         if (currencyEnabled)
             return baseToCurrencyText(amount);
-        return amount.toFormatedString();
+        return amount.separateThousands();
     }
 
 }
