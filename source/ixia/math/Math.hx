@@ -63,4 +63,8 @@ abstract Math(std.Math) {
         return formatedString;
     }
 
+    public static inline function calSpacing(fitSize:Float, elementSize:Float, elementsCount:Int):Float {
+        return (fitSize - elementSize * elementsCount) / (elementsCount - 1);
+    }
+
 }
