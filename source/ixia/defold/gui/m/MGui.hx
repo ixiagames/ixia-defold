@@ -5,7 +5,7 @@ import ixia.defold.types.Hash;
 
 using defold.Gui;
 
-class MGui extends MGuiBase<GuiNode, NodeStyle> {
+class MGui extends MGuiBase<ExtGuiNode, NodeStyle> {
 
     public function new(?touchActionID:Hash, ?acquiresInputFocus:Bool = true, ?renderOrder:Int) {
         super(touchActionID, acquiresInputFocus);
@@ -14,7 +14,7 @@ class MGui extends MGuiBase<GuiNode, NodeStyle> {
             Gui.set_render_order(renderOrder);
     }
 
-    override function idToTarget(id:Hash):GuiNode {
+    override function idToTarget(id:Hash):ExtGuiNode {
         return Gui.get_node(id);
     }
 
@@ -33,7 +33,7 @@ class MGui extends MGuiBase<GuiNode, NodeStyle> {
     override function applyStateStyle(id:Hash, style:NodeStyle) {
         if (style == null)
             return;
-
+        
         var node = Gui.get_node(id);
         if (style.enabled != null)
             node.set_enabled(style.enabled);
