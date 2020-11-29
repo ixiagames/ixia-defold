@@ -43,8 +43,10 @@ class MGuiBase<TTarget, TStyle> {
 
     var _targetsMin:RawTable<Hash, Float> = new RawTable();
     var _targetsMax:RawTable<Hash, Float> = new RawTable();
+    var _targetsValue:RawTable<Hash, Float> = new RawTable();
     var _targetsStepValue:RawTable<Hash, Float> = new RawTable();
     var _targetsStepIndex:RawTable<Hash, Int> = new RawTable();
+    var _targetsPercent:RawTable<Hash, Float> = new RawTable();
     
     var _userdata:RawTable<Hash, Dynamic> = new RawTable();
     var _dataListeners:RawTable<Hash, Array<DataListener>> = new RawTable();
@@ -258,7 +260,12 @@ class MGuiBase<TTarget, TStyle> {
         _targetsTrackLength[id] = length;
         _targetsDirection[id] = direction;
         _targetsStartPos[id] = getPos(id);
-        if (min != null) _targetsMin[id] = min;
+        _targetsPercent[id] = 0;
+        if (min != null) {
+            _targetsValue[id] = min;
+            _targetsMin[id] = min;
+            // Will cause error if use '_targetsMin[id] = _targetsValue[id] = min'.
+        }
         if (max != null) _targetsMax[id] = max;
         if (step != null) _targetsStepValue[id] = step;
         if (thumbStyle != null) style(id, thumbStyle);
@@ -322,9 +329,15 @@ class MGuiBase<TTarget, TStyle> {
         if (_targetsState[id].dragged) {
             updateDrag(id);
             dispatch(id, DRAG, action);
-            if (isSlider(id))
-                dispatch(id, VALUE, action);
-
+            if (isSlider(id)) {
+                setPercent(id, switch (_targetsDirection[id]) {
+                    case LEFT_RIGHT:
+                        (getPos(id).x - _targetsStartPos[id].x) / _targetsTrackLength[id];
+                    case RIGHT_LEFT:
+                        (_targetsStartPos[id].x - getPos(id).x) / _targetsTrackLength[id];
+                });
+            }
+        
         } else if (pointerPick(id)) {
             if (!_targetsState[id].touched) {
                 setState(id, HOVERED);
@@ -519,40 +532,53 @@ class MGuiBase<TTarget, TStyle> {
         return _targetsDirection[id] != null && _targetsStartPos[id] != null && _targetsTrackLength[id] != null;
     }
 
-    public function sliderPercent(id:Hash):Float {
-        if (!isSlider(id))
-            return 0;
-
-        return switch (_targetsDirection[id]) {
-            case LEFT_RIGHT:
-                (getPos(id).x - _targetsStartPos[id].x) / _targetsTrackLength[id];
-            case RIGHT_LEFT:
-                (_targetsStartPos[id].x - getPos(id).x) / _targetsTrackLength[id];
-        }
+    public inline function percent(id:Hash):Float {
+        return _targetsPercent[id];
     }
 
-    public function setSliderPercent(id:Hash, percent:Float):Void {
-        if (!isSlider(id))
-            Error.error('$id is not a slider.');
-
+    public function setPercent(id:Hash, percent:Float):Void {
         if (percent < 0) percent = 0;
         else if (percent > 1) percent = 1;
 
-        var pos = getPos(id);
-        switch (_targetsDirection[id]) {
-            case LEFT_RIGHT:
-                pos.x = _targetsStartPos[id].x + percent * _targetsTrackLength[id];
-            case RIGHT_LEFT:
-                pos.x = _targetsStartPos[id].x + _targetsTrackLength[id] * (1 - percent);
+        if (percent == _targetsPercent[id])
+            return;
+        
+        var value = percent.between(_targetsMin[id], _targetsMax[id]);
+        if (_targetsStepValue[id] != null) {
+            var stepIndex = value / _targetsStepValue[id];
+            if (stepIndex - stepIndex.floor() > 0) {
+                _targetsStepIndex[id] = stepIndex.round();
+                value = _targetsStepValue[id] * _targetsStepIndex[id];
+                percent = (value - _targetsMin[id]) / (_targetsMax[id] - _targetsMin[id]);
+                if (percent > 1) {
+                    percent = 1;
+                    value = _targetsMax[id];
+                }
+            }
         }
-        setPos(id, pos);
+        
+        _targetsValue[id] = value;
+        _targetsPercent[id] = percent;
+        
+        if (isSlider(id)) {
+            var pos = getPos(id);
+            switch (_targetsDirection[id]) {
+                case LEFT_RIGHT:
+                    pos.x = _targetsStartPos[id].x + percent * _targetsTrackLength[id];
+                case RIGHT_LEFT:
+                    pos.x = _targetsStartPos[id].x + _targetsTrackLength[id] * (1 - percent);
+            }
+            setPos(id, pos);
+        }
+
+        dispatch(id, VALUE);
     }
 
-    public function sliderValue(id:Hash):Float {
-        return sliderPercent(id).between(_targetsMin[id], _targetsMax[id]);
+    public function value(id:Hash):Float {
+        return _targetsValue[id];
     }
 
-    public function setSliderValue(id:Hash, value:Float):Void {
+    public function setValue(id:Hash, value:Float):Void {
         if (!isSlider(id))
             Error.error('$id is not a slider.');
 
@@ -564,11 +590,7 @@ class MGuiBase<TTarget, TStyle> {
         if (max == null)
             Error.error('$id does not have a maximum value.');
 
-        setSliderPercent(id, (value - min) / (max - min));
-    }
-
-    public function sliderValueInt(id:Hash):Int {
-        return Std.int(sliderPercent(id).between(_targetsMin[id], _targetsMax[id]));
+        setPercent(id, (value - min) / (max - min));
     }
 
     public inline function min(id:Hash):Float {
