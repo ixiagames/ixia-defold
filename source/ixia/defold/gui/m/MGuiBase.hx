@@ -552,6 +552,21 @@ class MGuiBase<TTarget, TStyle> {
         return sliderPercent(id).between(_targetsMin[id], _targetsMax[id]);
     }
 
+    public function setSliderValue(id:Hash, value:Float):Void {
+        if (!isSlider(id))
+            Error.error('$id is not a slider.');
+
+        var min = _targetsMin[id];
+        if (min == null)
+            Error.error('$id does not have a minimum value.');
+
+        var max = _targetsMax[id];
+        if (max == null)
+            Error.error('$id does not have a maximum value.');
+
+        setSliderPercent(id, (value - min) / (max - min));
+    }
+
     public function sliderValueInt(id:Hash):Int {
         return Std.int(sliderPercent(id).between(_targetsMin[id], _targetsMax[id]));
     }
