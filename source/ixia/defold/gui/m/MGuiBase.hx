@@ -537,22 +537,28 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     public function setPercent(id:Hash, percent:Float):Void {
+        var min = _targetsMin[id];
+        if (min == null)
+            Error.error('$id does not have a minimum value.');
+
+        var max = _targetsMax[id];
+        if (max == null)
+            Error.error('$id does not have a maximum value.');
+
         if (percent < 0) percent = 0;
         else if (percent > 1) percent = 1;
 
-        if (percent == _targetsPercent[id])
-            return;
-        
-        var value = percent.between(_targetsMin[id], _targetsMax[id]);
-        if (_targetsStepValue[id] != null) {
-            var stepIndex = value / _targetsStepValue[id];
+        var value = percent.between(min, max);
+        var step = _targetsStepValue[id];
+        if (step != null) {
+            var stepIndex = value / step;
             if (stepIndex - stepIndex.floor() > 0) {
                 _targetsStepIndex[id] = stepIndex.round();
-                value = _targetsStepValue[id] * _targetsStepIndex[id];
-                percent = (value - _targetsMin[id]) / (_targetsMax[id] - _targetsMin[id]);
+                value = step * _targetsStepIndex[id];
+                percent = (value - min) / (max - min);
                 if (percent > 1) {
                     percent = 1;
-                    value = _targetsMax[id];
+                    value = max;
                 }
             }
         }
@@ -578,27 +584,19 @@ class MGuiBase<TTarget, TStyle> {
         return _targetsValue[id];
     }
 
-    public function setValue(id:Hash, value:Float):Void {
-        if (!isSlider(id))
-            Error.error('$id is not a slider.');
-
-        var min = _targetsMin[id];
-        if (min == null)
-            Error.error('$id does not have a minimum value.');
-
-        var max = _targetsMax[id];
-        if (max == null)
-            Error.error('$id does not have a maximum value.');
-
-        setPercent(id, (value - min) / (max - min));
+    public function setValue(id:Hash, value:Float):MGuiBase<TTarget, TStyle> {
+        _targetsValue[id] = value;
+        updatePercent(id);
+        return this;
     }
 
     public inline function min(id:Hash):Float {
         return _targetsMin[id];
     }
 
-    public inline function setMin(id:Hash, value:Float):MGuiBase<TTarget, TStyle> {
-        _targetsMin[id] = value;
+    public function setMin(id:Hash, min:Float):MGuiBase<TTarget, TStyle> {
+        _targetsMin[id] = min;
+        updatePercent(id);
         return this;
     }
 
@@ -606,21 +604,31 @@ class MGuiBase<TTarget, TStyle> {
         return _targetsMax[id];
     }
 
-    public inline function setMax(id:Hash, value:Float):MGuiBase<TTarget, TStyle> {
+    public function setMax(id:Hash, value:Float):MGuiBase<TTarget, TStyle> {
         _targetsMax[id] = value;
+        updatePercent(id);
         return this;
     }
 
     public inline function stepValue(id:Hash):Float {
         return _targetsStepValue[id];
     }
+    
+    public inline function setStepValue(id:Hash, value:Float):MGuiBase<TTarget, TStyle> {
+        _targetsStepValue[id] = value;
+        updatePercent(id);
+        return this;
+    }
 
     public inline function stepIndex(id:Hash):Int {
         return _targetsStepIndex[id];
     }
-    
-    public inline function setStepValue(id:Hash, value:Float):MGuiBase<TTarget, TStyle> {
-        _targetsStepValue[id] = value;
+
+    public inline function setStepIndex(id:Hash, index:Int):MGuiBase<TTarget, TStyle> {
+        if (_targetsStepValue[id] == null)
+            Error.error('$id does not have a step value.');
+        _targetsValue[id] = _targetsStepValue[id] * index;
+        updatePercent(id);
         return this;
     }
 
@@ -628,7 +636,17 @@ class MGuiBase<TTarget, TStyle> {
         _targetsMin[id] = min;
         _targetsMax[id] = max;
         _targetsStepValue[id] = step;
+        if (_targetsValue[id] == null || _targetsValue[id] <= min)
+            setPercent(id, 0);
+        else if (_targetsValue[id] >= max)
+            setPercent(id, 1);
+        else
+            setPercent(id, (_targetsValue[id] - min) / (max - min));
         return this;
+    }
+
+    inline function updatePercent(id:Hash):Void {
+        setPercent(id, (_targetsValue[id] - _targetsMin[id]) / (_targetsMax[id] - _targetsMin[id]));
     }
 
     public inline function pointerPick(id:Hash):Bool {
