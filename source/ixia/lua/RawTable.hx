@@ -27,5 +27,8 @@ abstract RawTable<TKey, TValue>(Dynamic) {
 
 }
 
+@:forward(get, put)
+abstract ReadOnlyRawTable<TKey, TValue>(RawTable<TKey, TValue>) { }
+
 typedef DynamicRawTable = RawTable<Dynamic, Dynamic>;
 typedef AnyRawTable = RawTable<Any, Any>;
