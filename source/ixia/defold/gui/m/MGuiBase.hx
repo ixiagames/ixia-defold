@@ -141,7 +141,7 @@ class MGuiBase<TTarget, TStyle> {
         return this;
     }
 
-    public function subAction(actionID:Hash, ?pressed:Null<Bool> = true, listener:InputActionListener):MGuiBase<TTarget, TStyle> {
+    public function subAction(actionID:Hash, ?pressed:Bool, listener:InputActionListener):MGuiBase<TTarget, TStyle> {
         var listeners = pressed == null ? _actionsListeners : (pressed ? _pressesListeners : _releasesListeners);
         if (listeners[actionID] == null)
             listeners[actionID] = [];
@@ -154,6 +154,13 @@ class MGuiBase<TTarget, TStyle> {
         return this;
     }
 
+    public function unsubAction(actionID:Hash, ?pressed:Bool, listener:InputActionListener):Bool {
+        var listeners = pressed == null ? _actionsListeners : (pressed ? _pressesListeners : _releasesListeners);
+        if (listeners[actionID] == null)
+            return false;
+        return listeners[actionID].remove(listener);
+    }
+    
     public function subData(dataIDs:Hashes, listener:DataListener):MGuiBase<TTarget, TStyle> {
         for (id in dataIDs) {
             if (_dataListeners[id] == null)
