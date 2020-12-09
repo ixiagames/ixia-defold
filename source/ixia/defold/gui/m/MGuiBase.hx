@@ -51,6 +51,7 @@ class MGuiBase<TTarget, TStyle> {
     var _userdata:RawTable<Hash, Dynamic> = new RawTable();
     var _dataListeners:RawTable<Hash, Array<DataListener>> = new RawTable();
     var _messagesListeners:RawTable<Hash, Array<Dynamic->Void>> = new RawTable();
+    var _inputsListeners:Array<InputActionListener>;
     var _actionsListeners:RawTable<Hash, Array<InputActionListener>> = new RawTable();
     var _pressesListeners:RawTable<Hash, Array<InputActionListener>> = new RawTable();
     var _releasesListeners:RawTable<Hash, Array<InputActionListener>> = new RawTable();
@@ -126,6 +127,18 @@ class MGuiBase<TTarget, TStyle> {
                 _messagesListeners[cast message].splice(addedIndex, 1);
         }
         _messagesListeners[cast message].push(listener);
+        return this;
+    }
+
+    public function subInputs(listener:InputActionListener):MGuiBase<TTarget, TStyle> {
+        if (_inputsListeners == null)
+            _inputsListeners = [];
+        else {
+            var addedIndex = _inputsListeners.indexOf(listener);
+            if (addedIndex > -1)
+                _inputsListeners.splice(addedIndex, 1);
+        }
+        _inputsListeners.push(listener);
         return this;
     }
 
@@ -308,6 +321,11 @@ class MGuiBase<TTarget, TStyle> {
                 pointerState = RELEASED;
         }
         
+        if (_inputsListeners != null) {
+            for (listener in _inputsListeners)
+                listener.call(actionID, action);
+        }
+
         if (_actionsListeners[actionID] != null) {
             for (listener in _actionsListeners[actionID])
                 listener.call(actionID, action);
