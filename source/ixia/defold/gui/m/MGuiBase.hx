@@ -95,9 +95,11 @@ class MGuiBase<TTarget, TStyle> {
             initTarget(id);
 
             for (field in Reflect.fields(listeners)) {
-                var event = TargetEvent.fromString(field);
                 var listener = Reflect.field(listeners, field);
+                if (listener == null)
+                    continue;
 
+                var event = TargetEvent.fromString(field);
                 if (_targetsListeners[id][event] == null)
                     _targetsListeners[id][event] = [];
                 else {
@@ -109,6 +111,25 @@ class MGuiBase<TTarget, TStyle> {
             }
         }
         return this;
+    }
+
+    public function unsub(ids:Hashes, listeners:TargetEventListeners):Void {
+        for (id in ids) {
+            if (_targetsListeners[id] == null)
+                continue;
+
+            for (field in Reflect.fields(listeners)) {
+                var listener = Reflect.field(listeners, field);
+                if (listener == null)
+                    continue;
+
+                var event = TargetEvent.fromString(field);
+                if (_targetsListeners[id][event] == null)
+                    continue;
+
+                _targetsListeners[id][event].remove(listener);
+            }
+        }
     }
 
     public function subGroup(group:Hash, listeners:TargetEventListeners):MGuiBase<TTarget, TStyle> {
