@@ -24,6 +24,7 @@ using ixia.math.Math;
 class MGuiBase<TTarget, TStyle> {
 
     public var touchActionID(default, null):Hash;
+    public var pointerMoveActionID(default, null):Hash;
     public var pointerX(default, null):Float = 0;
     public var pointerY(default, null):Float = 0;
     public var pointerState(default, null):PointerState = RELEASED;
@@ -56,11 +57,9 @@ class MGuiBase<TTarget, TStyle> {
     var _pressesListeners:RawTable<Hash, Array<InputActionListener>> = new RawTable();
     var _releasesListeners:RawTable<Hash, Array<InputActionListener>> = new RawTable();
 
-    public function new(?touchActionID:Hash, ?acquiresInputFocus:Bool = true) {
-        if (touchActionID == null)
-            this.touchActionID = "touch".hash();
-        else
-            this.touchActionID = touchActionID;
+    public function new(?touchActionID:Hash, ?pointerMoveActionID:Hash, ?acquiresInputFocus:Bool = true) {
+        this.pointerMoveActionID = pointerMoveActionID != null ? pointerMoveActionID : "pointer_move".hash();
+        this.touchActionID = touchActionID != null ? touchActionID : "touch".hash();
 
         if (acquiresInputFocus)
             acquireInputFocus();
@@ -320,12 +319,15 @@ class MGuiBase<TTarget, TStyle> {
             else if (action.released)
                 pointerState = RELEASED;
         }
+
+        //
         
+        if (actionID == null)
+            actionID = pointerMoveActionID;
         if (_inputsListeners != null) {
             for (listener in _inputsListeners)
                 listener.call(actionID, action);
         }
-
         if (_actionsListeners[actionID] != null) {
             for (listener in _actionsListeners[actionID])
                 listener.call(actionID, action);
