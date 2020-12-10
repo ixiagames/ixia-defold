@@ -74,6 +74,19 @@ class MGuiBase<TTarget, TStyle> {
 
     //
 
+    /**
+     * Remove a target from the interaction list.
+     * Remove its listeners & styles but leave other data (like min, max, percent...).
+     */
+    public function removeInteraction(id:Hash):Void {
+        if (_targetsID.remove(id)) {
+            _targetsTapInited[id] = null;
+            _targetsListeners[id] = null;
+            _targetsStateStyle[id] = null;
+            _targetsState[id] = null;
+        }
+    }
+
     function initTarget(id:Hash):Void {
         if (_targetsID.indexOf(id) > -1)
             return;

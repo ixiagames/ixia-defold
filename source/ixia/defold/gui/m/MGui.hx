@@ -71,5 +71,10 @@ class MGui extends MGuiBase<ExtGuiNode, NodeStyle> {
                 Gui.get_node(id).set_enabled(enabled);
         }
     }
+
+    public function delete(id:Hash):Void {
+        removeInteraction(id);
+        Gui.get_node(id);
+    }
     
 }
