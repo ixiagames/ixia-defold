@@ -572,7 +572,7 @@ class MGuiBase<TTarget, TStyle> {
         }
     }
 
-    public inline function isAwake(id:Hash):Bool {
+    public function isAwake(id:Hash):Bool {
         return _targetsState[id] != null && _targetsState[id] != SLEEPING;
     }
 
