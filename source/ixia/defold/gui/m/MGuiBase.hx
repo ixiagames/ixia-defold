@@ -589,7 +589,7 @@ class MGuiBase<TTarget, TStyle> {
         return _targetsState[id] != null && _targetsState[id] != SLEEPING;
     }
 
-    public function isSlider(id:Hash):Bool {
+    public inline function isSlider(id:Hash):Bool {
         return _targetsDirection[id] != null && _targetsStartPos[id] != null && _targetsTrackLength[id] != null;
     }
 
