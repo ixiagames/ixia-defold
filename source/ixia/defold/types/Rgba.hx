@@ -1,5 +1,7 @@
 package ixia.defold.types;
 
+import defold.types.Vector3;
+import haxe.extern.EitherType;
 import defold.types.Vector4;
 import defold.Vmath;
 using defold.Sys;
@@ -39,5 +41,9 @@ abstract Rgba(Vector4) from Vector4 to Vector4 {
     public var a(get, never):Int;
     inline function get_a() return cast this.w;
     inline function set_a(value) return cast this.w = value;
+
+    @:to public inline function toVector3or4():EitherType<Vector3, Vector4> {
+        return cast this;
+    }
     
 }
