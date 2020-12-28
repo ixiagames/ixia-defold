@@ -7,12 +7,14 @@ import defold.types.Vector3;
 import defold.types.Vector4;
 import haxe.extern.EitherType;
 import ixia.defold.types.Hash;
+import ixia.defold.types.Rgba;
 
 using Defold;
 
 typedef NodeStyle = {
 
     ?enabled:Bool,
+    ?color:Rgba,
     ?flipbook:HashOrString,
     ?animations:Map<String, NodeAnimationConfigs>,
     ?nodes:NodeStyleMap

@@ -42,6 +42,9 @@ class MGui extends MGuiBase<ExtGuiNode, NodeStyle> {
         if (style.enabled != null)
             node.set_enabled(style.enabled);
 
+        if (style.color != null)
+            node.set_color(style.color);
+
         if (style.flipbook != null)
             node.play_flipbook(style.flipbook);
 
