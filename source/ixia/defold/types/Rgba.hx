@@ -1,9 +1,10 @@
 package ixia.defold.types;
 
-import defold.types.Vector3;
-import haxe.extern.EitherType;
-import defold.types.Vector4;
 import defold.Vmath;
+import defold.types.Vector3;
+import defold.types.Vector4;
+import haxe.extern.EitherType;
+
 using defold.Sys;
 using lua.Lua;
 
