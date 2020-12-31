@@ -9,6 +9,10 @@ using lua.Lua;
 
 abstract Rgba(Vector4) from Vector4 to Vector4 {
 
+    @:from public static function fromVector3(vector3:Vector3):Rgba {
+        return Vmath.vector4(vector3.x, vector3.y, vector3.z, 1);
+    }
+
     public static function fromConfigClearColor():Rgba {
         var rs = "Render.clear_color_red".get_config();
         var gs = "Render.clear_color_green".get_config();
@@ -18,7 +22,7 @@ abstract Rgba(Vector4) from Vector4 to Vector4 {
             rs != null ? rs.tonumber() : 0,
             gs != null ? gs.tonumber() : 0,
             bs != null ? bs.tonumber() : 0,
-            as != null ? as.tonumber() : 255
+            as != null ? as.tonumber() : 1
         );
     }
     
