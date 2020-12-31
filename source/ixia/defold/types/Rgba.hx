@@ -27,7 +27,7 @@ abstract Rgba(Vector4) from Vector4 to Vector4 {
         );
     }
     
-    public inline function new(r:Int, g:Int, b:Int, a:Int) {
+    public inline function new(r:Int, g:Int, b:Int, a:Float) {
         this = Vmath.vector4(r, g, b, a);
     }
 
@@ -43,7 +43,7 @@ abstract Rgba(Vector4) from Vector4 to Vector4 {
     inline function get_b() return cast this.z;
     inline function set_b(value) return cast this.z = value;
 
-    public var a(get, never):Int;
+    public var a(get, never):Float;
     inline function get_a() return cast this.w;
     inline function set_a(value) return cast this.w = value;
 
