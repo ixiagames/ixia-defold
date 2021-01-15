@@ -14,12 +14,12 @@ abstract Rgba(Vector4) from Vector4 to Vector4 {
         return Vmath.vector4(vector3.x, vector3.y, vector3.z, 1);
     }
 
-    @:from public static inline function fromInt(int:Int):Rgba {
+    @:from public static inline function fromHex(hex:Int):Rgba {
         return Vmath.vector4(
-            ((int >> 24) & 0xFF) / 255,
-            ((int >> 16) & 0xFF) / 255,
-            ((int >> 8) & 0xFF) / 255,
-            (int & 0xFF) / 255
+            ((hex >> 24) & 0xFF) / 255,
+            ((hex >> 16) & 0xFF) / 255,
+            ((hex >> 8) & 0xFF) / 255,
+            (hex & 0xFF) / 255
         );
     }
 
