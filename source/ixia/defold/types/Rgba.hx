@@ -27,19 +27,19 @@ abstract Rgba(Vector4) from Vector4 to Vector4 {
         );
     }
     
-    public inline function new(r:Int, g:Int, b:Int, a:Float) {
+    public inline function new(r:Float, g:Float, b:Float, a:Float) {
         this = Vmath.vector4(r, g, b, a);
     }
 
-    public var r(get, set):Int;
+    public var r(get, set):Float;
     inline function get_r() return cast this.x;
     inline function set_r(value) return cast this.x = value;
 
-    public var g(get, set):Int;
+    public var g(get, set):Float;
     inline function get_g() return cast this.y;
     inline function set_g(value) return cast this.y = value;
 
-    public var b(get, set):Int;
+    public var b(get, set):Float;
     inline function get_b() return cast this.z;
     inline function set_b(value) return cast this.z = value;
 
