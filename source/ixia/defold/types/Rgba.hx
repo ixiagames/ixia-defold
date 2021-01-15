@@ -10,8 +10,17 @@ using lua.Lua;
 
 abstract Rgba(Vector4) from Vector4 to Vector4 {
 
-    @:from public static function fromVector3(vector3:Vector3):Rgba {
+    @:from public static inline function fromVector3(vector3:Vector3):Rgba {
         return Vmath.vector4(vector3.x, vector3.y, vector3.z, 1);
+    }
+
+    @:from public static inline function fromInt(int:Int):Rgba {
+        return Vmath.vector4(
+            ((int >> 24) & 0xFF) / 255,
+            ((int >> 16) & 0xFF) / 255,
+            ((int >> 8) & 0xFF) / 255,
+            (int & 0xFF) / 255
+        );
     }
 
     public static function fromConfigClearColor():Rgba {
@@ -25,6 +34,10 @@ abstract Rgba(Vector4) from Vector4 to Vector4 {
             bs != null ? bs.tonumber() : 0,
             as != null ? as.tonumber() : 1
         );
+    }
+
+    @:to public inline function toVector3or4():EitherType<Vector3, Vector4> {
+        return cast this;
     }
     
     public inline function new(r:Float, g:Float, b:Float, a:Float) {
@@ -46,9 +59,5 @@ abstract Rgba(Vector4) from Vector4 to Vector4 {
     public var a(get, never):Float;
     inline function get_a() return cast this.w;
     inline function set_a(value) return cast this.w = value;
-
-    @:to public inline function toVector3or4():EitherType<Vector3, Vector4> {
-        return cast this;
-    }
     
 }
