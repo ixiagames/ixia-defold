@@ -19,7 +19,13 @@ class MGui extends MGuiBase<ExtGuiNode, NodeStyle> {
     }
 
     override function isAwake(id:Hash):Bool {
-        return !super.isAwake(id) ? false : Gui.get_node(id).is_enabled();
+        var parent = Gui.get_node(id).get_parent();
+        while (parent != null) {
+            if (!parent.is_enabled())
+                return false;
+            parent = parent.get_parent();
+        }
+        return super.isAwake(id);
     }
 
     override function pick(id:Hash, x:Float, y:Float):Bool {
