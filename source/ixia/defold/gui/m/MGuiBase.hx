@@ -531,7 +531,7 @@ class MGuiBase<TTarget, TStyle> {
         return _targetsState[id];
     }
 
-    function setState(id:Hash, state:TargetState):Void {
+    public function setState(id:Hash, state:TargetState):Void {
         if (_targetsState[id] == state)
             return;
 
