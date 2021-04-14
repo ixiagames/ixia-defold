@@ -12,7 +12,7 @@ using ixia.math.Math;
 
 class Locale {
 
-    static inline var TEXT_NOT_FOUND = "TEXT_NOT_FOUND";
+    static inline var KEY_NOT_FOUND = "KEY_NOT_FOUND";
     #if use_template
     static inline var CONTEXT_REQUIRED = "CONTEXT_REQUIRED";
     #end
@@ -53,6 +53,7 @@ class Locale {
     //
 
     public var id(default, null):String;
+    public var missingKeyAction(default, null):MissingKeyAction;
     public var currencyRate(default, null):Float;
 
     #if use_template
@@ -61,8 +62,9 @@ class Locale {
     var map:Map<String, String> = [];
     #end
     
-    public function new(id:String, currencyRate:Float = 1) {
+    public function new(id:String, missingKeyAction:MissingKeyAction, currencyRate:Float = 1) {
         this.id = id;
+        this.missingKeyAction = missingKeyAction;
         this.currencyRate = currencyRate;
         parse(id, []);
     }
@@ -130,17 +132,29 @@ class Locale {
     }
 
     public function tr(key:String, ?context:Dynamic):String {
-        var data = map[key];
-        if (data == null) {
-            #if debug
-            Error.error('Key not found: "$key"');
-            #end
-            return TEXT_NOT_FOUND;
+        var text = map[key];
+        if (text == null) {
+            var number = Std.parseFloat(key);
+            if (!Math.isNaN(number))
+                return key;
+            
+            switch (missingKeyAction) {
+                case ERROR:
+                    Error.error('Key not found: "$key"');
+                    return KEY_NOT_FOUND;
+                
+                case WARNING:
+                    trace('Key not found: "$key"');
+                    return KEY_NOT_FOUND;
+
+                case USE_KEY_AS_TEXT:
+                    text = key;
+            }
         }
 
         if (context == null) {
             #if use_template
-            switch (data) {
+            switch (text) {
                 case Left(s):
                     return s;
                 
@@ -151,11 +165,11 @@ class Locale {
                     return CONTEXT_REQUIRED + ': $key';
             }
             #end
-            return data;
+            return text;
         }
 
         #if use_template
-        switch (data) {
+        switch (text) {
             case Left(s):
                 #if debug
                 Error.error('Unused context for key: "$key"');
@@ -167,8 +181,8 @@ class Locale {
         }
         #else
         for (field in Reflect.fields(context))
-            data = data.replace('::$field::', Std.string(Reflect.field(context, field)));
-        return data;
+            text = text.replace('::$field::', Std.string(Reflect.field(context, field)));
+        return text;
         #end
     }
 
@@ -216,5 +230,13 @@ class Locale {
             return baseToCurrencyText(amount);
         return amount.separateThousands();
     }
+
+}
+
+enum abstract MissingKeyAction(Int) {
+    
+    var ERROR;
+    var WARNING;
+    var USE_KEY_AS_TEXT;
 
 }
