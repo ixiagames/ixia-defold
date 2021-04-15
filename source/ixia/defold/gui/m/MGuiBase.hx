@@ -46,7 +46,7 @@ class MGuiBase<TTarget, TStyle> {
     var _targetsMax:RawTable<Hash, Float> = new RawTable();
     var _targetsValue:RawTable<Hash, Float> = new RawTable();
     var _targetsStepValue:RawTable<Hash, Float> = new RawTable();
-    var _targetsStepIndex:RawTable<Hash, Int> = new RawTable();
+    var _targetsNumSteps:RawTable<Hash, Int> = new RawTable();
     var _targetsPercent:RawTable<Hash, Float> = new RawTable();
     
     var _userdata:RawTable<Hash, Dynamic> = new RawTable();
@@ -468,20 +468,18 @@ class MGuiBase<TTarget, TStyle> {
         var trackLength = _targetsTrackLength[id];
         var heldPos = _targetsHeldPos[id];
         var tx = pointerX - heldPos.x;
-        //var ty = pointerY - heldPos.y;
         if (start != null && trackLength != null && _targetsMin[id] != null && _targetsMax[id] != null && _targetsStepValue[id] != null) {
             var percent = switch (_targetsDirection[id]) {
                 case LEFT_RIGHT: (tx - start.x) / trackLength;
                 case RIGHT_LEFT: (start.x - tx) / trackLength;
             }
-            var maxDistance = _targetsMax[id] - _targetsMin[id];
-            var distance = _targetsMin[id] + maxDistance * percent;
-            var steps = distance / _targetsStepValue[id];
-            var downSteps = steps.floor();
-            var upSteps = steps.ceil();
-            _targetsStepIndex[id] = Math.abs(downSteps - steps) < Math.abs(upSteps - steps) ? downSteps : upSteps;
-            steps = _targetsStepIndex[id];
-            percent = (steps * _targetsStepValue[id]) / maxDistance;
+            var maxValueDistance = _targetsMax[id] - _targetsMin[id];
+            var numSteps = (maxValueDistance * percent) / _targetsStepValue[id];
+            var downSteps = numSteps.floor();
+            var upSteps = numSteps.ceil();
+            _targetsNumSteps[id] = Math.abs(downSteps - numSteps) < Math.abs(upSteps - numSteps) ? downSteps : upSteps;
+            numSteps = _targetsNumSteps[id];
+            percent = (numSteps * _targetsStepValue[id]) / maxValueDistance;
             switch (_targetsDirection[id]) {
                 case LEFT_RIGHT: tx = start.x + trackLength * percent;
                 case RIGHT_LEFT: tx = start.x - trackLength * percent;
@@ -614,8 +612,8 @@ class MGuiBase<TTarget, TStyle> {
         if (step != null) {
             var stepIndex = value / step;
             if (stepIndex - stepIndex.floor() > 0) {
-                _targetsStepIndex[id] = stepIndex.round();
-                value = step * _targetsStepIndex[id];
+                _targetsNumSteps[id] = stepIndex.round();
+                value = step * _targetsNumSteps[id];
                 percent = (value - min) / (max - min);
                 if (percent > 1) {
                     percent = 1;
@@ -682,7 +680,7 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     public inline function stepIndex(id:Hash):Int {
-        return _targetsStepIndex[id];
+        return _targetsNumSteps[id];
     }
 
     public inline function setStepIndex(id:Hash, index:Int):MGuiBase<TTarget, TStyle> {
