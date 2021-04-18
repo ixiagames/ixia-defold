@@ -16,7 +16,7 @@ abstract ExtGuiNode(GuiNode) from GuiNode to GuiNode {
 
     public var enabled(get, set):Bool;
     inline function get_enabled() return this.is_enabled();
-    public inline function set_enabled(value) {
+    inline function set_enabled(value) {
         this.set_enabled(value);
         return value;
     }
@@ -55,6 +55,13 @@ abstract ExtGuiNode(GuiNode) from GuiNode to GuiNode {
         var scale = this.get_scale();
         scale.y = value;
         this.set_scale(scale);
+        return value;
+    }
+
+    public var text(get, set):String;
+    inline function get_text() return this.get_text();
+    inline function set_text(value) {
+        this.set_text(value);
         return value;
     }
 
