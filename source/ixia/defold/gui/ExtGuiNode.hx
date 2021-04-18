@@ -5,6 +5,13 @@ using defold.Gui;
 @:using(defold.Gui)
 abstract ExtGuiNode(GuiNode) from GuiNode to GuiNode {
 
+    public var enabled(get, set):Bool;
+    inline function get_enabled() return this.is_enabled();
+    inline function set_enabled(value) {
+        this.set_enabled(value);
+        return value;
+    }
+
     public var x(get, set):Float;
     inline function get_x() return this.get_position().x;
     inline function set_x(value) {
