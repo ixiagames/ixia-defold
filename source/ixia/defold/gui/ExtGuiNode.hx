@@ -16,7 +16,7 @@ abstract ExtGuiNode(GuiNode) from GuiNode to GuiNode {
 
     public var enabled(get, set):Bool;
     inline function get_enabled() return this.is_enabled();
-    inline function set_enabled(value) {
+    public inline function set_enabled(value) {
         this.set_enabled(value);
         return value;
     }
