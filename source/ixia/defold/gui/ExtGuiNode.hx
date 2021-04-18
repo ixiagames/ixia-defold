@@ -1,11 +1,18 @@
 package ixia.defold.gui;
 
+import defold.types.HashOrString;
 import ixia.defold.types.Hash;
 import lua.Table;
 using defold.Gui;
 
 @:using(defold.Gui)
 abstract ExtGuiNode(GuiNode) from GuiNode to GuiNode {
+
+    public static inline function getNode(id:HashOrString):ExtGuiNode {
+        return id.get_node();
+    }
+
+    //
 
     public var enabled(get, set):Bool;
     inline function get_enabled() return this.is_enabled();
