@@ -1,5 +1,7 @@
 package ixia.defold.gui;
 
+import ixia.defold.types.Hash;
+import lua.Table;
 using defold.Gui;
 
 @:using(defold.Gui)
@@ -47,6 +49,14 @@ abstract ExtGuiNode(GuiNode) from GuiNode to GuiNode {
         scale.y = value;
         this.set_scale(scale);
         return value;
+    }
+
+    public inline function clone():ExtGuiNode {
+        return this.clone();
+    }
+
+    public inline function cloneTree():Table<Hash, ExtGuiNode> {
+        return this.clone_tree();
     }
 
 }
