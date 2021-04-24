@@ -40,6 +40,26 @@ abstract ExtGuiNode(GuiNode) from GuiNode to GuiNode {
         return value;
     }
 
+    public var width(get, set):Float;
+    inline function get_width() return this.get_size().x;
+    inline function set_width(value) {
+        // Would using this.animate("size.x", value, EASING_LINEAR, 0) better?
+        var size = this.get_size();
+        size.x = value;
+        this.set_size(size);
+        return value;
+    }
+
+    public var height(get, set):Float;
+    inline function get_height() return this.get_size().y;
+    inline function set_height(value) {
+        // Would using this.animate("size.x", value, EASING_LINEAR, 0) better?
+        var size = this.get_size();
+        size.y = value;
+        this.set_size(size);
+        return value;
+    }
+
     public var scale_x(get, set):Float;
     inline function get_scale_x() return this.get_scale().x;
     inline function set_scale_x(value) {
