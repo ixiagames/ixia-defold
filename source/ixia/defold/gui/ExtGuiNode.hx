@@ -1,5 +1,6 @@
 package ixia.defold.gui;
 
+import defold.types.Vector3;
 import defold.types.HashOrString;
 import ixia.defold.types.Hash;
 import lua.Table;
@@ -18,6 +19,13 @@ abstract ExtGuiNode(GuiNode) from GuiNode to GuiNode {
     inline function get_enabled() return this.is_enabled();
     inline function set_enabled(value) {
         this.set_enabled(value);
+        return value;
+    }
+
+    public var position(get, set):Vector3;
+    inline function get_position() return this.get_position();
+    inline function set_position(value) {
+        this.set_position(value);
         return value;
     }
 
