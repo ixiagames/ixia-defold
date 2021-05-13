@@ -44,6 +44,10 @@ abstract Rgba(Vector4) from Vector4 to Vector4 {
         this = Vmath.vector4(r, g, b, a);
     }
 
+    public inline function copy():Rgba {
+        return new Rgba(r, g, b, a);
+    }
+
     public var r(get, set):Float;
     inline function get_r() return cast this.x;
     inline function set_r(value) return cast this.x = value;
