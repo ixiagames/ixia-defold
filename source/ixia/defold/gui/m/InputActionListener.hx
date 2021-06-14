@@ -8,8 +8,8 @@ from Void->Void to Void->Void
 from Hash->Void to Hash->Void
 from Hash->ScriptOnInputAction->Void to Hash->ScriptOnInputAction->Void {
 
-    public inline function call(actionID:Hash, action:ScriptOnInputAction) {
-        this(actionID, action);
+    public inline function call(actionId:Hash, action:ScriptOnInputAction) {
+        this(actionId, action);
     }
 
 }

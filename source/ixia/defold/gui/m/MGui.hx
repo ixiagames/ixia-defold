@@ -7,8 +7,8 @@ using defold.Gui;
 
 class MGui extends MGuiBase<ExtGuiNode, NodeStyle> {
 
-    public function new(?touchActionID:Hash, ?acquiresInputFocus:Bool = true, ?renderOrder:Int) {
-        super(touchActionID, acquiresInputFocus);
+    public function new(?touchActionId:Hash, ?acquiresInputFocus:Bool = true, ?renderOrder:Int) {
+        super(touchActionId, acquiresInputFocus);
         
         if (renderOrder != null)
             Gui.set_render_order(renderOrder);

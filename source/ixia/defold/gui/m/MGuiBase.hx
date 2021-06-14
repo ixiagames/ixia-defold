@@ -23,14 +23,14 @@ using ixia.math.Math;
 
 class MGuiBase<TTarget, TStyle> {
 
-    public var touchActionID(default, null):Hash;
-    public var pointerMoveActionID(default, null):Hash;
+    public var touchActionId(default, null):Hash;
+    public var pointerMoveActionId(default, null):Hash;
     public var pointerX(default, null):Float = 0;
     public var pointerY(default, null):Float = 0;
     public var pointerState(default, null):PointerState = RELEASED;
 
     var _groups:RawTable<Hash, Array<Hash>> = new RawTable();
-    var _targetsID:Array<Hash> = [];
+    var _targetsId:Array<Hash> = [];
 
     var _targetsTapInited:RawTable<Hash, Bool> = new RawTable();
     var _targetsState:RawTable<Hash, TargetState> = new RawTable();
@@ -57,9 +57,9 @@ class MGuiBase<TTarget, TStyle> {
     var _pressesListeners:RawTable<Hash, Array<InputActionListener>> = new RawTable();
     var _releasesListeners:RawTable<Hash, Array<InputActionListener>> = new RawTable();
 
-    public function new(?touchActionID:Hash, ?pointerMoveActionID:Hash, ?acquiresInputFocus:Bool = true) {
-        this.pointerMoveActionID = pointerMoveActionID != null ? pointerMoveActionID : "pointer_move".hash();
-        this.touchActionID = touchActionID != null ? touchActionID : "touch".hash();
+    public function new(?touchActionId:Hash, ?pointerMoveActionId:Hash, ?acquiresInputFocus:Bool = true) {
+        this.pointerMoveActionId = pointerMoveActionId != null ? pointerMoveActionId : "pointer_move".hash();
+        this.touchActionId = touchActionId != null ? touchActionId : "touch".hash();
 
         if (acquiresInputFocus)
             acquireInputFocus();
@@ -79,7 +79,7 @@ class MGuiBase<TTarget, TStyle> {
      * Remove its listeners & styles but leave other data (like min, max, percent...).
      */
     public function removeInteraction(id:Hash):Void {
-        if (_targetsID.remove(id)) {
+        if (_targetsId.remove(id)) {
             _targetsTapInited[id] = null;
             _targetsListeners[id] = null;
             _targetsStateStyle[id] = null;
@@ -88,10 +88,10 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     function initTarget(id:Hash):Void {
-        if (_targetsID.indexOf(id) > -1)
+        if (_targetsId.indexOf(id) > -1)
             return;
 
-        _targetsID.push(id);
+        _targetsId.push(id);
         _targetsTapInited[id] = false;
         _targetsListeners[id] = new RawTable();
         setState(id, pointerPick(id) ? HOVERED : UNTOUCHED);
@@ -175,28 +175,28 @@ class MGuiBase<TTarget, TStyle> {
         return this;
     }
 
-    public function subAction(actionID:Hash, ?pressed:Bool, listener:InputActionListener):MGuiBase<TTarget, TStyle> {
+    public function subAction(actionId:Hash, ?pressed:Bool, listener:InputActionListener):MGuiBase<TTarget, TStyle> {
         var listeners = pressed == null ? _actionsListeners : (pressed ? _pressesListeners : _releasesListeners);
-        if (listeners[actionID] == null)
-            listeners[actionID] = [];
+        if (listeners[actionId] == null)
+            listeners[actionId] = [];
         else {
-            var addedIndex = listeners[actionID].indexOf(listener);
+            var addedIndex = listeners[actionId].indexOf(listener);
             if (addedIndex > -1)
-                listeners[actionID].splice(addedIndex, 1);
+                listeners[actionId].splice(addedIndex, 1);
         }
-        listeners[actionID].push(listener);
+        listeners[actionId].push(listener);
         return this;
     }
 
-    public function unsubAction(actionID:Hash, ?pressed:Bool, listener:InputActionListener):Bool {
+    public function unsubAction(actionId:Hash, ?pressed:Bool, listener:InputActionListener):Bool {
         var listeners = pressed == null ? _actionsListeners : (pressed ? _pressesListeners : _releasesListeners);
-        if (listeners[actionID] == null)
+        if (listeners[actionId] == null)
             return false;
-        return listeners[actionID].remove(listener);
+        return listeners[actionId].remove(listener);
     }
     
-    public function subData(dataIDs:Hashes, listener:DataListener):MGuiBase<TTarget, TStyle> {
-        for (id in dataIDs) {
+    public function subData(dataIds:Hashes, listener:DataListener):MGuiBase<TTarget, TStyle> {
+        for (id in dataIds) {
             if (_dataListeners[id] == null)
                 _dataListeners[id] = [];
             else {
@@ -227,13 +227,13 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     public function group(groups:Hashes, ids:Hashes):MGuiBase<TTarget, TStyle> {
-        for (groupID in groups) {
-            if (_groups[groupID] == null)
-                _groups[groupID] = [];
+        for (groupId in groups) {
+            if (_groups[groupId] == null)
+                _groups[groupId] = [];
             
             for (id in ids) {
-                if (_groups[groupID].indexOf(id) == -1)
-                    _groups[groupID].push(id);
+                if (_groups[groupId].indexOf(id) == -1)
+                    _groups[groupId].push(id);
             }
         }
 
@@ -288,20 +288,20 @@ class MGuiBase<TTarget, TStyle> {
         return this;
     }
 
-    public function set(dataID:Hash, data:Dynamic):MGuiBase<TTarget, TStyle> {
-        if (_userdata[dataID] == data)
+    public function set(dataId:Hash, data:Dynamic):MGuiBase<TTarget, TStyle> {
+        if (_userdata[dataId] == data)
             return this;
 
-        _userdata[dataID] = data;
-        if (_dataListeners[dataID] != null) {
-            for (listener in _dataListeners[dataID])
-                listener.call(data, dataID);
+        _userdata[dataId] = data;
+        if (_dataListeners[dataId] != null) {
+            for (listener in _dataListeners[dataId])
+                listener.call(data, dataId);
         }
         return this;
     }
 
-    public inline function get<T>(dataID:Hash):T {
-        return _userdata[dataID];
+    public inline function get<T>(dataId:Hash):T {
+        return _userdata[dataId];
     }
 
     public function slider(
@@ -327,21 +327,21 @@ class MGuiBase<TTarget, TStyle> {
         return this;
     }
 
-    public inline function input(actionID:Hash, action:ScriptOnInputAction, ?scriptData:Dynamic):Void {
-        inputXY(actionID, action, action.x, action.y, scriptData);
+    public inline function input(actionId:Hash, action:ScriptOnInputAction, ?scriptData:Dynamic):Void {
+        inputXY(actionId, action, action.x, action.y, scriptData);
     }
 
-    public function inputXY(actionID:Hash, action:ScriptOnInputAction, x:Float, y:Float, ?scriptData:Dynamic):Void {
-        if (actionID == null) {
+    public function inputXY(actionId:Hash, action:ScriptOnInputAction, x:Float, y:Float, ?scriptData:Dynamic):Void {
+        if (actionId == null) {
             pointerX = x;
             pointerY = y;
 
-            for (id in _targetsID) {
+            for (id in _targetsId) {
                 if (isAwake(id))
                     handleTargetPointerMove(id, action, scriptData);
             }
 
-        } else if (actionID == touchActionID) {
+        } else if (actionId == touchActionId) {
             pointerX = x;
             pointerY = y;
             
@@ -350,7 +350,7 @@ class MGuiBase<TTarget, TStyle> {
             else if (action.released)
                 pointerState = JUST_PRESSED;
 
-            for (id in _targetsID) {
+            for (id in _targetsId) {
                 if (isAwake(id))
                     handleTargetPressOrRelease(id, action, scriptData);
             }
@@ -363,25 +363,25 @@ class MGuiBase<TTarget, TStyle> {
 
         //
         
-        if (actionID == null)
-            actionID = pointerMoveActionID;
+        if (actionId == null)
+            actionId = pointerMoveActionId;
         if (_inputsListeners != null) {
             for (listener in _inputsListeners)
-                listener.call(actionID, action);
+                listener.call(actionId, action);
         }
-        if (_actionsListeners[actionID] != null) {
-            for (listener in _actionsListeners[actionID])
-                listener.call(actionID, action);
+        if (_actionsListeners[actionId] != null) {
+            for (listener in _actionsListeners[actionId])
+                listener.call(actionId, action);
         }
         if (action.pressed) {
-            if (_pressesListeners[actionID] != null) {
-                for (listener in _pressesListeners[actionID])
-                    listener.call(actionID, action);
+            if (_pressesListeners[actionId] != null) {
+                for (listener in _pressesListeners[actionId])
+                    listener.call(actionId, action);
             }
         } else if (action.released) {
-            if (_releasesListeners[actionID] != null) {
-                for (listener in _releasesListeners[actionID])
-                    listener.call(actionID, action);
+            if (_releasesListeners[actionId] != null) {
+                for (listener in _releasesListeners[actionId])
+                    listener.call(actionId, action);
             }
         }
     }
@@ -510,9 +510,9 @@ class MGuiBase<TTarget, TStyle> {
         setPos(id, pos);
     }
 
-    public function message<T>(messageID:Message<T>, ?message:T, ?sender:Url):Void {
-        if (_messagesListeners[cast messageID] != null) {
-            for (listener in _messagesListeners[cast messageID])
+    public function message<T>(messageId:Message<T>, ?message:T, ?sender:Url):Void {
+        if (_messagesListeners[cast messageId] != null) {
+            for (listener in _messagesListeners[cast messageId])
                 listener(message);
         }
     }

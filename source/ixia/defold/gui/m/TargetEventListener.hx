@@ -9,8 +9,8 @@ from Hash->Void to Hash->Void
 from Hash->TargetEvent->Void to Hash->TargetEvent->Void
 from Hash->TargetEvent->ScriptOnInputAction->Void to Hash->TargetEvent->ScriptOnInputAction->Void {
 
-    public inline function call(targetID:Hash, event:TargetEvent, action:ScriptOnInputAction) {
-        this(targetID, event, action);
+    public inline function call(targetId:Hash, event:TargetEvent, action:ScriptOnInputAction) {
+        this(targetId, event, action);
     }
 
 }
