@@ -10,10 +10,10 @@ class StructTools {
      * Only guaranteed to work on anonymous structures.
      */
     public static function deepCopy<T>(value:T):T {
-        if (Std.is(value, String))
+        if (Std.isOfType(value, String))
             return value;
 
-        if (Std.is(value, Array))
+        if (Std.isOfType(value, Array))
             return cast [ for (v in (cast value:Array<Dynamic>)) deepCopy(v) ];
 
         if (Reflect.isObject(value)) {
