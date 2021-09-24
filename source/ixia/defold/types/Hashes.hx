@@ -3,6 +3,7 @@ package ixia.defold.types;
 import ixia.defold.types.Hash;
 import defold.types.HashOrString;
 
+@:transitive
 @:forward
 abstract Hashes(Array<Hash>) from Array<Hash> to Array<Hash> {
 
