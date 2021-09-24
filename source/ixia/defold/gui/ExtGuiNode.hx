@@ -26,6 +26,13 @@ abstract ExtGuiNode(GuiNode) from GuiNode to GuiNode {
 
     //
 
+    public var size(get, set):Vector3;
+    inline function get_size() return this.get_size();
+    inline function set_size(value) {
+        this.set_size(value);
+        return value;
+    }
+
     public var width(get, set):Float;
     inline function get_width() return this.get_size().x;
     inline function set_width(value) {
