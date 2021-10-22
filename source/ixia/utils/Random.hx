@@ -27,7 +27,7 @@ class Random {
     }
 
     /** Shuffle an array in place. **/
-    public static inline function shuffle<T>(array:Array<T>):Void {
+    public static function shuffle<T>(array:Array<T>):Void {
         var randomIndex:Int;
         var value:T;
         for (i in 0...array.length) {
@@ -37,7 +37,7 @@ class Random {
             array[randomIndex] = value;
         }
     }
-
+    
     /** Pick a random element from array. **/
     public static inline function pick<T>(array:Array<T>):T {
         return array[int0(array.length)];
