@@ -38,6 +38,22 @@ class Random {
         }
     }
     
+    // Got this from https://stackoverflow.com/a/19270021.
+    public static function pickElements<T>(array:Array<T>, n:Int):Array<T> {
+        var result = new Array<T>();
+        var length = array.length;
+        if (n > length)
+            throw ("More elements taken than available.");
+
+        var taken = new Array();
+        while (n-- > 0) {
+            var x = Math.floor(Math.random() * length);
+            result[n] = array[taken[x] != null ? taken[x] : x];
+            taken[x] = taken[--length] != null ? taken[length] : length;
+        }
+        return result;
+    }
+
     /** Pick a random element from array. **/
     public static inline function pick<T>(array:Array<T>):T {
         return array[int0(array.length)];

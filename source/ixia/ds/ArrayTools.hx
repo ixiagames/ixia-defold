@@ -8,6 +8,10 @@ class ArrayTools {
         Random.shuffle(array);
     }
 
+    public static inline function getRandonElements<T>(array:Array<T>, n:Int):Array<T> {
+        return Random.pickElements(array, n);
+    }
+
     public static function hasDuplicated<T>(array:Array<T>):Bool {
         for (i in 0...array.length) {
             if (i != array.lastIndexOf(array[i]))
