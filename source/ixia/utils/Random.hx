@@ -27,7 +27,7 @@ class Random {
     }
 
     /** Shuffle an array in place. **/
-    public static inline function shuffle<T>(array:Array<T>):Void {
+    public static function shuffle<T>(array:Array<T>):Void {
         var randomIndex:Int;
         var value:T;
         for (i in 0...array.length) {
@@ -36,6 +36,22 @@ class Random {
             array[i] = array[randomIndex];
             array[randomIndex] = value;
         }
+    }
+    
+    // Got this from https://stackoverflow.com/a/19270021.
+    public static function pickElements<T>(array:Array<T>, n:Int):Array<T> {
+        var result = new Array<T>();
+        var length = array.length;
+        if (n > length)
+            throw ("More elements taken than available.");
+
+        var taken = new Array();
+        while (n-- > 0) {
+            var x = Math.floor(Math.random() * length);
+            result[n] = array[taken[x] != null ? taken[x] : x];
+            taken[x] = taken[--length] != null ? taken[length] : length;
+        }
+        return result;
     }
 
     /** Pick a random element from array. **/
