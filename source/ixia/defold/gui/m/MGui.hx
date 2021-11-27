@@ -65,6 +65,9 @@ class MGui extends MGuiBase<ExtGuiNode, NodeStyle> {
         if (style.flipbook != null)
             node.play_flipbook(style.flipbook);
 
+        if (style.texture != null)
+            node.set_texture(style.texture);
+
         if (style.animations != null) {
             for (prop => configs in style.animations) {
                 node.animate(

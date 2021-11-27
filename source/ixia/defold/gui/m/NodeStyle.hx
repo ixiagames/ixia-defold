@@ -17,6 +17,7 @@ typedef NodeStyle = {
     ?color:Rgba,
     ?alpha:Float,
     ?flipbook:HashOrString,
+    ?texture:HashOrString,
     ?animations:Map<String, NodeAnimationConfigs>,
     ?nodes:NodeStyleMap
 
