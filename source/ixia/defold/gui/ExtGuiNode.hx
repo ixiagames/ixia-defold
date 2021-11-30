@@ -133,6 +133,7 @@ abstract ExtGuiNode(GuiNode) from GuiNode to GuiNode {
     inline function set_red(value) {
         var color = this.get_color();
         color.x = value;
+        this.set_color(color);
         return value;
     }
 
@@ -141,6 +142,7 @@ abstract ExtGuiNode(GuiNode) from GuiNode to GuiNode {
     inline function set_green(value) {
         var color = this.get_color();
         color.y = value;
+        this.set_color(color);
         return value;
     }
 
@@ -149,6 +151,7 @@ abstract ExtGuiNode(GuiNode) from GuiNode to GuiNode {
     inline function set_blue(value) {
         var color = this.get_color();
         color.z = value;
+        this.set_color(color);
         return value;
     }
 
@@ -157,6 +160,7 @@ abstract ExtGuiNode(GuiNode) from GuiNode to GuiNode {
     inline function set_alpha(value) {
         var color = this.get_color();
         color.w = value;
+        this.set_color(color);
         return value;
     }
 
