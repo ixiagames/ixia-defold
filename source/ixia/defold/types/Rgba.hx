@@ -49,19 +49,19 @@ abstract Rgba(Vector4) from Vector4 to Vector4 {
     }
 
     public var r(get, set):Float;
-    inline function get_r() return cast this.x;
-    inline function set_r(value) return cast this.x = value;
+    inline function get_r() return this.x;
+    inline function set_r(value) return this.x = value;
 
     public var g(get, set):Float;
-    inline function get_g() return cast this.y;
-    inline function set_g(value) return cast this.y = value;
+    inline function get_g() return this.y;
+    inline function set_g(value) return this.y = value;
 
     public var b(get, set):Float;
-    inline function get_b() return cast this.z;
-    inline function set_b(value) return cast this.z = value;
+    inline function get_b() return this.z;
+    inline function set_b(value) return this.z = value;
 
-    public var a(get, never):Float;
-    inline function get_a() return cast this.w;
-    inline function set_a(value) return cast this.w = value;
+    public var a(get, set):Float;
+    inline function get_a() return this.w;
+    inline function set_a(value) return this.w = value;
     
 }
