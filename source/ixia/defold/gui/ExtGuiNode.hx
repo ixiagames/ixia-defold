@@ -17,6 +17,15 @@ abstract ExtGuiNode(GuiNode) from GuiNode to GuiNode {
 
     //
 
+    public var id(get, set):Hash;
+    inline function get_id() return this.get_id();
+    inline function set_id(value) {
+        this.set_id(value);
+        return value;
+    }
+
+    //
+
     public var enabled(get, set):Bool;
     inline function get_enabled() return this.is_enabled();
     inline function set_enabled(value) {
