@@ -101,6 +101,13 @@ abstract ExtGuiNode(GuiNode) from GuiNode to GuiNode {
 
     //
 
+    public var scale(get, set):Vector3;
+    inline function get_scale() return this.get_scale();
+    inline function set_scale(value) {
+        this.set_scale(value);
+        return value;
+    }
+
     public var scale_x(get, set):Float;
     inline function get_scale_x() return this.get_scale().x;
     inline function set_scale_x(value) {
