@@ -3,7 +3,8 @@ package ixia.lua;
 using lua.PairTools;
 using lua.Table;
 
-class TableTools {
+@:forwardStatics
+abstract TableTools(lua.TableTools) {
     
     public static function removeValue<T>(table:Table<Int, T>, value:T):Bool {
         for (entry in table.ipairsIterator()) {
