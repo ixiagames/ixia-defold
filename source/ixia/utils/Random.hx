@@ -54,9 +54,14 @@ class Random {
         return result;
     }
 
-    /** Pick a random element from array. **/
+    /** Pick a random element fromthe  array. **/
     public static inline function pick<T>(array:Array<T>):T {
         return array[int0(array.length)];
+    }
+
+    /** Pick a random index from the array. **/
+    public static inline function pickIndex<T>(array:Array<T>):Int {
+        return int0(array.length);
     }
 
 }
