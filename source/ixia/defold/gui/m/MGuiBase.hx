@@ -523,10 +523,8 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     public function dispatch(id:Hash, event:TargetEvent, ?action:ScriptOnInputAction):Void {
-        if (_targetsListeners[id] == null) {
-            Error.error(id + " wasn't subscripted with any event listener");
+        if (_targetsListeners[id] == null)
             return;
-        }
 
         if (_targetsListeners[id][event] == null)
             return;
