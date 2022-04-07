@@ -89,13 +89,17 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     function initTarget(id:Hash):Void {
-        if (_targetsId.indexOf(id) > -1)
+        if (exists(id))
             return;
 
         _targetsId.push(id);
         _targetsTapInited[id] = false;
         _targetsListeners[id] = new RawTable();
         setState(id, pointerPick(id) ? HOVERED : UNTOUCHED);
+    }
+
+    public inline function exists(id:Hash):Bool {
+        return _targetsId.indexOf(id) > -1;
     }
 
     public function config(ids:Hashes, style:TargetStyle<TStyle>, listeners:TargetEventListeners):MGuiBase<TTarget, TStyle> {
