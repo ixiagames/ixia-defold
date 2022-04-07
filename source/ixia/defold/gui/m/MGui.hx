@@ -20,6 +20,11 @@ class MGui extends MGuiBase<ExtGuiNode, NodeStyle> {
     }
 
     override function isAwake(id:Hash, ?posInfos:PosInfos):Bool {
+        if (id == Defold.hash("0"))
+            trace("isAwake", _targetsState[id]);
+        if (!super.isAwake(id))
+            return false;
+
         try {
             var node = Gui.get_node(id);
             if (!node.is_enabled())
@@ -35,7 +40,7 @@ class MGui extends MGuiBase<ExtGuiNode, NodeStyle> {
             Error.error(error.message + ' ($id)', posInfos);
         }
         
-        return super.isAwake(id);
+        return true;
     }
 
     override function pick(id:Hash, x:Float, y:Float):Bool {

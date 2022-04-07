@@ -1,6 +1,6 @@
 package ixia.defold.gui.m;
 
-enum abstract TargetState(Int) to Int {
+enum abstract TargetState #if debug (String) to String #else (Int) to Int #end {
     
     var UNTOUCHED;
     var HOVERED;

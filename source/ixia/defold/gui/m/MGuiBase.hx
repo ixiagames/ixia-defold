@@ -538,25 +538,14 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     public function setState(id:Hash, state:TargetState):Void {
+        if (id == "0".hash())
+            trace("setState", state);
+
         if (_targetsState[id] == state)
             return;
 
         _targetsState[id] = state;
         applyStateStyle(id, getStateStyle(id));
-    }
-
-    function getStateStyle(id:Hash):TStyle {
-        var style = _targetsStateStyle[id];
-        if (style == null)
-            return null;
-
-        return switch (_targetsState[id]) {
-            case UNTOUCHED: style.untouched;
-            case HOVERED:   style.hovered;
-            case PRESSED:   style.pressed;
-            case DRAGGED:   style.dragged;
-            case SLEEPING:  style.sleeping;
-        }
     }
 
     public function wake(id:Hash):Void {
