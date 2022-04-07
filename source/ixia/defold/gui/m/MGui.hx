@@ -1,5 +1,6 @@
 package ixia.defold.gui.m;
 
+import haxe.PosInfos;
 import defold.types.Vector3;
 import ixia.defold.types.Hash;
 
@@ -18,7 +19,7 @@ class MGui extends MGuiBase<ExtGuiNode, NodeStyle> {
         return Gui.get_node(id);
     }
 
-    override function isAwake(id:Hash):Bool {
+    override function isAwake(id:Hash, ?posInfos:PosInfos):Bool {
         try {
             var node = Gui.get_node(id);
             if (!node.is_enabled())
@@ -31,7 +32,7 @@ class MGui extends MGuiBase<ExtGuiNode, NodeStyle> {
                 parent = parent.get_parent();
             }
         } catch (error) {
-            Error.error(error.message + ' ($id)');
+            Error.error(error.message + ' ($id)', posInfos);
         }
         
         return super.isAwake(id);

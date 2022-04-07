@@ -7,6 +7,7 @@ import defold.support.ScriptOnInputAction;
 import defold.types.Message;
 import defold.types.Url;
 import defold.types.Vector3;
+import haxe.PosInfos;
 import haxe.ds.Either;
 import haxe.extern.EitherType;
 import ixia.defold.gui.m.TargetEvent;
@@ -588,7 +589,7 @@ class MGuiBase<TTarget, TStyle> {
         }
     }
 
-    public function isAwake(id:Hash):Bool {
+    public function isAwake(id:Hash, ?posInfos:PosInfos):Bool {
         return _targetsState[id] != null && _targetsState[id] != SLEEPING;
     }
 
