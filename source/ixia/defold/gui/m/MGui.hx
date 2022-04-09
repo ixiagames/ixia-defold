@@ -20,8 +20,6 @@ class MGui extends MGuiBase<ExtGuiNode, NodeStyle> {
     }
 
     override function isAwake(id:Hash, ?posInfos:PosInfos):Bool {
-        if (id == Defold.hash("0"))
-            trace("isAwake", _targetsState[id]);
         if (!super.isAwake(id))
             return false;
 

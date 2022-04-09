@@ -12,7 +12,6 @@ import haxe.ds.Either;
 import haxe.extern.EitherType;
 import ixia.defold.gui.m.TargetEvent;
 import ixia.defold.gui.m.TargetEventListener.TargetEventListeners;
-import ixia.defold.gui.m.TargetState;
 import ixia.defold.types.Hash;
 import ixia.defold.types.Hashes;
 import ixia.ds.OneOfTwo;
@@ -20,7 +19,6 @@ import ixia.lua.RawTable;
 
 using Defold;
 using Math;
-using ixia.math.Math;
 
 class MGuiBase<TTarget, TStyle> {
 
@@ -29,27 +27,8 @@ class MGuiBase<TTarget, TStyle> {
     public var pointerX(default, null):Float = 0;
     public var pointerY(default, null):Float = 0;
     public var pointerState(default, null):PointerState = RELEASED;
-
-    var _groups:RawTable<Hash, Array<Hash>> = new RawTable();
-    var _targetsId:Array<Hash> = [];
-
-    var _targetsTapInited:RawTable<Hash, Bool> = new RawTable();
-    var _targetsState:RawTable<Hash, TargetState> = new RawTable();
-    var _targetsStateStyle:RawTable<Hash, TargetStyle<TStyle>> = new RawTable();
-    var _targetsListeners:RawTable<Hash, RawTable<TargetEvent, Array<TargetEventListener>>> = new RawTable();
-    
-    var _targetsStartPos:RawTable<Hash, Vector3> = new RawTable();
-    var _targetsHeldPos:RawTable<Hash, Vector3> = new RawTable();
-    var _targetsTrackLength:RawTable<Hash, Float> = new RawTable();
-    var _targetsDirection:RawTable<Hash, DragDirection> = new RawTable();
-
-    var _targetsMin:RawTable<Hash, Float> = new RawTable();
-    var _targetsMax:RawTable<Hash, Float> = new RawTable();
-    var _targetsValue:RawTable<Hash, Float> = new RawTable();
-    var _targetsStepValue:RawTable<Hash, Float> = new RawTable();
-    var _targetsNumSteps:RawTable<Hash, Int> = new RawTable();
-    var _targetsPercent:RawTable<Hash, Float> = new RawTable();
-    
+    public final targets = new Map<Hash, TargetData<TTarget, TStyle>>();
+    var _groups:RawTable<Hash, Array<Hash>> = new RawTable();    
     var _userdata:RawTable<Hash, Dynamic> = new RawTable();
     var _dataListeners:RawTable<Hash, Array<DataListener>> = new RawTable();
     var _messagesListeners:RawTable<Hash, Array<Dynamic->Void>> = new RawTable();
@@ -79,27 +58,15 @@ class MGuiBase<TTarget, TStyle> {
      * Remove a target from the interaction list.
      * Remove its listeners & styles but leave other data (like min, max, percent...).
      */
-    public function removeInteraction(id:Hash):Void {
-        if (_targetsId.remove(id)) {
-            _targetsTapInited[id] = null;
-            _targetsListeners[id] = null;
-            _targetsStateStyle[id] = null;
-            _targetsState[id] = null;
-        }
+    public function removeInteraction(id:Hash):Bool {
+        return targets.remove(id);
     }
 
-    function initTarget(id:Hash):Void {
-        if (exists(id))
-            return;
+    function initTarget(id:Hash):TargetData<TTarget, TStyle> {
+        if (targets.exists(id))
+            return targets[id];
 
-        _targetsId.push(id);
-        _targetsTapInited[id] = false;
-        _targetsListeners[id] = new RawTable();
-        setState(id, pointerPick(id) ? HOVERED : UNTOUCHED);
-    }
-
-    public inline function exists(id:Hash):Bool {
-        return _targetsId.indexOf(id) > -1;
+        return targets[id] = (new TargetData(this, id));
     }
 
     public function config(ids:Hashes, style:TargetStyle<TStyle>, listeners:TargetEventListeners):MGuiBase<TTarget, TStyle> {
@@ -109,8 +76,9 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     public function sub(ids:Hashes, listeners:TargetEventListeners):MGuiBase<TTarget, TStyle> {
+        var target:TargetData<TTarget, TStyle>;
         for (id in ids) {
-            initTarget(id);
+            target = initTarget(id);
 
             for (field in Reflect.fields(listeners)) {
                 var listener = Reflect.field(listeners, field);
@@ -118,22 +86,24 @@ class MGuiBase<TTarget, TStyle> {
                     continue;
 
                 var event = TargetEvent.fromString(field);
-                if (_targetsListeners[id][event] == null)
-                    _targetsListeners[id][event] = [];
+                if (target.listeners[event] == null)
+                    target.listeners[event] = [];
                 else {
-                    var addedIndex = _targetsListeners[id][event].indexOf(listener);
+                    var addedIndex = target.listeners[event].indexOf(listener);
                     if (addedIndex > -1)
-                        _targetsListeners[id][event].splice(addedIndex, 1);
+                        target.listeners[event].splice(addedIndex, 1);
                 }
-                _targetsListeners[id][event].push(listener);
+                target.listeners[event].push(listener);
             }
         }
         return this;
     }
 
     public function unsub(ids:Hashes, listeners:TargetEventListeners):Void {
+        var target:TargetData<TTarget, TStyle>;
         for (id in ids) {
-            if (_targetsListeners[id] == null)
+            target = targets[id];
+            if (target == null)
                 continue;
 
             for (field in Reflect.fields(listeners)) {
@@ -142,10 +112,10 @@ class MGuiBase<TTarget, TStyle> {
                     continue;
 
                 var event = TargetEvent.fromString(field);
-                if (_targetsListeners[id][event] == null)
+                if (target.listeners[event] == null)
                     continue;
 
-                _targetsListeners[id][event].remove(listener);
+                target.listeners[event].remove(listener);
             }
         }
     }
@@ -215,13 +185,12 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     public function style(ids:Hashes, style:TargetStyle<TStyle>):MGuiBase<TTarget, TStyle> {
+        var target:TargetData<TTarget, TStyle>;
         for (id in ids) {
-            initTarget(id);
-
-            _targetsStateStyle[id] = style;
-            applyStateStyle(id, Reflect.field(style, _targetsState[id].toString()));
+            target = initTarget(id);
+            target.stateStyle = style;
+            applyStateStyle(id, Reflect.field(style, target.state.toString()));
         }
-
         return this;
     }
 
@@ -314,21 +283,22 @@ class MGuiBase<TTarget, TStyle> {
         ?min:Float, ?max:Float, ?step:Float,
         ?thumbStyle:TargetStyle<TStyle>, ?listeners:TargetEventListeners
     ):MGuiBase<TTarget, TStyle> {
-        initTarget(id);
-        _targetsTrackLength[id] = length;
-        _targetsDirection[id] = direction;
-        _targetsStartPos[id] = getPos(id);
-        _targetsPercent[id] = 0;
-        if (min != null) {
-            _targetsValue[id] = min;
-            _targetsMin[id] = min;
-            // Will cause error if use '_targetsMin[id] = _targetsValue[id] = min'.
-        }
-        if (max != null) _targetsMax[id] = max;
-        if (step != null) _targetsStepValue[id] = step;
-        if (thumbStyle != null) style(id, thumbStyle);
-        if (listeners != null) sub(id, listeners);
-        dispatch(id, VALUE);
+        var target = initTarget(id);
+        target.sliderTrackLength = length;
+        target.sliderDirection = direction;
+        target.sliderStartPos = getPos(id);
+        target.sliderPercent = 0;
+        if (min != null)
+            target.sliderValue = target.sliderMin = min;
+        if (max != null)
+            target.sliderMax = max;
+        if (step != null)
+            target.sliderStepValue = step;
+        if (thumbStyle != null)
+            style(id, thumbStyle);
+        if (listeners != null)
+            sub(id, listeners);
+        target.dispatch(VALUE);
         return this;
     }
 
@@ -341,7 +311,7 @@ class MGuiBase<TTarget, TStyle> {
             pointerX = x;
             pointerY = y;
 
-            for (id in _targetsId) {
+            for (id in targets.keys()) {
                 if (isAwake(id))
                     handleTargetPointerMove(id, action, scriptData);
             }
@@ -355,7 +325,7 @@ class MGuiBase<TTarget, TStyle> {
             else if (action.released)
                 pointerState = JUST_PRESSED;
 
-            for (id in _targetsId) {
+            for (id in targets.keys()) {
                 if (isAwake(id))
                     handleTargetPressOrRelease(id, action, scriptData);
             }
@@ -392,107 +362,111 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     function handleTargetPointerMove(id:Hash, action:ScriptOnInputAction, scriptData:Dynamic):Void {
-        if (_targetsState[id].dragged) {
+        var target = targets[id];
+        if (target.state.dragged) {
             updateDrag(id);
-            dispatch(id, DRAG, action);
-            if (isSlider(id)) {
-                setPercent(id, switch (_targetsDirection[id]) {
+            target.dispatch(DRAG, action);
+            if (target.isSlider()) {
+                target.setSliderPercent(switch (target.sliderDirection) {
                     case LEFT_RIGHT:
-                        (getPos(id).x - _targetsStartPos[id].x) / _targetsTrackLength[id];
+                        (getPos(id).x - target.sliderStartPos.x) / target.sliderTrackLength;
                     case RIGHT_LEFT:
-                        (_targetsStartPos[id].x - getPos(id).x) / _targetsTrackLength[id];
+                        (target.sliderStartPos.x - getPos(id).x) / target.sliderTrackLength;
                 });
             }
         
         } else if (pointerPick(id)) {
-            if (!_targetsState[id].touched) {
-                setState(id, HOVERED);
-                dispatch(id, ENTER, action);
+            if (!target.state.touched) {
+                target.state = HOVERED;
+                target.dispatch(ENTER, action);
             }
         } else {
-            if (_targetsState[id].touched) {
-                setState(id, UNTOUCHED);
-                dispatch(id, LEAVE, action);
+            if (target.state.touched) {
+                target.state = UNTOUCHED;
+                target.dispatch(LEAVE, action);
             }
         }
     }
 
     function handleTargetPressOrRelease(id:Hash, action:ScriptOnInputAction, scriptData:Dynamic):Void {
+        var target = targets[id];
         if (action.pressed) {
             if (pointerPick(id)) {
-                _targetsTapInited[id] = true;
-
-                setState(id, PRESSED);
-                dispatch(id, PRESS, action);
-
-                if (_targetsDirection[id] != null) {
+                target.tapInited = true;
+                target.state = PRESSED;
+                target.dispatch(PRESS, action);
+                if (target.sliderDirection != null) {
                     startDrag(id);
-                    dispatch(id, DRAG, action);
+                    target.dispatch(DRAG, action);
                 }
             }
         } else if (action.released) {
             var releaseDispatched = false;
-
             if (pointerPick(id)) {
-                if (_targetsTapInited[id]) {
-                    _targetsTapInited[id] = false;
-                    dispatch(id, TAP, action);
+                if (target.tapInited) {
+                    target.tapInited = false;
+                    target.dispatch(TAP, action);
                 }
-                
                 if (isAwake(id)) {
-                    setState(id, HOVERED);
-                    dispatch(id, RELEASE, action);
+                    target.state = HOVERED;
+                    target.dispatch(RELEASE, action);
                     releaseDispatched = true;
                 }
             }
 
-            if (_targetsState[id].dragged) {
-                setState(id, pointerPick(id) ? HOVERED : UNTOUCHED);
+            if (target.state.dragged) {
+                target.state = pointerPick(id) ? HOVERED : UNTOUCHED;
                 if (!releaseDispatched)
-                    dispatch(id, RELEASE, action);
+                    target.dispatch(RELEASE, action);
             }
         }
     }
 
     function startDrag(id:Hash):Void {
-        if (_targetsStartPos[id] == null)
-            _targetsStartPos[id] = getPos(id);
-        if (_targetsHeldPos[id] == null)
-            _targetsHeldPos[id] = Vmath.vector3();
+        var target = targets[id];
+        if (target.sliderStartPos == null)
+            target.sliderStartPos = getPos(id);
+        if (target.heldPos == null)
+            target.heldPos = Vmath.vector3();
 
         var pos = getPos(id);
-        _targetsHeldPos[id].x = pointerX - pos.x;
-        _targetsHeldPos[id].y = pointerY - pos.y;
+        target.heldPos.x = pointerX - pos.x;
+        target.heldPos.y = pointerY - pos.y;
 
-        setState(id, DRAGGED);
+        target.state = DRAGGED;
         updateDrag(id);
     }
 
     function updateDrag(id:Hash):Void {
-        var start = _targetsStartPos[id];
-        var trackLength = _targetsTrackLength[id];
-        var heldPos = _targetsHeldPos[id];
+        var target = targets[id];
+        var start = target.sliderStartPos;
+        var trackLength = target.sliderTrackLength;
+        var heldPos = target.heldPos;
         var tx = pointerX - heldPos.x;
-        if (start != null && trackLength != null && _targetsMin[id] != null && _targetsMax[id] != null && _targetsStepValue[id] != null) {
-            var percent = switch (_targetsDirection[id]) {
+        if (
+            start != null && trackLength != null &&
+            target.sliderMin != null && target.sliderMax != null &&
+            target.sliderValue != null
+        ) {
+            var percent = switch (target.sliderDirection) {
                 case LEFT_RIGHT: (tx - start.x) / trackLength;
                 case RIGHT_LEFT: (start.x - tx) / trackLength;
             }
-            var maxValueDistance = _targetsMax[id] - _targetsMin[id];
-            var numSteps = (maxValueDistance * percent) / _targetsStepValue[id];
+            var maxValueDistance = target.sliderMax - target.sliderMin;
+            var numSteps = (maxValueDistance * percent) / target.sliderStepValue;
             var downSteps = numSteps.floor();
             var upSteps = numSteps.ceil();
-            _targetsNumSteps[id] = Math.abs(downSteps - numSteps) < Math.abs(upSteps - numSteps) ? downSteps : upSteps;
-            numSteps = _targetsNumSteps[id];
-            percent = (numSteps * _targetsStepValue[id]) / maxValueDistance;
-            switch (_targetsDirection[id]) {
+            target.sliderNumSteps = Math.abs(downSteps - numSteps) < Math.abs(upSteps - numSteps) ? downSteps : upSteps;
+            numSteps = target.sliderNumSteps;
+            percent = (numSteps * target.sliderStepValue) / maxValueDistance;
+            switch (target.sliderDirection) {
                 case LEFT_RIGHT: tx = start.x + trackLength * percent;
                 case RIGHT_LEFT: tx = start.x - trackLength * percent;
             }
         }
 
         var pos = getPos(id);
-        switch (_targetsDirection[id]) {
+        switch (target.sliderDirection) {
             case LEFT_RIGHT: 
                 if (start != null) {
                     if (tx < start.x)
@@ -522,40 +496,13 @@ class MGuiBase<TTarget, TStyle> {
         }
     }
 
-    public function dispatch(id:Hash, event:TargetEvent, ?action:ScriptOnInputAction):Void {
-        if (_targetsListeners[id] == null)
-            return;
-
-        if (_targetsListeners[id][event] == null)
-            return;
-
-        for (listener in _targetsListeners[id][event])
-            listener.call(id, event, action);
-    }
-
-    public inline function getState(id:Hash):TargetState {
-        return _targetsState[id];
-    }
-
-    public function setState(id:Hash, state:TargetState):Void {
-        if (id == "0".hash())
-            trace("setState", state);
-
-        if (_targetsState[id] == state)
-            return;
-
-        _targetsState[id] = state;
-        applyStateStyle(id, getStateStyle(id));
-    }
-
     public function wake(id:Hash):Void {
-        initTarget(id);
-        
-        if (_targetsState[id] != SLEEPING)
+        var target = initTarget(id);
+        if (target.state != SLEEPING)
             return;
 
-        setState(id, pointerPick(id) ? HOVERED : UNTOUCHED);
-        dispatch(id, WAKE);
+        target.state = pointerPick(id) ? HOVERED : UNTOUCHED;
+        target.dispatch(WAKE);
     }
 
     public function wakeGroup(group:Hash):Void {
@@ -566,11 +513,12 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     public function sleep(id:Hash):Void {
-        if (_targetsState[id] == SLEEPING)
+        var target = targets[id];
+        if (target.state == SLEEPING)
             return;
 
-        setState(id, SLEEPING);
-        dispatch(id, SLEEP);
+        target.state = SLEEPING;
+        target.dispatch(SLEEP);
     }
 
     public function sleepGroup(group:Hash):Void {
@@ -581,128 +529,59 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     public function isAwake(id:Hash, ?posInfos:PosInfos):Bool {
-        return _targetsState[id] != null && _targetsState[id] != SLEEPING;
-    }
-
-    public inline function isSlider(id:Hash):Bool {
-        return _targetsDirection[id] != null && _targetsStartPos[id] != null && _targetsTrackLength[id] != null;
-    }
-
-    public inline function percent(id:Hash):Float {
-        return _targetsPercent[id];
-    }
-
-    public function setPercent(id:Hash, percent:Float):Void {
-        var min = _targetsMin[id];
-        if (min == null)
-            Error.error('$id does not have a minimum value.');
-
-        var max = _targetsMax[id];
-        if (max == null)
-            Error.error('$id does not have a maximum value.');
-
-        if (percent < 0) percent = 0;
-        else if (percent > 1) percent = 1;
-
-        var value = percent.between(min, max);
-        var step = _targetsStepValue[id];
-        if (step != null) {
-            var stepIndex = value / step;
-            if (stepIndex - stepIndex.floor() > 0) {
-                _targetsNumSteps[id] = stepIndex.round();
-                value = step * _targetsNumSteps[id];
-                percent = (value - min) / (max - min);
-                if (percent > 1) {
-                    percent = 1;
-                    value = max;
-                }
-            }
-        }
-        
-        _targetsValue[id] = value;
-        _targetsPercent[id] = percent;
-        
-        if (isSlider(id)) {
-            var pos = getPos(id);
-            switch (_targetsDirection[id]) {
-                case LEFT_RIGHT:
-                    pos.x = _targetsStartPos[id].x + percent * _targetsTrackLength[id];
-                case RIGHT_LEFT:
-                    pos.x = _targetsStartPos[id].x + _targetsTrackLength[id] * (1 - percent);
-            }
-            setPos(id, pos);
-        }
-
-        dispatch(id, VALUE);
-    }
-
-    public function value(id:Hash):Float {
-        return _targetsValue[id];
+        return targets.exists(id) && targets[id].state != SLEEPING;
     }
 
     public function setValue(id:Hash, value:Float):MGuiBase<TTarget, TStyle> {
-        _targetsValue[id] = value;
+        targets[id].sliderValue = value;
         updatePercent(id);
         return this;
     }
-
-    public inline function min(id:Hash):Float {
-        return _targetsMin[id];
-    }
-
+    
     public function setMin(id:Hash, min:Float):MGuiBase<TTarget, TStyle> {
-        _targetsMin[id] = min;
+        targets[id].sliderMin = min;
         updatePercent(id);
         return this;
-    }
-
-    public inline function max(id:Hash):Float {
-        return _targetsMax[id];
     }
 
     public function setMax(id:Hash, value:Float):MGuiBase<TTarget, TStyle> {
-        _targetsMax[id] = value;
+        targets[id].sliderMax = value;
         updatePercent(id);
         return this;
-    }
-
-    public inline function stepValue(id:Hash):Float {
-        return _targetsStepValue[id];
     }
     
     public inline function setStepValue(id:Hash, value:Float):MGuiBase<TTarget, TStyle> {
-        _targetsStepValue[id] = value;
+        targets[id].sliderStepValue = value;
         updatePercent(id);
         return this;
     }
 
-    public inline function stepIndex(id:Hash):Int {
-        return _targetsNumSteps[id];
-    }
-
     public inline function setStepIndex(id:Hash, index:Int):MGuiBase<TTarget, TStyle> {
-        if (_targetsStepValue[id] == null)
+        var target = targets[id];
+        if (target.sliderStepValue == null)
             Error.error('$id does not have a step value.');
-        _targetsValue[id] = _targetsStepValue[id] * index;
+        target.sliderStepValue = target.sliderStepValue * index;
         updatePercent(id);
         return this;
     }
 
     public function setMinMaxStep(id:Hash, min:Float, max:Float, step:Float):MGuiBase<TTarget, TStyle> {
-        _targetsMin[id] = min;
-        _targetsMax[id] = max;
-        _targetsStepValue[id] = step;
-        if (_targetsValue[id] == null || _targetsValue[id] <= min)
-            setPercent(id, 0);
-        else if (_targetsValue[id] >= max)
-            setPercent(id, 1);
+        var target = targets[id];
+        target.sliderMin = min;
+        target.sliderMax = max;
+        target.sliderStepValue = step;
+        if (target.sliderValue == null || target.sliderValue <= min)
+            target.setSliderPercent(0);
+        else if (target.sliderValue >= max)
+            target.setSliderPercent(1);
         else
-            setPercent(id, (_targetsValue[id] - min) / (max - min));
+            target.setSliderPercent((target.sliderValue - min) / (max - min));
         return this;
     }
 
     inline function updatePercent(id:Hash):Void {
-        setPercent(id, (_targetsValue[id] - _targetsMin[id]) / (_targetsMax[id] - _targetsMin[id]));
+        var target = targets[id];
+        target.setSliderPercent((target.sliderValue - target.sliderMin) / (target.sliderMax - target.sliderMin));
     }
 
     public inline function pointerPick(id:Hash):Bool {
