@@ -496,35 +496,17 @@ class MGuiBase<TTarget, TStyle> {
         }
     }
 
-    public function wake(id:Hash):Void {
-        var target = initTarget(id);
-        if (target.state != SLEEPING)
-            return;
-
-        target.state = pointerPick(id) ? HOVERED : UNTOUCHED;
-        target.dispatch(WAKE);
-    }
-
     public function wakeGroup(group:Hash):Void {
         if (_groups[group] != null) {
             for (id in _groups[group])
-                wake(id);
+                targets[id].wake();
         }
-    }
-
-    public function sleep(id:Hash):Void {
-        var target = targets[id];
-        if (target.state == SLEEPING)
-            return;
-
-        target.state = SLEEPING;
-        target.dispatch(SLEEP);
     }
 
     public function sleepGroup(group:Hash):Void {
         if (_groups[group] != null) {
             for (id in _groups[group])
-                sleep(id);
+                targets[id].state = SLEEPING;
         }
     }
 
@@ -537,7 +519,7 @@ class MGuiBase<TTarget, TStyle> {
         updatePercent(id);
         return this;
     }
-    
+
     public function setMin(id:Hash, min:Float):MGuiBase<TTarget, TStyle> {
         targets[id].sliderMin = min;
         updatePercent(id);

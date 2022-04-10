@@ -38,6 +38,18 @@ class TargetData<TTarget, TStyle> {
         state = mgui.pointerPick(id) ? HOVERED : UNTOUCHED;
     }
 
+    public inline function sleep():Void {
+        state = SLEEPING;
+    }
+
+    public function wake():Void {
+        if (state != SLEEPING)
+            return;
+
+        state = mgui.pointerPick(id) ? HOVERED : UNTOUCHED;
+        dispatch(WAKE);
+    }
+
     public function dispatch(event:TargetEvent, ?action:ScriptOnInputAction):Void {
         if (listeners == null || listeners[event] == null)
             return;
@@ -104,12 +116,15 @@ class TargetData<TTarget, TStyle> {
         dispatch(VALUE);
     }
 
-    inline function set_state(value) {
+    function set_state(value) {
         if (value == state)
             return state;
 
         state = value;
         mgui.applyStateStyle(id, getStateStyle());
+        if (state == SLEEPING)
+            dispatch(SLEEP);
+
         return state;
     }
 
