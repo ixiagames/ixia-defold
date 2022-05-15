@@ -16,6 +16,7 @@ import ixia.defold.types.Hash;
 import ixia.defold.types.Hashes;
 import ixia.ds.OneOfTwo;
 import ixia.lua.RawTable;
+import defold.types.Message;
 
 using Defold;
 using Math;
@@ -28,11 +29,13 @@ class MGuiBase<TTarget, TStyle> {
     public var pointerY(default, null):Float = 0;
     public var pointerState(default, null):PointerState = RELEASED;
     public final targets = new Map<Hash, TargetData<TTarget, TStyle>>();
+
+    public final inputListeners = new Map<Hash, InputActionListener>();
+    public final messageListeners = new Map<Hash, (guiData:Dynamic, messageId:Message<Dynamic>, message:Dynamic, sender:Url)->Void>();
+
     var _groups:RawTable<Hash, Array<Hash>> = new RawTable();    
     var _userdata:RawTable<Hash, Dynamic> = new RawTable();
     var _dataListeners:RawTable<Hash, Array<DataListener>> = new RawTable();
-    var _messagesListeners:RawTable<Hash, Array<Dynamic->Void>> = new RawTable();
-    var _inputsListeners:Array<InputActionListener>;
     var _actionsListeners:RawTable<Hash, Array<InputActionListener>> = new RawTable();
     var _pressesListeners:RawTable<Hash, Array<InputActionListener>> = new RawTable();
     var _releasesListeners:RawTable<Hash, Array<InputActionListener>> = new RawTable();
@@ -123,30 +126,6 @@ class MGuiBase<TTarget, TStyle> {
     public function subGroup(group:Hash, listeners:TargetEventListeners):MGuiBase<TTarget, TStyle> {
         if (_groups[group] != null)
             sub(cast _groups[group], listeners);
-        return this;
-    }
-
-    public function subMes<T>(message:Message<T>, listener:EitherType<Void->Void, T->Void>):MGuiBase<TTarget, TStyle> {
-        if (_messagesListeners[cast message] == null)
-            _messagesListeners[cast message] = [];
-        else {
-            var addedIndex = _messagesListeners[cast message].indexOf(listener);
-            if (addedIndex > -1)
-                _messagesListeners[cast message].splice(addedIndex, 1);
-        }
-        _messagesListeners[cast message].push(listener);
-        return this;
-    }
-
-    public function subInputs(listener:InputActionListener):MGuiBase<TTarget, TStyle> {
-        if (_inputsListeners == null)
-            _inputsListeners = [];
-        else {
-            var addedIndex = _inputsListeners.indexOf(listener);
-            if (addedIndex > -1)
-                _inputsListeners.splice(addedIndex, 1);
-        }
-        _inputsListeners.push(listener);
         return this;
     }
 
@@ -278,28 +257,9 @@ class MGuiBase<TTarget, TStyle> {
         return _userdata[dataId];
     }
 
-    public function slider(
-        id:Hash, length:Float, ?direction:DragDirection = LEFT_RIGHT,
-        ?min:Float, ?max:Float, ?step:Float,
-        ?thumbStyle:TargetStyle<TStyle>, ?listeners:TargetEventListeners
-    ):MGuiBase<TTarget, TStyle> {
-        var target = initTarget(id);
-        target.sliderTrackLength = length;
-        target.sliderDirection = direction;
-        target.sliderStartPos = getPos(id);
-        target.sliderPercent = 0;
-        if (min != null)
-            target.sliderValue = target.sliderMin = min;
-        if (max != null)
-            target.sliderMax = max;
-        if (step != null)
-            target.sliderStepValue = step;
-        if (thumbStyle != null)
-            style(id, thumbStyle);
-        if (listeners != null)
-            sub(id, listeners);
-        target.dispatch(VALUE);
-        return this;
+    public inline function message<TMessage>(guiData:Dynamic, message_id:Message<TMessage>, message:TMessage, sender:Url):Void {
+        for (listener in messageListeners)
+            listener(guiData, message_id, message, sender);
     }
 
     public inline function input(actionId:Hash, action:ScriptOnInputAction, ?scriptData:Dynamic):Void {
@@ -340,14 +300,15 @@ class MGuiBase<TTarget, TStyle> {
         
         if (actionId == null)
             actionId = pointerMoveActionId;
-        if (_inputsListeners != null) {
-            for (listener in _inputsListeners)
-                listener.call(actionId, action);
-        }
+
+        for (listener in inputListeners)
+            listener.call(actionId, action);
+
         if (_actionsListeners[actionId] != null) {
             for (listener in _actionsListeners[actionId])
                 listener.call(actionId, action);
         }
+
         if (action.pressed) {
             if (_pressesListeners[actionId] != null) {
                 for (listener in _pressesListeners[actionId])
@@ -489,11 +450,28 @@ class MGuiBase<TTarget, TStyle> {
         setPos(id, pos);
     }
 
-    public function message<T>(messageId:Message<T>, ?message:T, ?sender:Url):Void {
-        if (_messagesListeners[cast messageId] != null) {
-            for (listener in _messagesListeners[cast messageId])
-                listener(message);
-        }
+    public function slider(
+        id:Hash, length:Float, ?direction:DragDirection = LEFT_RIGHT,
+        ?min:Float, ?max:Float, ?step:Float,
+        ?thumbStyle:TargetStyle<TStyle>, ?listeners:TargetEventListeners
+    ):MGuiBase<TTarget, TStyle> {
+        var target = initTarget(id);
+        target.sliderTrackLength = length;
+        target.sliderDirection = direction;
+        target.sliderStartPos = getPos(id);
+        target.sliderPercent = 0;
+        if (min != null)
+            target.sliderValue = target.sliderMin = min;
+        if (max != null)
+            target.sliderMax = max;
+        if (step != null)
+            target.sliderStepValue = step;
+        if (thumbStyle != null)
+            style(id, thumbStyle);
+        if (listeners != null)
+            sub(id, listeners);
+        target.dispatch(VALUE);
+        return this;
     }
 
     public function wakeGroup(group:Hash):Void {
