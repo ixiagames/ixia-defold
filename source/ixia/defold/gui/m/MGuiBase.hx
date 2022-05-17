@@ -24,7 +24,6 @@ using Math;
 class MGuiBase<TTarget, TStyle> {
 
     public var touchActionId(default, null):Hash;
-    public var pointerMoveActionId(default, null):Hash;
     public var pointerX(default, null):Float = 0;
     public var pointerY(default, null):Float = 0;
     public var pointerState(default, null):PointerState = RELEASED;
@@ -41,7 +40,6 @@ class MGuiBase<TTarget, TStyle> {
     var _releasesListeners:RawTable<Hash, Array<InputActionListener>> = new RawTable();
 
     public function new(?touchActionId:Hash, ?pointerMoveActionId:Hash, ?acquiresInputFocus:Bool = true) {
-        this.pointerMoveActionId = pointerMoveActionId != null ? pointerMoveActionId : "pointer_move".hash();
         this.touchActionId = touchActionId != null ? touchActionId : "touch".hash();
 
         if (acquiresInputFocus)
@@ -297,9 +295,6 @@ class MGuiBase<TTarget, TStyle> {
         }
 
         //
-        
-        if (actionId == null)
-            actionId = pointerMoveActionId;
 
         for (listener in inputListeners)
             listener.call(actionId, action);
