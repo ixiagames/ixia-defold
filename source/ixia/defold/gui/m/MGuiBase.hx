@@ -9,14 +9,12 @@ import defold.types.Url;
 import defold.types.Vector3;
 import haxe.PosInfos;
 import haxe.ds.Either;
-import haxe.extern.EitherType;
 import ixia.defold.gui.m.TargetEvent;
 import ixia.defold.gui.m.TargetEventListener.TargetEventListeners;
 import ixia.defold.types.Hash;
 import ixia.defold.types.Hashes;
 import ixia.ds.OneOfTwo;
 import ixia.lua.RawTable;
-import defold.types.Message;
 
 using Defold;
 using Math;
