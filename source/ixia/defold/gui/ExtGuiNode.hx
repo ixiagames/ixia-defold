@@ -182,6 +182,15 @@ abstract ExtGuiNode(GuiNode) from GuiNode to GuiNode {
 
     //
 
+    public var pivot(get, set):GuiPivot;
+    inline function get_pivot() return this.get_pivot();
+    inline function set_pivot(value) {
+        this.set_pivot(value);
+        return value;
+    }
+
+    //
+
     public inline function clone():ExtGuiNode {
         return this.clone();
     }
