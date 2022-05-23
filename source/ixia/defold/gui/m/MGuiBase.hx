@@ -33,9 +33,6 @@ class MGuiBase<TTarget, TStyle> {
     var _groups:RawTable<Hash, Array<Hash>> = new RawTable();    
     var _userdata:RawTable<Hash, Dynamic> = new RawTable();
     var _dataListeners:RawTable<Hash, Array<DataListener>> = new RawTable();
-    var _actionsListeners:RawTable<Hash, Array<InputActionListener>> = new RawTable();
-    var _pressesListeners:RawTable<Hash, Array<InputActionListener>> = new RawTable();
-    var _releasesListeners:RawTable<Hash, Array<InputActionListener>> = new RawTable();
 
     public function new(?touchActionId:Hash, ?pointerMoveActionId:Hash, ?acquiresInputFocus:Bool = true) {
         this.touchActionId = touchActionId != null ? touchActionId : "touch".hash();
@@ -125,26 +122,6 @@ class MGuiBase<TTarget, TStyle> {
         return this;
     }
 
-    public function subAction(actionId:Hash, ?pressed:Bool, listener:InputActionListener):MGuiBase<TTarget, TStyle> {
-        var listeners = pressed == null ? _actionsListeners : (pressed ? _pressesListeners : _releasesListeners);
-        if (listeners[actionId] == null)
-            listeners[actionId] = [];
-        else {
-            var addedIndex = listeners[actionId].indexOf(listener);
-            if (addedIndex > -1)
-                listeners[actionId].splice(addedIndex, 1);
-        }
-        listeners[actionId].push(listener);
-        return this;
-    }
-
-    public function unsubAction(actionId:Hash, ?pressed:Bool, listener:InputActionListener):Bool {
-        var listeners = pressed == null ? _actionsListeners : (pressed ? _pressesListeners : _releasesListeners);
-        if (listeners[actionId] == null)
-            return false;
-        return listeners[actionId].remove(listener);
-    }
-    
     public function subData(dataIds:Hashes, listener:DataListener):MGuiBase<TTarget, TStyle> {
         for (id in dataIds) {
             if (_dataListeners[id] == null)
@@ -296,23 +273,6 @@ class MGuiBase<TTarget, TStyle> {
 
         for (listener in inputListeners)
             listener.call(actionId, action);
-
-        if (_actionsListeners[actionId] != null) {
-            for (listener in _actionsListeners[actionId])
-                listener.call(actionId, action);
-        }
-
-        if (action.pressed) {
-            if (_pressesListeners[actionId] != null) {
-                for (listener in _pressesListeners[actionId])
-                    listener.call(actionId, action);
-            }
-        } else if (action.released) {
-            if (_releasesListeners[actionId] != null) {
-                for (listener in _releasesListeners[actionId])
-                    listener.call(actionId, action);
-            }
-        }
     }
 
     function handleTargetPointerMove(id:Hash, action:ScriptOnInputAction, scriptData:Dynamic):Void {
