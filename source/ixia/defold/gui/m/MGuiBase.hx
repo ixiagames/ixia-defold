@@ -27,8 +27,8 @@ class MGuiBase<TTarget, TStyle> {
     public var pointerState(default, null):PointerState = RELEASED;
     public final targets = new Map<Hash, TargetData<TTarget, TStyle>>();
 
-    public final inputListeners = new Map<Hash, InputActionListener>();
-    public final messageListeners = new Map<Hash, (guiData:Dynamic, messageId:Message<Dynamic>, message:Dynamic, sender:Url)->Void>();
+    public final inputListeners = new Array<InputActionListener>();
+    public final messageListeners = new Array<(guiData:Dynamic, messageId:Message<Dynamic>, message:Dynamic, sender:Url)->Void>();
 
     var _groups:RawTable<Hash, Array<Hash>> = new RawTable();    
     var _userdata:RawTable<Hash, Dynamic> = new RawTable();
