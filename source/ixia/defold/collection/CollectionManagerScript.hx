@@ -8,13 +8,19 @@ import defold.types.Url;
 
 using ixia.defold.UrlTools;
 
+typedef CollectionManagerScriptData = {
+
+    @property(true) var singleCollection:Bool;
+
+}
+
 @:access(ixia.defold.collection.Collection)
-class CollectionManagerScript extends Script<{}> {
+class CollectionManagerScript extends Script<CollectionManagerScriptData> {
 
     public var url(default, null):Url;
     public var collections(default, null):Array<Collection>;
     
-    override function init(self:{}) {
+    override function init(self:CollectionManagerScriptData) {
         super.init(self);
 
         collections = [];
@@ -48,7 +54,7 @@ class CollectionManagerScript extends Script<{}> {
         return [ for (collection in collections) if (!collection.loaded) collection ];
     }
 
-    override function on_message<TMessage>(self:{}, message_id:Message<TMessage>, message:TMessage, sender:Url) {
+    override function on_message<TMessage>(self:CollectionManagerScriptData, message_id:Message<TMessage>, message:TMessage, sender:Url) {
         switch (message_id) {
             case CollectionManagerMessages.LOAD_COLLECTION:
                 Msg.post(message.proxyUrl, message.async != null && message.async? CollectionproxyMessages.async_load : CollectionproxyMessages.load);
@@ -63,6 +69,13 @@ class CollectionManagerScript extends Script<{}> {
                 Msg.post(message.proxyUrl, CollectionproxyMessages.disable);
 
             case CollectionproxyMessages.proxy_loaded:
+                if (self.singleCollection) {
+                    for (collection in collections) {
+                        if (collection.loaded)
+                            Msg.post(collection.proxyUrl, CollectionproxyMessages.unload);
+                    }
+                }
+                
                 var collection = get(sender);
                 collection.loaded = true;
                 if (collection.onLoaded != null)
