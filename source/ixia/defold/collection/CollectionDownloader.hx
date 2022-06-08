@@ -40,7 +40,7 @@ class CollectionDownloader {
     public var onError:String->Void;
 
     public var allResources(default, null):Array<String>;
-    public var pendingResources(default, never):Array<String> = [];
+    public var pendingResources(default, null):Array<String>;
     public var downloadedResources(default, never):Array<String> = [];
     public var resourceManifest(default, null):ResourceManifestReference;
     public var progress(get, never):Float;
@@ -58,10 +58,15 @@ class CollectionDownloader {
         var table:Table<Int, String> = untyped __lua__("_G.collectionproxy.missing_resources({0})", collection.proxyUrl);
         allResources = [ for (entry in table.ipairsIterator()) entry.value ];
         resourceManifest = resourceManifest != null ? resourceManifest : Resource.get_current_manifest();
+
+        #if debug
+        trace("Resources: " + allResources.length);
+        #end
     }
     
     function download():Void {
-        if (allResources.length == 0) {
+        pendingResources = allResources.copy();
+        if (pendingResources.length == 0) {
             onCollecionDownloaded();
             if (onProgress != null)
                 onProgress(this);
@@ -72,20 +77,35 @@ class CollectionDownloader {
     }
 
     function downloadResource(id:String):Void {
+        #if debug
+        trace('Download: $id');
+        #end
         Http.request(path + id, "GET", (_, _, response) -> {
             if (response.status == 200 || response.status == 304) {
                 Resource.store_resource(resourceManifest, response.response, id, (_, hexdigest, success) -> {
                     if (success)
                         ownResourceDownloaded(id);    
-                    else if (onError != null)
-                        onError('Failed to store: $hexdigest');
+                    else if (onError != null) {
+                        #if debug
+                        trace('Failed to store: $id');
+                        #end
+                        onError('Failed to store: $id');
+                    }
                 });
-            } else if (onError != null)
-                onError('Failed to download: $id');
+            } else {
+                #if debug
+                trace('Failed to download: $id');
+                #end
+                if (onError != null)
+                    onError('Failed to download: $id');
+            }
         });
     }
 
     function ownResourceDownloaded(id:String):Void {
+        #if debug
+        trace('Downloaded: $id');
+        #end
         pendingResources.remove(id);
         downloadedResources.push(id);
         if (pendingResources.length > 0)
