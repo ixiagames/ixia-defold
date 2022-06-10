@@ -44,6 +44,7 @@ class CollectionDownloader {
     public var downloadedResources(default, never):Array<String> = [];
     public var resourceManifest(default, null):ResourceManifestReference;
     public var progress(get, never):Float;
+    public var downloaded(default, null):Bool = false;
     
     function new(collection:Collection, options:DownloadOptions) {
         this.collection = collection;
@@ -58,13 +59,13 @@ class CollectionDownloader {
         var table:Table<Int, String> = untyped __lua__("_G.collectionproxy.missing_resources({0})", collection.proxyUrl);
         allResources = [ for (entry in table.ipairsIterator()) entry.value ];
         resourceManifest = resourceManifest != null ? resourceManifest : Resource.get_current_manifest();
-
-        #if debug
-        trace("Resources: " + allResources.length);
-        #end
     }
     
     function download():Void {
+        #if debug
+        print("Missing resources: " + allResources.length);
+        #end
+        
         pendingResources = allResources.copy();
         if (pendingResources.length == 0) {
             onCollecionDownloaded();
@@ -77,9 +78,6 @@ class CollectionDownloader {
     }
 
     function downloadResource(id:String):Void {
-        #if debug
-        trace('Download: $id');
-        #end
         Http.request(path + id, "GET", (_, _, response) -> {
             if (response.status == 200 || response.status == 304) {
                 Resource.store_resource(resourceManifest, response.response, id, (_, hexdigest, success) -> {
@@ -103,9 +101,6 @@ class CollectionDownloader {
     }
 
     function ownResourceDownloaded(id:String):Void {
-        #if debug
-        trace('Downloaded: $id');
-        #end
         pendingResources.remove(id);
         downloadedResources.push(id);
         if (pendingResources.length > 0)
@@ -117,12 +112,21 @@ class CollectionDownloader {
     }
 
     function onCollecionDownloaded():Void {
+        if (downloaded)
+            return;
+
+        downloaded = true;
+
         if (autoLoad != NONE) {
             collection.load(autoLoad == ASYNC, _ -> {
                 if (autoEnable)
                     collection.enabled = true;
             });
         }
+
+        #if debug
+        print("Downloaded");
+        #end
     }
 
     inline function get_progress():Float {
@@ -130,5 +134,12 @@ class CollectionDownloader {
             return 0;
         return 1 - (pendingResources.length / allResources.length);
     }
+
+    
+    #if debug
+    inline function print(s:String):Void {
+        trace('${collection.proxyUrl.fragment} - $s');
+    }
+    #end
 
 }

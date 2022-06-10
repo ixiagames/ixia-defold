@@ -19,6 +19,7 @@ class CollectionManagerScript extends Script<CollectionManagerScriptData> {
 
     public var url(default, null):Url;
     public var collections(default, null):Array<Collection>;
+    var _waitingToLoad:Collection;
     
     override function init(self:CollectionManagerScriptData) {
         super.init(self);
@@ -57,31 +58,56 @@ class CollectionManagerScript extends Script<CollectionManagerScriptData> {
     override function on_message<TMessage>(self:CollectionManagerScriptData, message_id:Message<TMessage>, message:TMessage, sender:Url) {
         switch (message_id) {
             case CollectionManagerMessages.LOAD_COLLECTION:
-                Msg.post(message.proxyUrl, message.async != null && message.async? CollectionproxyMessages.async_load : CollectionproxyMessages.load);
+                #if debug
+                trace("Request to load: " + message.proxyUrl.fragment);
+                #end
+                for (collection in collections) {
+                    if (collection.proxyUrl == message.proxyUrl && collection.loaded)
+                        return;
+                }
 
-            case CollectionManagerMessages.UNLOAD_COLLECTION:
-                Msg.post(message.proxyUrl, CollectionproxyMessages.unload);
-
-            case CollectionManagerMessages.ENABLE_COLLECTION:
-                Msg.post(message.proxyUrl, CollectionproxyMessages.enable);
-
-            case CollectionManagerMessages.DISABLE_COLLECTION:
-                Msg.post(message.proxyUrl, CollectionproxyMessages.disable);
-
-            case CollectionproxyMessages.proxy_loaded:
                 if (self.singleCollection) {
                     for (collection in collections) {
                         if (collection.loaded)
                             Msg.post(collection.proxyUrl, CollectionproxyMessages.unload);
                     }
                 }
-                
+
+                Msg.post(message.proxyUrl, message.async != null && message.async? CollectionproxyMessages.async_load : CollectionproxyMessages.load);
+
+            case CollectionManagerMessages.UNLOAD_COLLECTION:
+                #if debug
+                trace("Request to unload: " + message.proxyUrl.fragment);
+                #end
+                Msg.post(message.proxyUrl, CollectionproxyMessages.unload);
+
+            case CollectionManagerMessages.ENABLE_COLLECTION:
+                #if debug
+                trace("Request to enable: " + message.proxyUrl.fragment);
+                #end
+                Msg.post(message.proxyUrl, CollectionproxyMessages.enable);
+
+            case CollectionManagerMessages.DISABLE_COLLECTION:
+                #if debug
+                trace("Request to disable: " + message.proxyUrl.fragment);
+                #end
+                Msg.post(message.proxyUrl, CollectionproxyMessages.disable);
+
+            case CollectionproxyMessages.proxy_loaded:
+                #if debug
+                trace("Proxy loaded: " + sender.fragment);
+                #end
+
                 var collection = get(sender);
                 collection.loaded = true;
                 if (collection.onLoaded != null)
                     collection.onLoaded(collection);
 
             case CollectionproxyMessages.proxy_unloaded:
+                #if debug
+                trace("Proxy unloaded: " + sender.fragment);
+                #end
+
                 var collection = get(sender);
                 collection.loaded = false;
                 if (collection.onUnloaded != null)
