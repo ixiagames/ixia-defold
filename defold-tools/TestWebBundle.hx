@@ -32,15 +32,26 @@ class TestWebBundle {
     }
 
     function extractResources():Void {
+        var zip:String = null;
         for (file in FileSystem.readDirectory(resourcesPath)) {
             if (file.endsWith(".zip")) {
-                unzip(file);
-                break;
+                if (zip == null || FileSystem.stat(resourcesPath + file).mtime.getTime() > FileSystem.stat(resourcesPath + zip).mtime.getTime())
+                    zip = file;
             }
+        }
+
+        if (zip != null)
+            unpackResource(zip);
+        else
+            throw "Found no resource pack in " + resourcesPath;
+
+        for (file in FileSystem.readDirectory(resourcesPath)) {
+            if (file != zip && file.endsWith(".zip"))
+                FileSystem.deleteFile(resourcesPath + file);
         }
     }
 
-    function unzip(file:String):Void {
+    function unpackResource(file:String):Void {
         Sys.command('unzip -o -qq $resourcesPath/$file -d $bundlePath/resources');
     }
 
