@@ -29,12 +29,15 @@ class Target<TTarget, TStyle> {
     public var sliderNumSteps(default, null):Int;
     public var sliderPercent(default, null):Float;
 
+    public var buttonMode:Bool = true;
+
     var _tapInited:Bool;
 
     public function new(mgui:MGuiBase<TTarget, TStyle>, id:Hash) {
         this.mgui = mgui;
         this.id = id;
         _tapInited = false;
+        buttonMode = mgui.defaultButtonMode;
         listeners = new RawTable();
         state = mgui.pointerPick(id) ? HOVERED : UNTOUCHED;
     }
@@ -141,6 +144,12 @@ class Target<TTarget, TStyle> {
             return state;
 
         state = value;
+
+        if (buttonMode) {
+            if (mgui.systemInfo.system_name == "HTML5")
+                defold.Html5.run("document.documentElement.style.cursor = " + (state.touched ? "'pointer'" : "'auto'"));
+        }
+        
         mgui.applyStateStyle(id, getStateStyle());
         if (state == SLEEPING)
             dispatch(SLEEP);

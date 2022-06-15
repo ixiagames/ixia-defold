@@ -1,6 +1,7 @@
 package ixia.defold.gui.m;
 
 import defold.Msg;
+import defold.Sys;
 import defold.Timer;
 import defold.Vmath;
 import defold.support.ScriptOnInputAction;
@@ -26,8 +27,10 @@ class MGuiBase<TTarget, TStyle> {
     public var pointerX(default, null):Float = 0;
     public var pointerY(default, null):Float = 0;
     public var pointerState(default, null):PointerState = RELEASED;
-    public final targets = new Map<Hash, Target<TTarget, TStyle>>();
+    public var defaultButtonMode:Bool;
+    public var systemInfo(default, null):SysSysInfo;
 
+    public final targets = new Map<Hash, Target<TTarget, TStyle>>();
     public final inputListeners = new Array<InputActionListener>();
     public final messageListeners = new Array<(guiData:Dynamic, messageId:Message<Dynamic>, message:Dynamic, sender:Url)->Void>();
 
@@ -35,11 +38,14 @@ class MGuiBase<TTarget, TStyle> {
     var _userdata:RawTable<Hash, Dynamic> = new RawTable();
     var _dataListeners:RawTable<Hash, Array<DataListener>> = new RawTable();
 
-    public function new(?touchActionId:Hash, ?pointerMoveActionId:Hash, ?acquiresInputFocus:Bool = true) {
+    public function new(?touchActionId:Hash, ?pointerMoveActionId:Hash, ?acquiresInputFocus:Bool = true, ?defaultButtonMode:Bool = true) {
         this.touchActionId = touchActionId != null ? touchActionId : "touch".hash();
+        this.defaultButtonMode = defaultButtonMode;
 
         if (acquiresInputFocus)
             acquireInputFocus();
+
+        systemInfo = Sys.get_sys_info();
     }
 
     // Override these.
