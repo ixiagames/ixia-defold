@@ -9,31 +9,32 @@ using Math;
 using ixia.math.Math;
 
 @:access(ixia.defold.gui.m.MGuiBase)
-class TargetData<TTarget, TStyle> {
+class Target<TTarget, TStyle> {
     
     public var id(default, null):Hash;
     public var mgui(default, null):MGuiBase<TTarget, TStyle>;
-
-    public var tapInited:Bool;
+    
     public var state(default, set):TargetState;
-    public var stateStyle:TargetStyle<TStyle>;
-    public var listeners:RawTable<TargetEvent, Array<TargetEventListener>>;
+    public var stateStyle(default, null):TargetStyle<TStyle>;
+    public var listeners(default, null):RawTable<TargetEvent, Array<TargetEventListener>>;
 
-    public var heldPos:Vector3;
-    public var sliderStartPos:Vector3;
-    public var sliderTrackLength:Float;
-    public var sliderDirection:DragDirection;
-    public var sliderMin:Float;
-    public var sliderMax:Float;
-    public var sliderValue:Float;
-    public var sliderStepValue:Float;
-    public var sliderNumSteps:Int;
-    public var sliderPercent:Float;
+    public var heldPos(default, null):Vector3;
+    public var sliderStartPos(default, null):Vector3;
+    public var sliderTrackLength(default, null):Float;
+    public var sliderDirection(default, null):DragDirection;
+    public var sliderMin(default, null):Float;
+    public var sliderMax(default, null):Float;
+    public var sliderValue(default, null):Float;
+    public var sliderStepValue(default, null):Float;
+    public var sliderNumSteps(default, null):Int;
+    public var sliderPercent(default, null):Float;
+
+    var _tapInited:Bool;
 
     public function new(mgui:MGuiBase<TTarget, TStyle>, id:Hash) {
         this.mgui = mgui;
         this.id = id;
-        tapInited = false;
+        _tapInited = false;
         listeners = new RawTable();
         state = mgui.pointerPick(id) ? HOVERED : UNTOUCHED;
     }
@@ -114,6 +115,25 @@ class TargetData<TTarget, TStyle> {
         }
 
         dispatch(VALUE);
+    }
+
+    function onPress(action:ScriptOnInputAction):Void {
+        _tapInited = true;
+        state = PRESSED;
+        dispatch(PRESS, action);
+        if (sliderDirection != null) {
+            mgui.startDrag(id);
+            dispatch(DRAG, action);
+        }
+    }
+
+    function onRelease(action:ScriptOnInputAction):Void {
+        state = mgui.pointerPick(id) ? HOVERED : UNTOUCHED;
+        if (_tapInited) {
+            _tapInited = false;
+            dispatch(TAP, action);
+        }
+        dispatch(RELEASE, action);   
     }
 
     function set_state(value) {

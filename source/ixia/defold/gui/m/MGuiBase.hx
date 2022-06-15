@@ -19,13 +19,14 @@ import ixia.lua.RawTable;
 using Defold;
 using Math;
 
+@:access(ixia.defold.gui.m.Target)
 class MGuiBase<TTarget, TStyle> {
 
     public var touchActionId(default, null):Hash;
     public var pointerX(default, null):Float = 0;
     public var pointerY(default, null):Float = 0;
     public var pointerState(default, null):PointerState = RELEASED;
-    public final targets = new Map<Hash, TargetData<TTarget, TStyle>>();
+    public final targets = new Map<Hash, Target<TTarget, TStyle>>();
 
     public final inputListeners = new Array<InputActionListener>();
     public final messageListeners = new Array<(guiData:Dynamic, messageId:Message<Dynamic>, message:Dynamic, sender:Url)->Void>();
@@ -58,11 +59,11 @@ class MGuiBase<TTarget, TStyle> {
         return targets.remove(id);
     }
 
-    function initTarget(id:Hash):TargetData<TTarget, TStyle> {
+    function initTarget(id:Hash):Target<TTarget, TStyle> {
         if (targets.exists(id))
             return targets[id];
 
-        return targets[id] = (new TargetData(this, id));
+        return targets[id] = (new Target(this, id));
     }
 
     public function config(ids:Hashes, style:TargetStyle<TStyle>, listeners:TargetEventListeners):MGuiBase<TTarget, TStyle> {
@@ -72,7 +73,7 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     public function sub(ids:Hashes, listeners:TargetEventListeners):MGuiBase<TTarget, TStyle> {
-        var target:TargetData<TTarget, TStyle>;
+        var target:Target<TTarget, TStyle>;
         for (id in ids) {
             target = initTarget(id);
 
@@ -96,7 +97,7 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     public function unsub(ids:Hashes, listeners:TargetEventListeners):Void {
-        var target:TargetData<TTarget, TStyle>;
+        var target:Target<TTarget, TStyle>;
         for (id in ids) {
             target = targets[id];
             if (target == null)
@@ -137,7 +138,7 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     public function style(ids:Hashes, style:TargetStyle<TStyle>):MGuiBase<TTarget, TStyle> {
-        var target:TargetData<TTarget, TStyle>;
+        var target:Target<TTarget, TStyle>;
         for (id in ids) {
             target = initTarget(id);
             target.stateStyle = style;
@@ -305,34 +306,12 @@ class MGuiBase<TTarget, TStyle> {
     function handleTargetPressOrRelease(id:Hash, action:ScriptOnInputAction, scriptData:Dynamic):Void {
         var target = targets[id];
         if (action.pressed) {
-            if (pointerPick(id)) {
-                target.tapInited = true;
-                target.state = PRESSED;
-                target.dispatch(PRESS, action);
-                if (target.sliderDirection != null) {
-                    startDrag(id);
-                    target.dispatch(DRAG, action);
-                }
-            }
-        } else if (action.released) {
-            var releaseDispatched = false;
-            if (pointerPick(id)) {
-                if (target.tapInited) {
-                    target.tapInited = false;
-                    target.dispatch(TAP, action);
-                }
-                if (isAwake(id)) {
-                    target.state = HOVERED;
-                    target.dispatch(RELEASE, action);
-                    releaseDispatched = true;
-                }
-            }
+            if (pointerPick(id))
+                target.onPress(action);
 
-            if (target.state.dragged) {
-                target.state = pointerPick(id) ? HOVERED : UNTOUCHED;
-                if (!releaseDispatched)
-                    target.dispatch(RELEASE, action);
-            }
+        } else if (action.released) {
+            if (target.state.dragged || target.state.touched)
+                target.onRelease(action);
         }
     }
 
