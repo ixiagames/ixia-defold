@@ -27,7 +27,7 @@ class Target<TTarget, TStyle> {
     public var sliderValue(default, null):Float;
     public var sliderStepValue(default, null):Float;
     public var sliderNumSteps(default, null):Int;
-    public var sliderPercent(default, null):Float;
+    public var sliderPercent(default, set):Float;
 
     public var buttonMode:Bool = true;
 
@@ -79,7 +79,44 @@ class Target<TTarget, TStyle> {
         return sliderDirection != null && sliderStartPos != null && sliderTrackLength != null;
     }
 
-    public function setSliderPercent(percent:Float):Void {
+    function onPress(action:ScriptOnInputAction):Void {
+        _tapInited = true;
+        state = PRESSED;
+        dispatch(PRESS, action);
+        if (sliderDirection != null) {
+            mgui.startDrag(id);
+            dispatch(DRAG, action);
+        }
+    }
+
+    function onRelease(action:ScriptOnInputAction):Void {
+        state = mgui.pointerPick(id) ? HOVERED : UNTOUCHED;
+        if (_tapInited) {
+            _tapInited = false;
+            dispatch(TAP, action);
+        }
+        dispatch(RELEASE, action);   
+    }
+
+    function set_state(value) {
+        if (value == state)
+            return state;
+
+        state = value;
+
+        if (buttonMode) {
+            if (mgui.systemInfo.system_name == "HTML5")
+                defold.Html5.run("document.documentElement.style.cursor = " + (state.touched ? "'pointer'" : "'auto'"));
+        }
+        
+        mgui.applyStateStyle(id, getStateStyle());
+        if (state == SLEEPING)
+            dispatch(SLEEP);
+
+        return state;
+    }
+
+    function set_sliderPercent(percent:Float):Float {
         if (sliderMin == null)
             Error.error('$id does not have a minimum value.');
 
@@ -118,43 +155,7 @@ class Target<TTarget, TStyle> {
         }
 
         dispatch(VALUE);
-    }
-
-    function onPress(action:ScriptOnInputAction):Void {
-        _tapInited = true;
-        state = PRESSED;
-        dispatch(PRESS, action);
-        if (sliderDirection != null) {
-            mgui.startDrag(id);
-            dispatch(DRAG, action);
-        }
-    }
-
-    function onRelease(action:ScriptOnInputAction):Void {
-        state = mgui.pointerPick(id) ? HOVERED : UNTOUCHED;
-        if (_tapInited) {
-            _tapInited = false;
-            dispatch(TAP, action);
-        }
-        dispatch(RELEASE, action);   
-    }
-
-    function set_state(value) {
-        if (value == state)
-            return state;
-
-        state = value;
-
-        if (buttonMode) {
-            if (mgui.systemInfo.system_name == "HTML5")
-                defold.Html5.run("document.documentElement.style.cursor = " + (state.touched ? "'pointer'" : "'auto'"));
-        }
-        
-        mgui.applyStateStyle(id, getStateStyle());
-        if (state == SLEEPING)
-            dispatch(SLEEP);
-
-        return state;
+        return sliderPercent;
     }
 
 }

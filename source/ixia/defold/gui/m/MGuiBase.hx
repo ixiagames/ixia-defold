@@ -288,12 +288,12 @@ class MGuiBase<TTarget, TStyle> {
             updateDrag(id);
             target.dispatch(DRAG, action);
             if (target.isSlider()) {
-                target.setSliderPercent(switch (target.sliderDirection) {
+                target.sliderPercent = switch (target.sliderDirection) {
                     case LEFT_RIGHT:
                         (getPos(id).x - target.sliderStartPos.x) / target.sliderTrackLength;
                     case RIGHT_LEFT:
                         (target.sliderStartPos.x - getPos(id).x) / target.sliderTrackLength;
-                });
+                };
             }
         
         } else if (pointerPick(id)) {
@@ -397,7 +397,6 @@ class MGuiBase<TTarget, TStyle> {
         target.sliderTrackLength = length;
         target.sliderDirection = direction;
         target.sliderStartPos = getPos(id);
-        target.sliderPercent = 0;
         if (min != null)
             target.sliderValue = target.sliderMin = min;
         if (max != null)
@@ -408,7 +407,7 @@ class MGuiBase<TTarget, TStyle> {
             style(id, thumbStyle);
         if (listeners != null)
             sub(id, listeners);
-        target.dispatch(VALUE);
+        target.sliderPercent = 0;
         return this;
     }
 
@@ -469,17 +468,17 @@ class MGuiBase<TTarget, TStyle> {
         target.sliderMax = max;
         target.sliderStepValue = step;
         if (target.sliderValue == null || target.sliderValue <= min)
-            target.setSliderPercent(0);
+            target.sliderPercent = 0;
         else if (target.sliderValue >= max)
-            target.setSliderPercent(1);
+            target.sliderPercent = 1;
         else
-            target.setSliderPercent((target.sliderValue - min) / (max - min));
+            target.sliderPercent = (target.sliderValue - min) / (max - min);
         return this;
     }
 
     inline function updatePercent(id:Hash):Void {
         var target = targets[id];
-        target.setSliderPercent((target.sliderValue - target.sliderMin) / (target.sliderMax - target.sliderMin));
+        target.sliderPercent = (target.sliderValue - target.sliderMin) / (target.sliderMax - target.sliderMin);
     }
 
     public inline function pointerPick(id:Hash):Bool {
