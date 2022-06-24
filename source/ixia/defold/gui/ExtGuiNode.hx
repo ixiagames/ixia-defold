@@ -8,6 +8,7 @@ import lua.Table;
 
 using defold.Gui;
 
+@:forward
 @:using(defold.Gui)
 abstract ExtGuiNode(GuiNode) from GuiNode to GuiNode {
 
@@ -35,12 +36,8 @@ abstract ExtGuiNode(GuiNode) from GuiNode to GuiNode {
 
     //
 
-    public var parent(get, set):ExtGuiNode;
+    public var parent(get, never):ExtGuiNode;
     inline function get_parent() return this.get_parent();
-    inline function set_parent(value) {
-        this.set_parent(value);
-        return value;
-    }
 
     //
 
