@@ -125,6 +125,42 @@ abstract ExtGuiNode(GuiNode) from GuiNode to GuiNode {
 
     //
 
+    public var rotation(get, set):Vector3;
+    inline function get_rotation() return this.get_rotation();
+    inline function set_rotation(value) {
+        this.set_rotation(value);
+        return value;
+    }
+
+    public var rotation_x(get, set):Float;
+    inline function get_rotation_x() return this.get_rotation().x;
+    inline function set_rotation_x(value) {
+        var rotation = this.get_rotation();
+        rotation.x = value;
+        this.set_rotation(rotation);
+        return value;
+    }
+
+    public var rotation_y(get, set):Float;
+    inline function get_rotation_y() return this.get_rotation().y;
+    inline function set_rotation_y(value) {
+        var rotation = this.get_rotation();
+        rotation.y = value;
+        this.set_rotation(rotation);
+        return value;
+    }
+
+    public var rotation_z(get, set):Float;
+    inline function get_rotation_z() return this.get_rotation().z;
+    inline function set_rotation_z(value) {
+        var rotation = this.get_rotation();
+        rotation.z = value;
+        this.set_rotation(rotation);
+        return value;
+    }
+
+    //
+
     public var color(get, set):Rgba;
     inline function get_color() return this.get_color();
     inline function set_color(value:Rgba) {
