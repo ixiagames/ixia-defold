@@ -1,3 +1,3 @@
 package ixia.ds;
 
-typedef LuaTableTools = lua.TableTools;
+typedef LuaTableTools = ixia.lua.TableTools;
