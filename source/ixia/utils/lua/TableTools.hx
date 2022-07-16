@@ -1,4 +1,4 @@
-package ixia.lua;
+package ixia.utils.lua;
 
 using lua.PairTools;
 using lua.Table;

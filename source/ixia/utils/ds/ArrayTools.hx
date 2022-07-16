@@ -1,6 +1,4 @@
-package ixia.ds;
-
-import ixia.utils.Random;
+package ixia.utils.ds;
 
 class ArrayTools {
     

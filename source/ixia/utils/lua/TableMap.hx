@@ -1,4 +1,4 @@
-package ixia.lua;
+package ixia.utils.lua;
 
 import lua.Lua;
 import lua.Table;

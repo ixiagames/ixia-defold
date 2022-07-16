@@ -1,4 +1,4 @@
-package ixia.ds;
+package ixia.utils.ds;
 
 //  Got this from https://code.haxe.org/category/macros/enum-abstract-values.html
 

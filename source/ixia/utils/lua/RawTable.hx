@@ -1,4 +1,4 @@
-package ixia.lua;
+package ixia.utils.lua;
 
 abstract RawTable<TKey, TValue>(Dynamic) {
     

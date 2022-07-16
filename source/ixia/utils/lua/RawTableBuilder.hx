@@ -1,8 +1,9 @@
-package ixia.lua;
+package ixia.utils.lua;
 
 #if macro
 import haxe.macro.Context;
 import haxe.macro.Expr;
+
 using haxe.macro.Tools;
 
 class RawTableBuilder {

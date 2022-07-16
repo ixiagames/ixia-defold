@@ -1,4 +1,4 @@
-package ixia.math;
+package ixia.utils.math;
 
 @:forwardStatics
 abstract Math(std.Math) {

@@ -1,4 +1,4 @@
-package ixia.ds;
+package ixia.utils.ds;
 
 import haxe.ds.Either;
 

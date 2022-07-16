@@ -1,4 +1,4 @@
-package ixia.math;
+package ixia.utils.math;
 
 // Copied & modified from https://github.com/HaxeFlixel/flixel/blob/bc11b6f875544f7d83877c9714379f021a36a120/flixel/tweens/FlxEase.hx
 
