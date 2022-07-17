@@ -3,10 +3,10 @@ package ixia.defold.gui.m;
 import defold.support.ScriptOnInputAction;
 import defold.types.Vector3;
 import ixia.defold.types.Hash;
-import ixia.lua.RawTable;
+import ixia.utils.lua.RawTable;
 
 using Math;
-using ixia.math.Math;
+using ixia.utils.math.Math;
 
 @:access(ixia.defold.gui.m.MGuiBase)
 class Target<TTarget, TStyle> {

@@ -14,8 +14,8 @@ import ixia.defold.gui.m.TargetEvent;
 import ixia.defold.gui.m.TargetEventListener.TargetEventListeners;
 import ixia.defold.types.Hash;
 import ixia.defold.types.Hashes;
-import ixia.ds.OneOfTwo;
-import ixia.lua.RawTable;
+import ixia.utils.ds.OneOfTwo;
+import ixia.utils.lua.RawTable;
 
 using Defold;
 using Math;
