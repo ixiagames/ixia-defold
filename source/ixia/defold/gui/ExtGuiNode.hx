@@ -68,6 +68,13 @@ abstract ExtGuiNode(GuiNode) from GuiNode to GuiNode {
         return value;
     }
 
+    public var size_mode(get, set):GuiSizeMode;
+    inline function get_size_mode() return this.get_size_mode();
+    inline function set_size_mode(value) {
+        this.set_size_mode(value);
+        return value;
+    }
+
     //
 
     public var position(get, set):Vector3;
