@@ -235,6 +235,24 @@ abstract ExtGuiNode(GuiNode) from GuiNode to GuiNode {
 
     //
 
+    public var texture(get, set):Hash;
+    inline function get_texture() return this.get_texture();
+    inline function set_texture(value) {
+        this.set_texture(value);
+        return value;
+    }
+
+    //
+
+    public var layer(get, set):Hash;
+    inline function get_layer() return this.get_layer();
+    inline function set_layer(value) {
+        this.set_layer(value);
+        return value;
+    }
+
+    //
+
     public inline function clone():ExtGuiNode {
         return this.clone();
     }
