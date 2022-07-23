@@ -36,8 +36,12 @@ abstract ExtGuiNode(GuiNode) from GuiNode to GuiNode {
 
     //
 
-    public var parent(get, never):ExtGuiNode;
+    public var parent(get, set):ExtGuiNode;
     inline function get_parent() return this.get_parent();
+    inline function set_parent(value) {
+        this.set_parent(value);
+        return value;
+    }
 
     //
 
