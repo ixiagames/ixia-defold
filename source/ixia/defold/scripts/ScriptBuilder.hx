@@ -1,10 +1,10 @@
-package ixia.defold.gui;
+package ixia.defold.scripts;
 
 #if macro
 import haxe.macro.Context;
 import haxe.macro.Expr;
 
-class ExtGuiScriptBuilder {
+class ScriptBuilder {
 
     macro static public function build():Array<Field> {
         var fields = Context.getBuildFields();
