@@ -2,9 +2,9 @@ package ixia.defold.collection;
 
 import defold.Collectionproxy.CollectionproxyMessages;
 import defold.Msg;
-import defold.support.Script;
 import defold.types.Message;
 import defold.types.Url;
+import ixia.defold.scripts.ExtScript;
 
 using ixia.defold.UrlTools;
 
@@ -15,9 +15,8 @@ typedef CollectionManagerScriptData = {
 }
 
 @:access(ixia.defold.collection.Collection)
-class CollectionManagerScript extends Script<CollectionManagerScriptData> {
+class CollectionManagerScript extends ExtScript<CollectionManagerScriptData> {
 
-    public var url(default, null):Url;
     public var collections(default, null):Array<Collection>;
     var _waitingToLoad:Collection;
     
@@ -25,7 +24,6 @@ class CollectionManagerScript extends Script<CollectionManagerScriptData> {
         super.init(self);
 
         collections = [];
-        url = Msg.url();
     }
 
     public function post<T>(messageId:Message<T>, message:T):Void {
@@ -56,6 +54,8 @@ class CollectionManagerScript extends Script<CollectionManagerScriptData> {
     }
 
     override function on_message<TMessage>(self:CollectionManagerScriptData, message_id:Message<TMessage>, message:TMessage, sender:Url) {
+        super.on_message(self, message_id, message, sender);
+        
         switch (message_id) {
             case CollectionManagerMessages.LOAD_COLLECTION:
                 #if debug
