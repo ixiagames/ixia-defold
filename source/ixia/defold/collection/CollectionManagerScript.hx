@@ -10,7 +10,7 @@ using ixia.defold.UrlTools;
 
 typedef CollectionManagerScriptData = {
 
-    @property(true) var singleCollection:Bool;
+    @property(false) var singleCollection:Bool;
 
 }
 
