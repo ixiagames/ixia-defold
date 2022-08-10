@@ -20,16 +20,16 @@ class Collection {
         this.proxyUrl = proxyUrl;
     }
 
-    public function load(async:Bool = false, ?callback:Collection->Void):Void {
+    public function load(?async:Bool = false, ?callback:Collection->Void):Void {
         if (callback != null)
             onLoaded = callback;
-        manager.post(CollectionManagerMessages.LOAD_COLLECTION, { proxyUrl: proxyUrl, async: async });
+        manager.post_loadCollection(proxyUrl, async);
     }
 
     public function unload(?callback:Collection->Void):Void {
         if (callback != null)
             onUnloaded = callback;
-        manager.post(CollectionManagerMessages.UNLOAD_COLLECTION, { proxyUrl: proxyUrl });
+        manager.post_unloadCollection(proxyUrl);
     }
 
     public function download(options:DownloadOptions):Void {
@@ -38,12 +38,10 @@ class Collection {
     }
 
     function set_enabled(value) {
-        manager.post(
-            value ?
-                CollectionManagerMessages.ENABLE_COLLECTION :
-                CollectionManagerMessages.DISABLE_COLLECTION,
-            { proxyUrl: proxyUrl }
-        );
+        if (value)
+            manager.post_enableCollection(proxyUrl);
+        else
+            manager.post_disableCollection(proxyUrl);
         return enabled = value;
     }
     
