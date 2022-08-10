@@ -38,5 +38,9 @@ class ExtGuiScript<T:{}> extends GuiScript<T> {
                 }
         }
     }
+
+    public inline function acquireInputFocus():Void {
+        Msg.post('.', new Message<Void>("acquire_input_focus"));
+    }
     
 }
