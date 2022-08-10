@@ -12,7 +12,7 @@ class ScriptBuilder {
         var remoteMethods = new Array<String>();
         for (field in fields) {
             for (meta in field.meta) {
-                if (meta.name == "remote") {
+                if (meta.name == "post") {
                     switch (field.kind) {
                         case FFun(fieldFunc):
                             var args = fieldFunc.args.copy();
