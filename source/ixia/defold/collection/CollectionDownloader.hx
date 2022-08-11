@@ -3,11 +3,12 @@ package ixia.defold.collection;
 import defold.Http;
 import defold.Resource;
 import ixia.defold.collection.Collection;
+import ixia.defold.collection.CollectionManagerScript.CollectionManagerScriptData;
 
 using lua.PairTools;
 using lua.Table;
 
-typedef DownloadOptions = {
+typedef DownloadOptions<T:CollectionManagerScriptData> = {
 
     path:String,
     /* Default to 3. */
@@ -16,7 +17,7 @@ typedef DownloadOptions = {
     ?autoLoad:AutoLoadMode,
     /* Default to false. */
     ?autoEnable:Bool,
-    ?onProgress:CollectionDownloader->Void,
+    ?onProgress:CollectionDownloader<T>->Void,
     ?onError:String->Void
 
 }
@@ -29,14 +30,14 @@ enum abstract AutoLoadMode(Int) {
 
 }
 
-class CollectionDownloader {
+class CollectionDownloader<T:CollectionManagerScriptData> {
 
-    public var collection(default, null):Collection;
+    public var collection(default, null):Collection<T>;
     public var path(default, null):String;
     public var maxSimulResources(default, null):Int;
     public var autoLoad(default, null):AutoLoadMode;
     public var autoEnable(default, null):Bool;
-    public var onProgress:CollectionDownloader->Void; // whatever passed to this function would becomes null 
+    public var onProgress:CollectionDownloader<T>->Void; // whatever passed to this function would becomes null 
     public var onError:String->Void;
 
     public var allResources(default, null):Array<String>;
@@ -46,7 +47,7 @@ class CollectionDownloader {
     public var progress(get, never):Float;
     public var downloaded(default, null):Bool = false;
     
-    function new(collection:Collection, options:DownloadOptions) {
+    function new(collection:Collection<T>, options:DownloadOptions<T>) {
         this.collection = collection;
         path = options.path;
         maxSimulResources = options.maxSimulResources != null ? options.maxSimulResources : 3;

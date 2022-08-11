@@ -15,13 +15,13 @@ typedef CollectionManagerScriptData = {
 }
 
 @:access(ixia.defold.collection.Collection)
-class CollectionManagerScript extends ExtScript<CollectionManagerScriptData> {
+class CollectionManagerScript<T:CollectionManagerScriptData> extends ExtScript<T> {
 
     public var options(default, null):CollectionManagerScriptData;
-    public var collections(default, null):Array<Collection>;
-    var _waitingToLoad:Collection;
+    public var collections(default, null):Array<Collection<T>>;
+    var _waitingToLoad:Collection<T>;
     
-    override function init(options:CollectionManagerScriptData) {
+    override function init(options:T) {
         super.init(options);
 
         this.options = options;
@@ -32,14 +32,14 @@ class CollectionManagerScript extends ExtScript<CollectionManagerScriptData> {
         Msg.post(url, messageId, message);
     }
 
-    public function add(proxyUrl:Url, ?userData:Dynamic):Collection {
+    public function add(proxyUrl:Url, ?userData:Dynamic):Collection<T> {
         var collection = new Collection(this, proxyUrl);
         collections.push(collection);
         collection.userData = userData;
         return collection;
     }
 
-    public function get(proxyUrl:Url):Collection {
+    public function get(proxyUrl:Url):Collection<T> {
         for (collection in collections) {
             if (collection.proxyUrl.compare(proxyUrl))
                 return collection;
@@ -47,11 +47,11 @@ class CollectionManagerScript extends ExtScript<CollectionManagerScriptData> {
         return null;
     }
 
-    public function getLoaded():Array<Collection> {
+    public function getLoaded():Array<Collection<T>> {
         return [ for (collection in collections) if (collection.loaded) collection ];
     }
 
-    public function getUnloaded():Array<Collection> {
+    public function getUnloaded():Array<Collection<T>> {
         return [ for (collection in collections) if (!collection.loaded) collection ];
     }
 
@@ -70,8 +70,7 @@ class CollectionManagerScript extends ExtScript<CollectionManagerScriptData> {
                     Msg.post(collection.proxyUrl, CollectionproxyMessages.unload);
             }
         }
-
-        Msg.post(proxyUrl, async? CollectionproxyMessages.async_load : CollectionproxyMessages.load);
+        Msg.post(proxyUrl, async ? CollectionproxyMessages.async_load : CollectionproxyMessages.load);
     }
 
     @post function unloadCollection(proxyUrl:Url):Void {
@@ -95,7 +94,7 @@ class CollectionManagerScript extends ExtScript<CollectionManagerScriptData> {
         Msg.post(proxyUrl, CollectionproxyMessages.disable);
     }
 
-    override function on_message<TMessage>(options:CollectionManagerScriptData, message_id:Message<TMessage>, message:TMessage, sender:Url) {
+    override function on_message<TMessage>(options:T, message_id:Message<TMessage>, message:TMessage, sender:Url) {
         super.on_message(options, message_id, message, sender);
         
         switch (message_id) {
@@ -103,7 +102,7 @@ class CollectionManagerScript extends ExtScript<CollectionManagerScriptData> {
                 #if debug
                 trace("Proxy loaded: " + sender.fragment);
                 #end
-
+                
                 var collection = get(sender);
                 collection.loaded = true;
                 if (collection.onLoaded != null)

@@ -2,37 +2,38 @@ package ixia.defold.collection;
 
 import defold.types.Url;
 import ixia.defold.collection.CollectionDownloader.DownloadOptions;
+import ixia.defold.collection.CollectionManagerScript.CollectionManagerScriptData;
 
 @:access(ixia.defold.collection.CollectionDownloader)
-class Collection {
+class Collection<T:CollectionManagerScriptData> {
 
-    public var manager(default, null):CollectionManagerScript;
+    public var manager(default, null):CollectionManagerScript<T>;
     public var proxyUrl(default, null):Url;
     public var enabled(default, set):Bool;
     public var loaded(default, null):Bool;
-    public var downloader(default, null):CollectionDownloader;
+    public var downloader(default, null):CollectionDownloader<T>;
     public var userData:Dynamic;
-    public var onLoaded:Collection->Void;
-    public var onUnloaded:Collection->Void;
+    public var onLoaded:Collection<T>->Void;
+    public var onUnloaded:Collection<T>->Void;
 
-    function new(manager:CollectionManagerScript, proxyUrl:Url) {
+    function new(manager:CollectionManagerScript<T>, proxyUrl:Url) {
         this.manager = manager;
         this.proxyUrl = proxyUrl;
     }
 
-    public function load(?async:Bool = false, ?callback:Collection->Void):Void {
+    public function load(?async:Bool = false, ?callback:Collection<T>->Void):Void {
         if (callback != null)
             onLoaded = callback;
         manager.post_loadCollection(proxyUrl, async);
     }
 
-    public function unload(?callback:Collection->Void):Void {
+    public function unload(?callback:Collection<T>->Void):Void {
         if (callback != null)
             onUnloaded = callback;
         manager.post_unloadCollection(proxyUrl);
     }
 
-    public function download(options:DownloadOptions):Void {
+    public function download(options:DownloadOptions<T>):Void {
         downloader = new CollectionDownloader(this, options);
         downloader.download();
     }
