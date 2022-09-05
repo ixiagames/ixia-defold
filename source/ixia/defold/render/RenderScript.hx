@@ -1,13 +1,13 @@
 package ixia.defold.render;
 
 import defold.Render;
+import defold.Vmath;
 import defold.support.RenderScript;
 import defold.types.Matrix4;
 import defold.types.Message;
 import defold.types.Url;
-import defold.Vmath;
 import ixia.defold.types.Rgba;
-import ixia.lua.RawTable;
+import ixia.utils.lua.RawTable;
 import lua.Table;
 
 class RenderScript<T:{}> extends defold.support.RenderScript<T> {
