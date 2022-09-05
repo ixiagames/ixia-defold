@@ -43,6 +43,10 @@ abstract ExtGuiNode(GuiNode) from GuiNode to GuiNode {
         return value;
     }
 
+    public inline function setParent(parent:ExtGuiNode, ?keepSceneTransform:Bool):Void {
+        this.set_parent(parent, keepSceneTransform);
+    }
+
     //
 
     public var size(get, set):Vector3;
