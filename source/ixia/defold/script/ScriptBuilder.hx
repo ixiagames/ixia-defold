@@ -1,4 +1,4 @@
-package ixia.defold.scripts;
+package ixia.defold.script;
 
 #if macro
 import haxe.macro.Context;

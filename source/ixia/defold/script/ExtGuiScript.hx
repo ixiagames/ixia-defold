@@ -1,13 +1,13 @@
-package ixia.defold.scripts;
+package ixia.defold.script;
 
 import defold.Msg;
-import defold.support.Script;
+import defold.support.GuiScript;
 import defold.types.Message;
 import defold.types.Url;
 import haxe.Constraints.Function;
 
-@:autoBuild(ixia.defold.scripts.ScriptBuilder.build())
-class ExtScript<T:{}> extends Script<T> {
+@:autoBuild(ixia.defold.script.ScriptBuilder.build())
+class ExtGuiScript<T:{}> extends GuiScript<T> {
 
     static final CALL = new Message<{ method:String, args:Dynamic }>("CALL");
 

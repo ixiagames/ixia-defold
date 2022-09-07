@@ -4,7 +4,7 @@ import defold.Collectionproxy.CollectionproxyMessages;
 import defold.Msg;
 import defold.types.Message;
 import defold.types.Url;
-import ixia.defold.scripts.ExtScript;
+import ixia.defold.script.ExtScript;
 
 using ixia.defold.UrlTools;
 
