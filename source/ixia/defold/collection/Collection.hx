@@ -12,13 +12,13 @@ class Collection<T:CollectionManagerScriptData> {
     public var enabled(default, set):Bool;
     public var loaded(default, null):Bool;
     public var downloader(default, null):CollectionDownloader<T>;
-    public var userData:Dynamic;
     public var onLoaded:Collection<T>->Void;
     public var onUnloaded:Collection<T>->Void;
 
-    function new(manager:CollectionManagerScript<T>, proxyUrl:Url) {
+    public function new(manager:CollectionManagerScript<T>, name:String, proxyUrl:Url) {
         this.manager = manager;
         this.proxyUrl = proxyUrl;
+        manager.collections[name] = this;
     }
 
     public function load(?async:Bool = false, ?callback:Collection<T>->Void):Void {

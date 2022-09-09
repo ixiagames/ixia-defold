@@ -18,7 +18,7 @@ typedef CollectionManagerScriptData = {
 class CollectionManagerScript<T:CollectionManagerScriptData> extends ExtScript<T> {
 
     public var options(default, null):CollectionManagerScriptData;
-    public var collections(default, null):Array<Collection<T>>;
+    public var collections(default, null):Map<String, Collection<T>>;
     var _waitingToLoad:Collection<T>;
     
     override function init(options:T) {
@@ -31,14 +31,7 @@ class CollectionManagerScript<T:CollectionManagerScriptData> extends ExtScript<T
     public function post<T>(messageId:Message<T>, message:T):Void {
         Msg.post(url, messageId, message);
     }
-
-    public function add(proxyUrl:Url, ?userData:Dynamic):Collection<T> {
-        var collection = new Collection(this, proxyUrl);
-        collections.push(collection);
-        collection.userData = userData;
-        return collection;
-    }
-
+    
     public function get(proxyUrl:Url):Collection<T> {
         for (collection in collections) {
             if (collection.proxyUrl.compare(proxyUrl))
