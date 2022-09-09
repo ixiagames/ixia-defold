@@ -40,7 +40,7 @@ abstract ExtMessage<T>(Message<T>) from Message<T> to Message<T> {
             post(url, message);
     }
 
-    public inline function subscribe():Void {
+    public function subscribe():Void {
         if (_map == null) {
             _map = [ (cast this) => [ Msg.url() ] ];
             return;
