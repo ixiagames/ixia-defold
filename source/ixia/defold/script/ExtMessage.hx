@@ -25,16 +25,12 @@ abstract ExtMessage<T>(Message<T>) from Message<T> to Message<T> {
         Post to all subscribers. 
     **/
     public inline function dispatch(?message:T):Void {
-        if (_map == null) {
-            Error.error("No subscriber.");
+        if (_map == null)
             return;
-        }
         
         var urls = _map[cast this];
-        if (urls == null) {
-            Error.error("No subscriber.");
+        if (urls == null)
             return;
-        }
 
         for (url in urls)
             post(url, message);
