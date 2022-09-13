@@ -31,6 +31,7 @@ extern class ImGui {
 
     public static function text(text:String):Void;
     public static function button(text:String):Bool;
+    public static function selectable(text:String, selected:Bool, ?flags:Int):Bool;
 
     ///// TABLE
 
