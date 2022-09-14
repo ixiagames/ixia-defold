@@ -32,6 +32,8 @@ extern class ImGui {
     public static function text(text:String):Void;
     public static function button(text:String):Bool;
     public static function selectable(text:String, selected:Bool, ?flags:Int):Bool;
+    public static function checkbox(text:String, checked:Bool):CheckboxResult;
+    public static function input_int(label:String, value:Int = 0):InputIntResult;
 
     ///// TABLE
 
@@ -41,6 +43,10 @@ extern class ImGui {
     public static function table_setup_column(label:String, ?flags:Int, ?init_width_or_weight:Int):Void;
     public static function table_next_row():Void;
     public static function table_next_column():Void;
+
+    ///// LAYOUT
+    
+    public static function same_line(offset:Int):Void;
     
 }
 
@@ -60,3 +66,19 @@ extern enum abstract WindowFlag(Int) from Int to Int {
     var isopen:Bool;
 
 }
+
+@:multiReturn extern class CheckboxResult {
+
+    var changed:Bool;
+    var checked:Bool;
+
+}
+
+@:multiReturn extern class InputIntResult {
+
+    var changed:Bool;
+    var value:Int;
+
+}
+
+
