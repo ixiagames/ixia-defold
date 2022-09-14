@@ -49,7 +49,7 @@ extern class ImGui {
 
     ///// LAYOUT
 
-    public static function same_line(offset:Int):Void;
+    public static function same_line(?offset:Int):Void;
     
 }
 
