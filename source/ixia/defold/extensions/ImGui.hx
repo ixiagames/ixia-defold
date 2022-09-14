@@ -50,9 +50,13 @@ extern class ImGui {
     ///// LAYOUT
 
     public static function same_line(?offset:Int):Void;
+
+    ///// STYLE
+
+    public static function push_style_color(color:ImGuiCol, red:Float, green:Float, blue:Float, alpha:Float):Void;
+    public static function pop_style_color(count:Int):Void;
     
 }
-
 
 @:native("imgui")
 extern enum abstract WindowFlag(Int) from Int to Int {
@@ -62,6 +66,16 @@ extern enum abstract WindowFlag(Int) from Int to Int {
     @:native("WINDOWFLAGS_NOCOLLAPSE")          var NOCOLLAPSE;
 
 }
+
+@:native("imgui")
+extern enum abstract ImGuiCol(Int) from Int to Int {
+    
+    @:native("ImGuiCol_Button")         var BUTTON;
+    @:native("ImGuiCol_ButtonHovered")  var BUTTON_HOVERED;
+    @:native("ImGuiCol_ButtonActive")   var BUTTON_ACTIVE;
+
+}
+
 
 @:multiReturn extern class BeginWindowResult {
 
