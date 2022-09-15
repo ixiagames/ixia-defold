@@ -24,6 +24,10 @@ extern class ImGui {
 
     ///// COMBO
 
+    public static function begin_popup_context_item(id:String, ?flags:Int):Bool;
+    public static function open_popup(?id:String, ?flags:Int):Void;
+    public static function end_popup():Void;
+    
     public static function begin_combo(label:String, preview:String):Bool;
     public static function end_combo():Bool;
 
@@ -82,6 +86,13 @@ extern enum abstract TableFlag(Int) from Int to Int {
     @:native("TABLE_BORDERSINNER")      var BORDERSINNER;
     @:native("TABLE_BORDERS")           var BORDERS;
     @:native("TABLE_CONTEXTMENUINBODY") var CONTEXTMENUINBODY;
+
+}
+
+@:native("imgui")
+extern enum abstract PopupFlag(Int) from Int to Int {
+    
+    @:native("POPUPFLAGS_MOUSEBUTTONRIGHT") var MOUSEBUTTONRIGHT;
 
 }
 
