@@ -25,6 +25,7 @@ extern class ImGui {
     ///// COMBO
 
     public static function begin_popup_context_item(id:String, ?flags:Int):Bool;
+    public static function begin_popup(id:String, ?flags:Int):Bool;
     public static function open_popup(?id:String, ?flags:Int):Void;
     public static function end_popup():Void;
     
