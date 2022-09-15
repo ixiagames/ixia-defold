@@ -76,6 +76,14 @@ extern enum abstract ImGuiCol(Int) from Int to Int {
 
 }
 
+@:native("imgui")
+extern enum abstract TableFlag(Int) from Int to Int {
+    
+    @:native("TABLE_BORDERSINNER")      var BORDERSINNER;
+    @:native("TABLE_BORDERS")           var BORDERS;
+    @:native("TABLE_CONTEXTMENUINBODY") var CONTEXTMENUINBODY;
+
+}
 
 @:multiReturn extern class BeginWindowResult {
 
