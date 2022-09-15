@@ -60,6 +60,10 @@ extern class ImGui {
 
     public static function push_style_color(color:ImGuiCol, red:Float, green:Float, blue:Float, alpha:Float):Void;
     public static function pop_style_color(count:Int):Void;
+
+    ///// INPUT
+
+    public static function is_item_clicked(button:MouseButton):Bool;
     
 }
 
@@ -95,6 +99,15 @@ extern enum abstract TableFlag(Int) from Int to Int {
 extern enum abstract PopupFlag(Int) from Int to Int {
     
     @:native("POPUPFLAGS_MOUSEBUTTONRIGHT") var MOUSEBUTTONRIGHT;
+
+}
+
+@:native("imgui")
+extern enum abstract MouseButton(Int) {
+    
+    @:native("MOUSEBUTTON_LEFT")    var LEFT;
+    @:native("MOUSEBUTTON_RIGHT")   var RIGHT;
+    @:native("MOUSEBUTTON_MIDDLE")  var MIDDLE;
 
 }
 
