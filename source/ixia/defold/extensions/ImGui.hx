@@ -83,6 +83,7 @@ extern enum abstract ImGuiCol(Int) from Int to Int {
     @:native("ImGuiCol_ButtonHovered")  var BUTTON_HOVERED;
     @:native("ImGuiCol_ButtonActive")   var BUTTON_ACTIVE;
     @:native("ImGuiCol_TableRowBg")     var TABLE_ROW_BG;
+    @:native("ImGuiCol_TableRowBgAlt")  var TABLE_ROW_BG_ALT;
 
 }
 
