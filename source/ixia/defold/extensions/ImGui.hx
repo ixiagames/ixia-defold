@@ -71,8 +71,8 @@ extern class ImGui {
 extern enum abstract WindowFlag(Int) from Int to Int {
     
     @:native("WINDOWFLAGS_NONE")                var NONE;
-    @:native("WINDOWFLAGS_ALWAYSAUTORESIZE")    var ALWAYSAUTORESIZE;
-    @:native("WINDOWFLAGS_NOCOLLAPSE")          var NOCOLLAPSE;
+    @:native("WINDOWFLAGS_ALWAYSAUTORESIZE")    var ALWAYS_AUTO_RESIZE;
+    @:native("WINDOWFLAGS_NOCOLLAPSE")          var NO_COLLAPSE;
 
 }
 
@@ -89,17 +89,17 @@ extern enum abstract ImGuiCol(Int) from Int to Int {
 @:native("imgui")
 extern enum abstract TableFlag(Int) from Int to Int {
     
-    @:native("TABLE_BORDERSINNER")      var BORDERSINNER;
+    @:native("TABLE_BORDERSINNER")      var BORDERS_INNER;
     @:native("TABLE_BORDERS")           var BORDERS;
-    @:native("TABLE_CONTEXTMENUINBODY") var CONTEXTMENUINBODY;
-    @:native("TABLE_ROWBG")             var ROWBG;
+    @:native("TABLE_CONTEXTMENUINBODY") var CONTEXT_MENU_IN_BODY;
+    @:native("TABLE_ROWBG")             var ROW_BG;
 
 }
 
 @:native("imgui")
 extern enum abstract PopupFlag(Int) from Int to Int {
     
-    @:native("POPUPFLAGS_MOUSEBUTTONRIGHT") var MOUSEBUTTONRIGHT;
+    @:native("POPUPFLAGS_MOUSEBUTTONRIGHT") var MOUSE_BUTTON_RIGHT;
 
 }
 
