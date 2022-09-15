@@ -103,6 +103,13 @@ extern enum abstract PopupFlag(Int) from Int to Int {
 }
 
 @:native("imgui")
+extern enum abstract SelectableFlag(Int) from Int to Int {
+    
+    @:native("SELECTABLE_SPAN_ALL_COLUMNS") var SPAN_ALL_COLUMNS;
+
+}
+
+@:native("imgui")
 extern enum abstract MouseButton(Int) {
     
     @:native("MOUSEBUTTON_LEFT")    var LEFT;
