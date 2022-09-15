@@ -86,6 +86,7 @@ extern enum abstract TableFlag(Int) from Int to Int {
     @:native("TABLE_BORDERSINNER")      var BORDERSINNER;
     @:native("TABLE_BORDERS")           var BORDERS;
     @:native("TABLE_CONTEXTMENUINBODY") var CONTEXTMENUINBODY;
+    @:native("TABLE_ROWBG")             var ROWBG;
 
 }
 
