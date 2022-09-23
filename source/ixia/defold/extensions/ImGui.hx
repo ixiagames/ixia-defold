@@ -64,6 +64,10 @@ extern class ImGui {
     ///// INPUT
 
     public static function is_item_clicked(button:MouseButton):Bool;
+
+    ///// NAVIGATION
+
+    public static function set_scroll_here_y(center_y_ratio:Float):Void;
     
 }
 
