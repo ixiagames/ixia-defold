@@ -19,14 +19,14 @@ extern class ImGui {
 
     ///// WINDOW
 
-    public static function begin_window(title:String, ?open:Bool, ?flags:Int = 0):BeginWindowResult;
+    public static function begin_window(title:String, ?open:Bool, ?flags:WindowFlag = 0):BeginWindowResult;
     public static function end_window():Void;
 
     ///// COMBO
 
-    public static function begin_popup_context_item(id:String, ?flags:Int):Bool;
-    public static function begin_popup(id:String, ?flags:Int):Bool;
-    public static function open_popup(?id:String, ?flags:Int):Void;
+    public static function begin_popup_context_item(id:String, ?flags:PopupFlag):Bool;
+    public static function begin_popup(id:String, ?flags:PopupFlag):Bool;
+    public static function open_popup(?id:String, ?flags:PopupFlag):Void;
     public static function end_popup():Void;
     
     public static function begin_combo(label:String, preview:String):Bool;
@@ -39,13 +39,13 @@ extern class ImGui {
         If width or height is inputed, the other will be required.
     **/
     public static function button(text:String, ?width:Int, ?height:Int):Bool;
-    public static function selectable(text:String, selected:Bool, ?flags:Int):Bool;
+    public static function selectable(text:String, selected:Bool, ?flags:SelectableFlag):Bool;
     public static function checkbox(text:String, checked:Bool):CheckboxResult;
     public static function input_int(label:String, value:Int = 0):InputIntResult;
 
     ///// TABLE
 
-    public static function begin_table(id:String, column:Int, ?flags:Int):Bool;
+    public static function begin_table(id:String, column:Int, ?flags:TableFlag):Bool;
     public static function end_table():Void;
     public static function table_headers_row():Void;
     public static function table_setup_column(label:String, ?flags:ColumnFlag, ?init_width_or_weight:Int):Void;
