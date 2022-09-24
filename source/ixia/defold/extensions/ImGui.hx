@@ -48,7 +48,7 @@ extern class ImGui {
     public static function begin_table(id:String, column:Int, ?flags:Int):Bool;
     public static function end_table():Void;
     public static function table_headers_row():Void;
-    public static function table_setup_column(label:String, ?flags:Int, ?init_width_or_weight:Int):Void;
+    public static function table_setup_column(label:String, ?flags:ColumnFlag, ?init_width_or_weight:Int):Void;
     public static function table_next_row():Void;
     public static function table_next_column():Void;
 
@@ -98,6 +98,29 @@ extern enum abstract TableFlag(Int) from Int to Int {
     @:native("TABLE_BORDERS")           var BORDERS;
     @:native("TABLE_CONTEXTMENUINBODY") var CONTEXT_MENU_IN_BODY;
     @:native("TABLE_ROWBG")             var ROW_BG;
+
+}
+
+@:native("imgui")
+extern enum abstract ColumnFlag(Int) from Int to Int {
+    
+    @:native("TABLECOLUMN_NONE")                    var NONE;
+    @:native("TABLECOLUMN_DEFAULTHIDE")             var DEFAULT_HIDE;
+    @:native("TABLECOLUMN_DEFAULTSORT")             var DEFAULT_SORT;
+    @:native("TABLECOLUMN_WIDTHSTRETCH")            var WIDTH_STRETCH;
+    @:native("TABLECOLUMN_WIDTHFIXED")              var WIDTH_FIXED;
+    @:native("TABLECOLUMN_NORESIZE")                var NO_RESIZE;
+    @:native("TABLECOLUMN_NOREORDER")               var NO_REORDER;
+    @:native("TABLECOLUMN_NOHIDE")                  var NO_HIDE;
+    @:native("TABLECOLUMN_NOCLIP")                  var NO_CLIP;
+    @:native("TABLECOLUMN_NOSORT")                  var NO_SORT;
+    @:native("TABLECOLUMN_NOSORTASCENDING")         var NO_SORT_ASCENDING;
+    @:native("TABLECOLUMN_NOSORTDESCENDING")        var NO_SORT_DESCENDING;
+    @:native("TABLECOLUMN_NOHEADERWIDTH")           var NO_HEADER_WIDTH;
+    @:native("TABLECOLUMN_PREFERSORTASCENDING")     var PREFER_SORT_ASCENDING;
+    @:native("TABLECOLUMN_PREFERSORTDESCENDING")    var PREFER_SORT_DESCENDING;
+    @:native("TABLECOLUMN_INDENTENABLE")            var INDENT_ENABLE;
+    @:native("TABLECOLUMN_INDENTDISABLE")           var INDENT_DISABLE;
 
 }
 
