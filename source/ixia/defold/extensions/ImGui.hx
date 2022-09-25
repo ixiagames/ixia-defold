@@ -12,6 +12,9 @@ extern class ImGui {
     public static function begin_main_menu_bar():Bool;
     public static function end_main_menu_bar():Void;
 
+    public static function begin_menu_bar():Bool;
+    public static function end_menu_bar():Void;
+
     public static function begin_menu(label:String, ?enabled:Bool):Bool;
     public static function end_menu():Void;
 
@@ -77,6 +80,7 @@ extern enum abstract WindowFlag(Int) from Int to Int {
     @:native("WINDOWFLAGS_NONE")                var NONE;
     @:native("WINDOWFLAGS_ALWAYSAUTORESIZE")    var ALWAYS_AUTO_RESIZE;
     @:native("WINDOWFLAGS_NOCOLLAPSE")          var NO_COLLAPSE;
+    @:native("WINDOWFLAGS_MENUBAR")             var MENU_BAR;
 
 }
 
