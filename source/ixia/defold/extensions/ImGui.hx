@@ -22,7 +22,7 @@ extern class ImGui {
 
     ///// WINDOW
 
-    public static function begin_window(title:String, ?open:Bool, ?flags:WindowFlag = 0):BeginWindowResult;
+    public static function begin_window(title:String, ?open:Bool, ?flags:WindowFlag = 0):WindowResult;
     public static function end_window():Void;
 
     public static function begin_child(title:String, ?width:Int, ?height:Int):Bool;
@@ -161,7 +161,7 @@ extern enum abstract MouseButton(Int) {
 
 }
 
-@:multiReturn extern class BeginWindowResult {
+@:multiReturn extern class WindowResult {
 
     var open:Bool;
     var result:Bool;
