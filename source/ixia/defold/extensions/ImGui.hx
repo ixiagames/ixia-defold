@@ -25,6 +25,9 @@ extern class ImGui {
     public static function begin_window(title:String, ?open:Bool, ?flags:WindowFlag = 0):BeginWindowResult;
     public static function end_window():Void;
 
+    public static function begin_child(title:String, ?width:Int, ?height:Int):Bool;
+    public static function end_child():Void;
+
     ///// COMBO
 
     public static function begin_popup_context_item(id:String, ?flags:PopupFlag):Bool;
@@ -54,6 +57,13 @@ extern class ImGui {
     public static function table_setup_column(label:String, ?flags:ColumnFlag, ?init_width_or_weight:Int):Void;
     public static function table_next_row():Void;
     public static function table_next_column():Void;
+
+    ///// TAB BAR
+
+    public static function begin_tab_bar(id:String):Bool;
+    public static function end_tab_bar():Void;
+    public static function begin_tab_item(label:String, ?open:Bool, ?flags:Int):TabItemResult;
+    public static function end_tab_item():Void;
 
     ///// LAYOUT
 
@@ -171,5 +181,13 @@ extern enum abstract MouseButton(Int) {
     var value:Int;
 
 }
+
+@:multiReturn extern class TabItemResult {
+
+    var result:Bool;
+    var open:Bool;
+
+}
+
 
 
