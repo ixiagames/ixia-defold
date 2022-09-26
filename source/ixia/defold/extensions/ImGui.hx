@@ -163,8 +163,8 @@ extern enum abstract MouseButton(Int) {
 
 @:multiReturn extern class BeginWindowResult {
 
+    var open:Bool;
     var result:Bool;
-    var isopen:Bool;
 
 }
 
@@ -184,8 +184,8 @@ extern enum abstract MouseButton(Int) {
 
 @:multiReturn extern class TabItemResult {
 
-    var result:Bool;
     var open:Bool;
+    var result:Bool;
 
 }
 
