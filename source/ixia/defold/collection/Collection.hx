@@ -10,7 +10,7 @@ class Collection<T:CollectionManagerScriptData> {
     public var manager(default, null):CollectionManagerScript<T>;
     public var proxyUrl(default, null):Url;
     public var enabled(default, set):Bool;
-    public var loaded(default, null):Bool;
+    public var loaded(default, null):Bool = false;
     public var downloader(default, null):CollectionDownloader<T>;
     public var onLoaded:Collection<T>->Void;
     public var onUnloaded:Collection<T>->Void;
