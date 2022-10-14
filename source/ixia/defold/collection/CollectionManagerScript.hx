@@ -40,23 +40,15 @@ class CollectionManagerScript<T:CollectionManagerScriptData> extends ExtScript<T
         return null;
     }
 
-    public function getLoaded():Array<Collection<T>> {
-        return [ for (collection in collections) if (collection.loaded) collection ];
-    }
-
-    public function getUnloaded():Array<Collection<T>> {
-        return [ for (collection in collections) if (!collection.loaded) collection ];
-    }
-
     @post function loadCollection(proxyUrl:Url, async:Bool = false):Void {
         for (collection in collections) {
-            if (collection.proxyUrl == proxyUrl && collection.loaded)
+            if (collection.proxyUrl == proxyUrl && collection.state.loaded)
                 return;
         }
 
         if (options.singleCollection) {
             for (collection in collections) {
-                if (collection.loaded)
+                if (collection.state.loaded)
                     Msg.post(collection.proxyUrl, CollectionproxyMessages.unload);
             }
         }
@@ -81,13 +73,13 @@ class CollectionManagerScript<T:CollectionManagerScriptData> extends ExtScript<T
         switch (message_id) {
             case CollectionproxyMessages.proxy_loaded:
                 var collection = get(sender);
-                collection.loaded = true;
+                collection.state = DISABLED;
                 if (collection.onLoaded != null)
                     collection.onLoaded(collection);
 
             case CollectionproxyMessages.proxy_unloaded:
                 var collection = get(sender);
-                collection.loaded = false;
+                collection.state = UNLOADED;
                 if (collection.onUnloaded != null)
                     collection.onUnloaded(collection);
         }

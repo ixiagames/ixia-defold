@@ -10,7 +10,7 @@ class Collection<T:CollectionManagerScriptData> {
     public var manager(default, null):CollectionManagerScript<T>;
     public var proxyUrl(default, null):Url;
     public var enabled(default, set):Bool;
-    public var loaded(default, null):Bool = false;
+    public var state(default, null):CollectionState = UNLOADED;
     public var downloader(default, null):CollectionDownloader<T>;
     public var onLoaded:Collection<T>->Void;
     public var onUnloaded:Collection<T>->Void;
@@ -22,12 +22,14 @@ class Collection<T:CollectionManagerScriptData> {
     }
 
     public function load(?async:Bool = false, ?callback:Collection<T>->Void):Void {
+        state = LOADING;
         if (callback != null)
             onLoaded = callback;
         manager.post_loadCollection(proxyUrl, async);
     }
 
     public function unload(?callback:Collection<T>->Void):Void {
+        state = UNLOADING;
         if (callback != null)
             onUnloaded = callback;
         manager.post_unloadCollection(proxyUrl);
@@ -39,11 +41,29 @@ class Collection<T:CollectionManagerScriptData> {
     }
 
     function set_enabled(value) {
-        if (value)
+        if (value) {
             manager.post_enableCollection(proxyUrl);
-        else
+            state = ENABLED;
+        } else {
             manager.post_disableCollection(proxyUrl);
+            state = DISABLED;
+        }
         return enabled = value;
     }
+    
+}
+
+enum abstract CollectionState(Int) to Int {
+
+    var UNLOADED;
+    var LOADING;
+    var UNLOADING;
+
+    // Both DISABLED & ENABLED mean the collection was loaded.
+    var DISABLED;
+    var ENABLED;
+
+    public var loaded(get, never):Bool;
+    inline function get_loaded() return this == DISABLED || this == ENABLED; 
     
 }
