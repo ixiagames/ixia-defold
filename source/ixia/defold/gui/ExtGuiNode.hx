@@ -36,6 +36,15 @@ abstract ExtGuiNode(GuiNode) from GuiNode to GuiNode {
 
     //
 
+    public var visible(get, set):Bool;
+    inline function get_visible() return this.get_visible();
+    inline function set_visible(value) {
+        this.set_visible(value);
+        return value;
+    }
+
+    //
+
     public var parent(get, set):ExtGuiNode;
     inline function get_parent() return this.get_parent();
     inline function set_parent(value) {
