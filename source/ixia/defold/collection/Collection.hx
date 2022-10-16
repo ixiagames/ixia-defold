@@ -53,7 +53,7 @@ class Collection<T:CollectionManagerScriptData> {
     
 }
 
-enum abstract CollectionState(Int) to Int {
+enum abstract CollectionState(#if debug String #else Int #end) to #if debug String #else Int #end {
 
     var UNLOADED;
     var LOADING;
