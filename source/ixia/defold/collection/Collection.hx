@@ -7,6 +7,7 @@ import ixia.defold.collection.CollectionManagerScript.CollectionManagerScriptDat
 @:access(ixia.defold.collection.CollectionDownloader)
 class Collection<T:CollectionManagerScriptData> {
 
+    public var name(default, null):String;
     public var manager(default, null):CollectionManagerScript<T>;
     public var proxyUrl(default, null):Url;
     public var enabled(default, set):Bool;
@@ -16,6 +17,7 @@ class Collection<T:CollectionManagerScriptData> {
     public var onUnloaded:Collection<T>->Void;
 
     public function new(manager:CollectionManagerScript<T>, name:String, proxyUrl:Url) {
+        this.name = name;
         this.manager = manager;
         this.proxyUrl = proxyUrl;
         manager.collections[name] = this;
