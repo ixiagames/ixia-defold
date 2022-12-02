@@ -1,10 +1,16 @@
 package ixia.defold.gui;
 
+import defold.Go.GoAnimatedProperty;
 import defold.Gui;
+import defold.types.HashOrString;
 import defold.types.Vector3;
+import defold.types.Vector4;
 import haxe.PosInfos;
+import haxe.extern.EitherType;
 import ixia.defold.types.Hash;
+import ixia.defold.types.Rgba;
 
+using Defold;
 using ixia.defold.gui.ExtGuiNode;
 
 class GuiManager extends GuiManagerBase<ExtGuiNode, NodeStyle> {
@@ -103,4 +109,36 @@ class GuiManager extends GuiManagerBase<ExtGuiNode, NodeStyle> {
         }
     }
     
+}
+
+typedef NodeStyle = {
+
+    ?enabled:Bool,
+    ?color:Rgba,
+    ?alpha:Float,
+    ?flipbook:HashOrString,
+    ?texture:HashOrString,
+    ?animations:Map<GuiAnimateProprty, NodeAnimationConfigs>,
+    ?nodes:NodeStyleMap
+
+}
+
+@:forward
+abstract NodeStyleMap(Map<Hash, NodeStyle>) from Map<Hash, NodeStyle> {
+
+    @:from static inline function fromStringMap(map:Map<String, NodeStyle>):NodeStyleMap {
+        return cast [ for (key => style in map) key.hash() => style ];
+    }
+    
+}
+
+typedef NodeAnimationConfigs = {
+
+    to:GoAnimatedProperty,
+    duration:Float,
+    ?delay:Float,
+    ?easing:EitherType<GuiEasing,EitherType<Vector3,Vector4>>,
+    ?playback:GuiPlayback,
+    ?onComplete:Dynamic->GuiNode->Void
+
 }
