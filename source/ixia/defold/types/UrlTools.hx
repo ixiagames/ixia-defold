@@ -1,4 +1,4 @@
-package ixia.defold;
+package ixia.defold.types;
 
 import defold.types.Url;
 

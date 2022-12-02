@@ -6,7 +6,7 @@ import defold.types.Message;
 import defold.types.Url;
 import ixia.defold.script.ExtScript;
 
-using ixia.defold.UrlTools;
+using ixia.defold.types.UrlTools;
 
 typedef CollectionManagerScriptData = {
 
