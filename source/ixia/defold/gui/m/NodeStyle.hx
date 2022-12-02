@@ -18,7 +18,7 @@ typedef NodeStyle = {
     ?alpha:Float,
     ?flipbook:HashOrString,
     ?texture:HashOrString,
-    ?animations:Map<String, NodeAnimationConfigs>,
+    ?animations:Map<GuiAnimateProprty, NodeAnimationConfigs>,
     ?nodes:NodeStyleMap
 
 }
