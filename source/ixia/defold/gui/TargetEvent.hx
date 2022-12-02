@@ -1,4 +1,4 @@
-package ixia.defold.gui.m;
+package ixia.defold.gui;
 
 enum abstract TargetEvent(Int) to Int {
     

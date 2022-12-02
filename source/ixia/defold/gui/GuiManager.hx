@@ -1,12 +1,13 @@
-package ixia.defold.gui.m;
+package ixia.defold.gui;
 
-import haxe.PosInfos;
+import defold.Gui;
 import defold.types.Vector3;
+import haxe.PosInfos;
 import ixia.defold.types.Hash;
 
-using defold.Gui;
+using ixia.defold.gui.ExtGuiNode;
 
-class MGui extends MGuiBase<ExtGuiNode, NodeStyle> {
+class GuiManager extends GuiManagerBase<ExtGuiNode, NodeStyle> {
 
     public function new(?touchActionId:Hash, ?acquiresInputFocus:Bool = true, ?renderOrder:Int) {
         super(touchActionId, acquiresInputFocus);
@@ -16,7 +17,7 @@ class MGui extends MGuiBase<ExtGuiNode, NodeStyle> {
     }
 
     override function idToTarget(id:Hash):ExtGuiNode {
-        return Gui.get_node(id);
+        return id.getNode();
     }
 
     override function isAwake(id:Hash, ?posInfos:PosInfos):Bool {
@@ -24,15 +25,15 @@ class MGui extends MGuiBase<ExtGuiNode, NodeStyle> {
             return false;
 
         try {
-            var node = Gui.get_node(id);
-            if (!node.is_enabled())
+            var node = targets[id].target;
+            if (!node.enabled)
                 return false;
     
-            var parent = node.get_parent();
+            var parent = node.parent;
             while (parent != null) {
-                if (!parent.is_enabled())
+                if (!parent.enabled)
                     return false;
-                parent = parent.get_parent();
+                parent = parent.parent;
             }
         } catch (error) {
             Error.error(error.message + ' ($id)', posInfos);
@@ -42,39 +43,38 @@ class MGui extends MGuiBase<ExtGuiNode, NodeStyle> {
     }
 
     override function pick(id:Hash, x:Float, y:Float):Bool {
-        return Gui.pick_node(Gui.get_node(id), x, y);
+        return Gui.pick_node(targets[id].target, x, y);
     }
 
     override function getPos(id:Hash):Vector3 {
-        return Gui.get_node(id).get_position();
+        return targets[id].target.position;
     }
 
     override function setPos(id:Hash, pos:Vector3) {
-        Gui.get_node(id).set_position(pos);
+        targets[id].target.position = pos;
     }
 
-    override function applyStateStyle(id:Hash, style:NodeStyle) {
+    override function applyStateStyle(node:ExtGuiNode, style:NodeStyle) {
         if (style == null)
             return;
         
-        var node = Gui.get_node(id);
         if (style.enabled != null)
-            node.set_enabled(style.enabled);
+            node.enabled = style.enabled;
 
         if (style.color != null)
-            node.set_color(style.color);
+            node.color = style.color;
 
         if (style.alpha != null) {
-            var color = node.get_color();
-            color.w = style.alpha;
-            node.set_color(color);
+            var color = node.color;
+            color.a = style.alpha;
+            node.color = color;
         }
 
         if (style.flipbook != null)
             node.play_flipbook(style.flipbook);
 
         if (style.texture != null)
-            node.set_texture(style.texture);
+            node.texture = style.texture;
 
         if (style.animations != null) {
             for (prop => configs in style.animations) {
@@ -92,14 +92,14 @@ class MGui extends MGuiBase<ExtGuiNode, NodeStyle> {
 
         if (style.nodes != null) {
             for (id => style in style.nodes)
-                applyStateStyle(id, style);
+                applyStateStyle(id.getNode(), style);
         }
     }
 
     public function setGroupEnabled(group:Hash, enabled:Bool):Void {
         if (_groups[group] != null) {
             for (id in _groups[group])
-                Gui.get_node(id).set_enabled(enabled);
+                targets[id].target.enabled = enabled;
         }
     }
     

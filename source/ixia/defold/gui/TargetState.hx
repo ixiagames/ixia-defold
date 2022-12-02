@@ -1,4 +1,4 @@
-package ixia.defold.gui.m;
+package ixia.defold.gui;
 
 enum abstract TargetState #if debug (String) to String #else (Int) to Int #end {
     

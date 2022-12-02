@@ -1,4 +1,4 @@
-package ixia.defold.gui.m;
+package ixia.defold.gui;
 
 import defold.types.Hash;
 

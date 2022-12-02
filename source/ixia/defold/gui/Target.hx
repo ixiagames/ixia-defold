@@ -1,4 +1,4 @@
-package ixia.defold.gui.m;
+package ixia.defold.gui;
 
 import defold.support.ScriptOnInputAction;
 import defold.types.Vector3;
@@ -8,11 +8,12 @@ import ixia.utils.lua.RawTable;
 using Math;
 using ixia.utils.math.Math;
 
-@:access(ixia.defold.gui.m.MGuiBase)
+@:access(ixia.defold.gui.GuiManagerBase)
 class Target<TTarget, TStyle> {
     
     public var id(default, null):Hash;
-    public var mgui(default, null):MGuiBase<TTarget, TStyle>;
+    public var manager(default, null):GuiManagerBase<TTarget, TStyle>;
+    public var target(default, null):TTarget;
     
     public var state(default, set):TargetState;
     public var stateStyle(default, null):TargetStyle<TStyle>;
@@ -33,13 +34,15 @@ class Target<TTarget, TStyle> {
 
     var _tapInited:Bool;
 
-    public function new(mgui:MGuiBase<TTarget, TStyle>, id:Hash) {
-        this.mgui = mgui;
+    public function new(manager:GuiManagerBase<TTarget, TStyle>, id:Hash) {
+        this.manager = manager;
         this.id = id;
+        target = manager.idToTarget(id);
+        if (target == null)
+            trace("ABSASA");
         _tapInited = false;
-        buttonMode = mgui.defaultButtonMode;
+        buttonMode = manager.defaultButtonMode;
         listeners = new RawTable();
-        state = mgui.pointerPick(id) ? HOVERED : UNTOUCHED;
     }
 
     public inline function sleep():Void {
@@ -50,7 +53,7 @@ class Target<TTarget, TStyle> {
         if (state != SLEEPING)
             return;
 
-        state = mgui.pointerPick(id) ? HOVERED : UNTOUCHED;
+        state = manager.pointerPick(id) ? HOVERED : UNTOUCHED;
         dispatch(WAKE);
     }
 
@@ -84,13 +87,13 @@ class Target<TTarget, TStyle> {
         state = PRESSED;
         dispatch(PRESS, action);
         if (sliderDirection != null) {
-            mgui.startDrag(id);
+            manager.startDrag(id);
             dispatch(DRAG, action);
         }
     }
 
     function onRelease(action:ScriptOnInputAction):Void {
-        state = mgui.pointerPick(id) ? HOVERED : UNTOUCHED;
+        state = manager.pointerPick(id) ? HOVERED : UNTOUCHED;
         if (_tapInited) {
             _tapInited = false;
             dispatch(TAP, action);
@@ -105,11 +108,11 @@ class Target<TTarget, TStyle> {
         state = value;
 
         if (buttonMode) {
-            if (mgui.systemInfo.system_name == "HTML5")
+            if (manager.systemInfo.system_name == "HTML5")
                 defold.Html5.run("document.documentElement.style.cursor = " + (state.touched ? "'pointer'" : "'auto'"));
         }
         
-        mgui.applyStateStyle(id, getStateStyle());
+        manager.applyStateStyle(target, getStateStyle());
         if (state == SLEEPING)
             dispatch(SLEEP);
 
@@ -144,14 +147,14 @@ class Target<TTarget, TStyle> {
         sliderPercent = percent;
         
         if (isSlider()) {
-            var pos = mgui.getPos(id);
+            var pos = manager.getPos(id);
             switch (sliderDirection) {
                 case LEFT_RIGHT:
                     pos.x = sliderStartPos.x + percent * sliderTrackLength;
                 case RIGHT_LEFT:
                     pos.x = sliderStartPos.x + sliderTrackLength * (1 - percent);
             }
-            mgui.setPos(id, pos);
+            manager.setPos(id, pos);
         }
 
         dispatch(VALUE);

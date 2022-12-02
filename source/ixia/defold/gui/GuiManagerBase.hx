@@ -1,4 +1,4 @@
-package ixia.defold.gui.m;
+package ixia.defold.gui;
 
 import defold.Msg;
 import defold.Sys;
@@ -10,8 +10,8 @@ import defold.types.Url;
 import defold.types.Vector3;
 import haxe.PosInfos;
 import haxe.ds.Either;
-import ixia.defold.gui.m.TargetEvent;
-import ixia.defold.gui.m.TargetEventListener.TargetEventListeners;
+import ixia.defold.gui.TargetEvent;
+import ixia.defold.gui.TargetEventListener.TargetEventListeners;
 import ixia.defold.types.Hash;
 import ixia.defold.types.Hashes;
 import ixia.utils.ds.OneOfTwo;
@@ -20,8 +20,8 @@ import ixia.utils.lua.RawTable;
 using Defold;
 using Math;
 
-@:access(ixia.defold.gui.m.Target)
-class MGuiBase<TTarget, TStyle> {
+@:access(ixia.defold.gui.Target)
+class GuiManagerBase<TTarget, TStyle> {
 
     public var touchActionId(default, null):Hash;
     public var pointerX(default, null):Float = 0;
@@ -34,9 +34,7 @@ class MGuiBase<TTarget, TStyle> {
     public final inputListeners = new Array<InputActionListener>();
     public final messageListeners = new Array<(guiData:Dynamic, messageId:Message<Dynamic>, message:Dynamic, sender:Url)->Void>();
 
-    var _groups:RawTable<Hash, Array<Hash>> = new RawTable();    
-    var _userdata:RawTable<Hash, Dynamic> = new RawTable();
-    var _dataListeners:RawTable<Hash, Array<DataListener>> = new RawTable();
+    var _groups:RawTable<Hash, Array<Hash>> = new RawTable();
 
     public function new(?touchActionId:Hash, ?pointerMoveActionId:Hash, ?acquiresInputFocus:Bool = true, ?defaultButtonMode:Bool = true) {
         this.touchActionId = touchActionId != null ? touchActionId : "touch".hash();
@@ -49,7 +47,7 @@ class MGuiBase<TTarget, TStyle> {
     }
 
     // Override these.
-    public function applyStateStyle(id:Hash, style:TStyle):Void {}
+    public function applyStateStyle(target:TTarget, style:TStyle):Void {}
     function idToTarget(id:Hash):TTarget return null;
     function pick(id:Hash, x:Float, y:Float):Bool return false;
     function getPos(id:Hash):Vector3 return null;
@@ -69,16 +67,18 @@ class MGuiBase<TTarget, TStyle> {
         if (targets.exists(id))
             return targets[id];
 
-        return targets[id] = (new Target(this, id));
+        targets[id] = new Target(this, id);
+        targets[id].state = pointerPick(id) ? HOVERED : UNTOUCHED;
+        return targets[id];
     }
 
-    public function config(ids:Hashes, style:TargetStyle<TStyle>, listeners:TargetEventListeners):MGuiBase<TTarget, TStyle> {
+    public function config(ids:Hashes, style:TargetStyle<TStyle>, listeners:TargetEventListeners):GuiManagerBase<TTarget, TStyle> {
         this.style(ids, style);
         sub(ids, listeners);
         return this;
     }
 
-    public function sub(ids:Hashes, listeners:TargetEventListeners):MGuiBase<TTarget, TStyle> {
+    public function sub(ids:Hashes, listeners:TargetEventListeners):GuiManagerBase<TTarget, TStyle> {
         var target:Target<TTarget, TStyle>;
         for (id in ids) {
             target = initTarget(id);
@@ -123,43 +123,29 @@ class MGuiBase<TTarget, TStyle> {
         }
     }
 
-    public function subGroup(group:Hash, listeners:TargetEventListeners):MGuiBase<TTarget, TStyle> {
+    public function subGroup(group:Hash, listeners:TargetEventListeners):GuiManagerBase<TTarget, TStyle> {
         if (_groups[group] != null)
             sub(cast _groups[group], listeners);
         return this;
     }
 
-    public function subData(dataIds:Hashes, listener:DataListener):MGuiBase<TTarget, TStyle> {
-        for (id in dataIds) {
-            if (_dataListeners[id] == null)
-                _dataListeners[id] = [];
-            else {
-                var addedIndex = _dataListeners[id].indexOf(listener);
-                if (addedIndex > -1)
-                    _dataListeners[id].splice(addedIndex, 1);
-            }
-            _dataListeners[id].push(listener);
-        }
-        return this;
-    }
-
-    public function style(ids:Hashes, style:TargetStyle<TStyle>):MGuiBase<TTarget, TStyle> {
+    public function style(ids:Hashes, style:TargetStyle<TStyle>):GuiManagerBase<TTarget, TStyle> {
         var target:Target<TTarget, TStyle>;
         for (id in ids) {
             target = initTarget(id);
             target.stateStyle = style;
-            applyStateStyle(id, Reflect.field(style, target.state.toString()));
+            applyStateStyle(target.target, Reflect.field(style, target.state.toString()));
         }
         return this;
     }
 
-    public function styleGroup(group:Hash, style:TargetStyle<TStyle>):MGuiBase<TTarget, TStyle> {
+    public function styleGroup(group:Hash, style:TargetStyle<TStyle>):GuiManagerBase<TTarget, TStyle> {
         if (_groups[group] != null)
             this.style(cast _groups[group], style);
         return this;
     }
 
-    public function group(groups:Hashes, ids:Hashes):MGuiBase<TTarget, TStyle> {
+    public function group(groups:Hashes, ids:Hashes):GuiManagerBase<TTarget, TStyle> {
         for (groupId in groups) {
             if (_groups[groupId] == null)
                 _groups[groupId] = [];
@@ -213,28 +199,6 @@ class MGuiBase<TTarget, TStyle> {
         } else if (onComplete != null) {
             Timer.delay(duration, false, cast onComplete);
         }
-    }
-
-    public function map(dataMap:UserDataMap):MGuiBase<TTarget, TStyle> {
-        for (id => data in dataMap)
-            _userdata[id] = data;
-        return this;
-    }
-
-    public function set(dataId:Hash, data:Dynamic):MGuiBase<TTarget, TStyle> {
-        if (_userdata[dataId] == data)
-            return this;
-
-        _userdata[dataId] = data;
-        if (_dataListeners[dataId] != null) {
-            for (listener in _dataListeners[dataId])
-                listener.call(data, dataId);
-        }
-        return this;
-    }
-
-    public inline function get<T>(dataId:Hash):T {
-        return _userdata[dataId];
     }
 
     public inline function message<TMessage>(guiData:Dynamic, message_id:Message<TMessage>, message:TMessage, sender:Url):Void {
@@ -392,7 +356,7 @@ class MGuiBase<TTarget, TStyle> {
         id:Hash, length:Float, ?direction:DragDirection = LEFT_RIGHT,
         ?min:Float, ?max:Float, ?step:Float,
         ?thumbStyle:TargetStyle<TStyle>, ?listeners:TargetEventListeners
-    ):MGuiBase<TTarget, TStyle> {
+    ):GuiManagerBase<TTarget, TStyle> {
         var target = initTarget(id);
         target.sliderTrackLength = length;
         target.sliderDirection = direction;
@@ -429,31 +393,31 @@ class MGuiBase<TTarget, TStyle> {
         return targets.exists(id) && targets[id].state != SLEEPING;
     }
 
-    public function setValue(id:Hash, value:Float):MGuiBase<TTarget, TStyle> {
+    public function setValue(id:Hash, value:Float):GuiManagerBase<TTarget, TStyle> {
         targets[id].sliderValue = value;
         updatePercent(id);
         return this;
     }
 
-    public function setMin(id:Hash, min:Float):MGuiBase<TTarget, TStyle> {
+    public function setMin(id:Hash, min:Float):GuiManagerBase<TTarget, TStyle> {
         targets[id].sliderMin = min;
         updatePercent(id);
         return this;
     }
 
-    public function setMax(id:Hash, value:Float):MGuiBase<TTarget, TStyle> {
+    public function setMax(id:Hash, value:Float):GuiManagerBase<TTarget, TStyle> {
         targets[id].sliderMax = value;
         updatePercent(id);
         return this;
     }
     
-    public inline function setStepValue(id:Hash, value:Float):MGuiBase<TTarget, TStyle> {
+    public inline function setStepValue(id:Hash, value:Float):GuiManagerBase<TTarget, TStyle> {
         targets[id].sliderStepValue = value;
         updatePercent(id);
         return this;
     }
 
-    public inline function setStepIndex(id:Hash, index:Int):MGuiBase<TTarget, TStyle> {
+    public inline function setStepIndex(id:Hash, index:Int):GuiManagerBase<TTarget, TStyle> {
         var target = targets[id];
         if (target.sliderStepValue == null)
             Error.error('$id does not have a step value.');
@@ -462,7 +426,7 @@ class MGuiBase<TTarget, TStyle> {
         return this;
     }
 
-    public function setMinMaxStep(id:Hash, min:Float, max:Float, step:Float):MGuiBase<TTarget, TStyle> {
+    public function setMinMaxStep(id:Hash, min:Float, max:Float, step:Float):GuiManagerBase<TTarget, TStyle> {
         var target = targets[id];
         target.sliderMin = min;
         target.sliderMax = max;
