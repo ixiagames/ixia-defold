@@ -85,7 +85,7 @@ class GuiManager extends GuiManagerBase<ExtGuiNode, NodeStyle> {
         if (style.animations != null) {
             for (prop => configs in style.animations) {
                 node.animate(
-                    prop,
+                    cast prop,
                     configs.to,
                     configs.easing != null ? configs.easing : GuiEasing.EASING_LINEAR,
                     configs.duration,
@@ -118,7 +118,7 @@ typedef NodeStyle = {
     ?alpha:Float,
     ?flipbook:HashOrString,
     ?texture:HashOrString,
-    ?animations:Map<GuiAnimateProprty, NodeAnimationConfigs>,
+    ?animations:Map<String, NodeAnimationConfigs>,
     ?nodes:NodeStyleMap
 
 }
