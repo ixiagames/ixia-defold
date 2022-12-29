@@ -11,19 +11,40 @@ class Collection<T:CollectionManagerScriptData> {
     public var manager(default, null):CollectionManagerScript<T>;
     public var proxyUrl(default, null):Url;
     public var enabled(default, set):Bool;
-    public var state(default, null):CollectionState = UNLOADED;
+    public var state(default, null):CollectionState;
     public var downloader(default, null):CollectionDownloader<T>;
+    public var resourcesUrl(default, null):String;
     public var onLoaded:Collection<T>->Void;
     public var onUnloaded:Collection<T>->Void;
 
-    public function new(manager:CollectionManagerScript<T>, name:String, proxyUrl:Url) {
+    public function new(manager:CollectionManagerScript<T>, name:String, proxyUrl:Url, ?resourcesUrl:String) {
         this.name = name;
         this.manager = manager;
         this.proxyUrl = proxyUrl;
+        this.resourcesUrl = resourcesUrl;
+        state = resourcesUrl != null ? EXCLUDED : UNLOADED;
         manager.collections[name] = this;
     }
 
     public function load(?async:Bool = false, ?callback:Collection<T>->Void):Void {
+        if (state == LOADING || state.loaded)
+            return;
+
+        if (state == DOWNLOADING) {
+            if (callback != null)
+                onLoaded = callback;
+            return;
+        }
+
+        if (state == EXCLUDED) {
+            download({ path: resourcesUrl });
+            downloader.onProgress = _ -> {
+                if (downloader.progress >= 1)
+                    load(async, callback);
+            }
+            return;
+        }
+        
         state = LOADING;
         if (callback != null)
             onLoaded = callback;
@@ -31,6 +52,9 @@ class Collection<T:CollectionManagerScriptData> {
     }
 
     public function unload(?callback:Collection<T>->Void):Void {
+        if (state == UNLOADING || !state.loaded)
+            return;
+
         state = UNLOADING;
         if (callback != null)
             onUnloaded = callback;
@@ -38,6 +62,7 @@ class Collection<T:CollectionManagerScriptData> {
     }
 
     public function download(options:DownloadOptions<T>):Void {
+        state = DOWNLOADING;
         downloader = new CollectionDownloader(this, options);
         downloader.download();
     }
@@ -57,6 +82,9 @@ class Collection<T:CollectionManagerScriptData> {
 
 enum abstract CollectionState(#if debug String #else Int #end) to #if debug String #else Int #end {
 
+    var EXCLUDED;
+    var DOWNLOADING;
+
     var UNLOADED;
     var LOADING;
     var UNLOADING;
@@ -64,6 +92,9 @@ enum abstract CollectionState(#if debug String #else Int #end) to #if debug Stri
     // Both DISABLED & ENABLED mean the collection was loaded.
     var DISABLED;
     var ENABLED;
+
+    public var downloaded(get, never):Bool;
+    inline function get_downloaded() return this != EXCLUDED && this != DOWNLOADING;
 
     public var loaded(get, never):Bool;
     inline function get_loaded() return this == DISABLED || this == ENABLED; 
