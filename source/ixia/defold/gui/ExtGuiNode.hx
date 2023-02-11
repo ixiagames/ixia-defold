@@ -274,4 +274,21 @@ abstract ExtGuiNode(GuiNode) from GuiNode to GuiNode {
         return this.clone_tree();
     }
 
+    //
+
+    public inline function loadTexuteFromUrl(url:String, ?textureId:String, ?callback:(?error:String)->Void):Void {
+        ixia.defold.utils.Loader.loadGuiTexture(url, textureId, (?textureId, ?error) -> {
+            if (error != null) {
+                if (callback != null)
+                    callback(error);
+                else
+                    Error.error(error);
+            } else {
+                texture = textureId;
+                if (callback != null)
+                    callback();
+            }
+        });
+    }
+
 }
