@@ -2,6 +2,7 @@ package ixia.defold.extensions;
 
 import haxe.Constraints.Function;
 import haxe.extern.EitherType;
+import lua.Table;
 
 @:luaRequire("colyseus.client")
 extern class Client {
@@ -11,6 +12,7 @@ extern class Client {
     public function join_or_create(room_name:String, options:Dynamic, callback:(error:String, room:Room)->Void):Void;
     public function join_by_id(room_id:String, options:Dynamic, callback:(error:String, room:Room)->Void):Void;
     public function consume_seat_reservation(reservation:Dynamic, callback:(error:String, room:Room)->Void):Void;
+    public function get_available_rooms(room_name:String, callback:(error:String, rooms:Table<Int, RoomInfoInLobby>)->Void):Void;
 
 }
 

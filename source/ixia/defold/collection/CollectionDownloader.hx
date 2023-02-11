@@ -14,19 +14,8 @@ typedef DownloadOptions<T:CollectionManagerScriptData> = {
     /* Default to 3. */
     ?maxSimulResources:Int,
     /* Default to NONE. */
-    ?autoLoad:AutoLoadMode,
-    /* Default to false. */
-    ?autoEnable:Bool,
     ?onProgress:CollectionDownloader<T>->Void,
     ?onError:String->Void
-
-}
-
-enum abstract AutoLoadMode(Int) {
-    
-    var NONE;
-    var SYNC;
-    var ASYNC;
 
 }
 
@@ -35,8 +24,6 @@ class CollectionDownloader<T:CollectionManagerScriptData> {
     public var collection(default, null):Collection<T>;
     public var path(default, null):String;
     public var maxSimulResources(default, null):Int;
-    public var autoLoad(default, null):AutoLoadMode;
-    public var autoEnable(default, null):Bool;
     public var onProgress:CollectionDownloader<T>->Void; // whatever passed to this function would becomes null 
     public var onError:String->Void;
 
@@ -51,15 +38,13 @@ class CollectionDownloader<T:CollectionManagerScriptData> {
         this.collection = collection;
         path = options.path;
         maxSimulResources = options.maxSimulResources != null ? options.maxSimulResources : 3;
-        autoLoad = options.autoLoad != null ? options.autoLoad : NONE;
-        autoEnable = options.autoEnable != null ? options.autoEnable : false;
         onProgress = options.onProgress;
         onError = options.onError;
 
         // When this was writtten, defold.Collectionproxy lacks the proper metadata for it to work.
         var table:Table<Int, String> = untyped __lua__("_G.collectionproxy.missing_resources({0})", collection.proxyUrl);
         allResources = [ for (entry in table.ipairsIterator()) entry.value ];
-        resourceManifest = resourceManifest != null ? resourceManifest : Resource.get_current_manifest();
+        resourceManifest = Resource.get_current_manifest();
     }
     
     function download():Void {
@@ -115,15 +100,9 @@ class CollectionDownloader<T:CollectionManagerScriptData> {
     function onCollecionDownloaded():Void {
         if (downloaded)
             return;
-
+        
         downloaded = true;
-
-        if (autoLoad != NONE) {
-            collection.load(autoLoad == ASYNC, _ -> {
-                if (autoEnable)
-                    collection.enabled = true;
-            });
-        }
+        @:privateAccess collection.state = UNLOADED;
 
         #if debug
         print("Downloaded");

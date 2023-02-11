@@ -47,7 +47,8 @@ extern class ImGui {
     public static function button(text:String, ?width:Int, ?height:Int):Bool;
     public static function selectable(text:String, selected:Bool, ?flags:SelectableFlag):Bool;
     public static function checkbox(text:String, checked:Bool):CheckboxResult;
-    public static function input_int(label:String, value:Int = 0):InputIntResult;
+    public static function input_int(label:String, value:Int = 0):InputResult<Int>;
+    public static function input_text(label:String, text:String, flags:Int):InputResult<String>;
 
     ///// TABLE
 
@@ -175,10 +176,10 @@ extern enum abstract MouseButton(Int) {
 
 }
 
-@:multiReturn extern class InputIntResult {
+@:multiReturn extern class InputResult<T> {
 
     var changed:Bool;
-    var value:Int;
+    var value:T;
 
 }
 
