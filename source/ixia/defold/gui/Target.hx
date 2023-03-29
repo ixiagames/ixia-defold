@@ -38,8 +38,6 @@ class Target<TTarget, TStyle> {
         this.manager = manager;
         this.id = id;
         target = manager.idToTarget(id);
-        if (target == null)
-            trace("ABSASA");
         _tapInited = false;
         buttonMode = manager.defaultButtonMode;
         listeners = new RawTable();
