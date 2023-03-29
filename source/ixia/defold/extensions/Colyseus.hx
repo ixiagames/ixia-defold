@@ -12,6 +12,7 @@ extern class Client {
     public function join_or_create(room_name:String, options:Dynamic, callback:(error:String, room:Room)->Void):Void;
     public function join_by_id(room_id:String, options:Dynamic, callback:(error:String, room:Room)->Void):Void;
     public function consume_seat_reservation(reservation:Dynamic, callback:(error:String, room:Room)->Void):Void;
+    public function reconnect(roomId:String, sessionId:String, callback:(error:String, room:Room)->Void):Void;
     public function get_available_rooms(room_name:String, callback:(error:String, rooms:Table<Int, RoomInfoInLobby>)->Void):Void;
 
 }
@@ -30,7 +31,7 @@ extern class Room {
     public function on(event:RoomEvent, handler:Function):Void;
     public function on_message(type:EitherType<String, Int>, handler:(message:Dynamic)->Void):Void;
     public inline function on_state_change(handler:(state:Dynamic)->Void):Void on(STATE_CHANGE, handler);
-    public inline function on_leave(handler:Dynamic->Void):Void on(LEAVE, handler);
+    public inline function on_leave(handler:Void->Void):Void on(LEAVE, handler);
     public inline function on_error(handler:(code:Int, message:String)->Void):Void on(ERROR, handler);
 
 }
