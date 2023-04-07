@@ -111,7 +111,7 @@ class CollectionDownloader<T:CollectionManagerScriptData> {
 
     inline function get_progress():Float {
         if (pendingResources.length == 0)
-            return 0;
+            return 1;
         return 1 - (pendingResources.length / allResources.length);
     }
 
