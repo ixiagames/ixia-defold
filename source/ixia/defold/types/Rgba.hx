@@ -24,10 +24,10 @@ abstract Rgba(Vector4) from Vector4 to Vector4 {
     }
 
     public static function fromConfigClearColor():Rgba {
-        var rs = "Render.clear_color_red".get_config();
-        var gs = "Render.clear_color_green".get_config();
-        var bs = "Render.clear_color_blue".get_config();
-        var as = "Render.clear_color_alpha".get_config();
+        var rs = "Render.clear_color_red".get_config_string();
+        var gs = "Render.clear_color_green".get_config_string();
+        var bs = "Render.clear_color_blue".get_config_string();
+        var as = "Render.clear_color_alpha".get_config_string();
         return new Rgba(
             rs != null ? rs.tonumber() : 0,
             gs != null ? gs.tonumber() : 0,
